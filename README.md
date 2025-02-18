@@ -71,7 +71,7 @@ npm run dev
 Esto iniciará un servidor de desarrollo, y podrás acceder a la aplicación en tu navegador en la siguiente URL:
 
 ```
-http://localhost:3000
+http://localhost:5173
 ```
 
 Cada vez que realices cambios en el código, el navegador se actualizará automáticamente gracias a la funcionalidad de "hot reload" que ofrece Vite.
