@@ -1,0 +1,557 @@
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden; /* Evita el scroll horizontal */
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+.title {
+  font-family: 'Ghost Shadow', sans-serif;
+  font-size: 2.1rem;
+  color: #fff;
+  text-align: center;
+  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.7); /* Efecto de sombra */
+  margin-bottom: 50px;
+  margin-top: 10px;
+}
+
+/* Estilos para la navegación */
+.nav {
+  display: flex;
+  justify-content: left;  /* Centra los enlaces horizontalmente */
+  gap: 10px;  /* Espacio entre los enlaces */
+  padding: 15px 30px;  /* Aumentamos el padding para hacer la barra más alta */
+  background-color: #222;
+  font-size: 1.3rem;  /* Aumentamos el tamaño de la fuente */
+}
+
+.nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+  margin: 0 20px; /* Espacio entre los enlaces */
+}
+
+.nav a:hover {
+  color: #34b7f1; /* Efecto hover con color azul */
+}
+
+
+/* Contenedor principal de Home */
+.home-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px;
+  background-image: url('../assets/HomeFoto.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+
+/* Sección izquierda (Título + Formulario) */
+.left-section {
+  flex: 1;
+  margin-right: 20px;
+}
+
+/* Sección derecha (Mockup) */
+.right-section {
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+
+/* Imagen del mockup */
+.right-section img {
+  max-width: 100%;
+  height: 550px;
+}
+
+/* Formulario de login */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  background: url('../assets/background.jpg') center/cover no-repeat;
+}
+
+.login-box {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px;
+  border-radius: 16px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 350px;
+  width: 100%;
+}
+
+.login-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  font-family: 'Creepster', cursive;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form label {
+  text-align: left;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.login-form input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.register-link {
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+}
+
+.register-link a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.login-button {
+  background-color: #28a745;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.login-button:hover {
+  background-color: #218838;
+}
+
+.google-login {
+  margin-top: 15px;
+}
+
+.google-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.google-button img {
+  width: 20px;
+  margin-right: 10px;
+}
+
+/* Estilos para el botón que hace scroll */
+.scroll-button {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.scroll-button button {
+  background-color: orange;
+  color: white;
+  padding: 15px 25px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.scroll-button button:hover {
+  background-color: darkorange;
+}
+
+/* Estilos para la sección de contenido sobre el juego */
+.game-intro {
+  padding: 50px 20px;
+  background-color: #f4f4f4;
+  text-align: center;
+  margin-top: 60px;
+}
+
+.game-intro h3 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.game-intro p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Estilos para la sección de Roles */
+.roles-info {
+  padding: 50px 20px;
+  background-color: #e4e4e4;
+  text-align: center;
+  margin-top: 60px;
+}
+
+.roles-info h3 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.roles-info p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Indicadores del carrusel */
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  margin-top: -40px;
+}
+
+.carousel-indicators span {
+  height: 16px;  /* Mayor tamaño */
+  width: 16px;   /* Mayor tamaño */
+  margin: 0 8px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.carousel-indicators span.active-indicator {
+  background-color: #717171;
+}
+
+/* Barra de progreso */
+.progress-bar {
+  height: 10px;
+  background: #ddd;
+  border-radius: 5px;
+  margin-top: 10px;
+  overflow: hidden;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #717171;
+  width: 0%;
+  transition: width 0.05s linear;
+}
+
+/* Resto del código del carrusel y popup se mantiene igual */
+.carousel-container {
+  position: relative;
+  max-width: 600px;
+  margin: 50px auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-slide {
+  width: 100%;
+  text-align: center;
+}
+
+.carousel-slide img {
+  max-width: 100%;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Cambiamos la transición */
+}
+
+.carousel-slide img:hover {
+  transform: none; /* Elimina el zoom */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Añadimos un efecto de sombra */
+}
+
+/* Nombre del rol */
+.role-name {
+  margin-top: 10px;
+  font-size: 2rem; /* Aumentamos el tamaño */
+  font-weight: bold;
+  color: #333;
+  transition: color 0.3s ease-in-out; /* Añadimos un efecto de transición al color */
+}
+
+/* Flechas del carrusel */
+.carousel-button {
+  background: transparent;
+  border: none;
+  font-size: 3rem;
+  cursor: pointer;
+  color: #333;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  padding: 0 20px; /* Aumentamos el padding para separarlas más */
+  transition: color 0.3s ease, transform 0.3s ease; /* Añadimos transición */
+}
+
+.carousel-button.left {
+  left: -20px;  /* Mayor separación */
+}
+
+.carousel-button.right {
+  right: -20px; /* Mayor separación */
+}
+
+.carousel-button:hover {
+  color: #f5a623; /* Cambiamos el color al pasar el ratón */
+  transform: translateY(-50%) scale(1.2); /* Añadimos un pequeño efecto de escala */
+}
+
+/* Popup overlay */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup-content {
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 500px;
+  text-align: center;
+  position: relative;
+}
+
+.popup-content img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.popup-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  cursor: pointer;
+  font-size: 1.8rem;
+}
+
+/* Estilos para la nueva sección "game-obj" */
+.game-obj {
+  background-color: #f8f9fa;
+  padding: 40px 20px;
+  text-align: center;
+  margin-top: 60px;
+}
+
+.game-obj h3 {
+  font-size: 2rem;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.game-obj ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.game-obj ul li {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  line-height: 1.6;
+  color: #555;
+}
+
+.game-obj ul li strong {
+  font-weight: bold;
+  color: #333;
+}
+
+.game-obj ul li:first-child {
+  margin-top: 20px; /* Un pequeño margen arriba para el primer item */
+}
+
+.game-obj ul li:last-child {
+  margin-bottom: 0; /* Elimina el margen de abajo en el último elemento */
+}
+
+/***********************************************
+ * SECCIÓN "¿LISTO PARA EMPEZAR?" 
+ ***********************************************/
+ .ready-section {
+  background-color: #222; /* Fondo oscuro */
+  color: #fff;           /* Texto claro */
+  text-align: center;
+  padding: 40px 20px;
+  margin-top: 40px;      /* Separación respecto a la sección anterior */
+}
+
+.ready-section h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.ready-section p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+/* Contenedor de botones en línea */
+.ready-buttons {
+  display: inline-flex;
+  gap: 20px;
+}
+
+/* Botones de la sección */
+.btn-download,
+.btn-home {
+  padding: 15px 30px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  color: #fff; /* Texto blanco */
+  transition: background-color 0.3s ease;
+}
+
+/* Botón DESCARGAR (verde) */
+.btn-download {
+  background-color: #28a745;
+}
+.btn-download:hover {
+  background-color: #218838;
+}
+
+/* Botón VOLVER AL INICIO (azul) */
+.btn-home {
+  background-color: #007bff;
+}
+.btn-home:hover {
+  background-color: #0069d9;
+}
+
+/***********************************************
+ * FOOTER
+ ***********************************************/
+.footer-section {
+  background-color: #222; /* Fondo oscuro */
+  color: #fff;           /* Texto blanco */
+  padding: 40px 20px;
+  text-align: left;
+  margin-top: 40px;      /* Separación respecto a la sección anterior */
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;        /* Para ajustarse en pantallas pequeñas */
+  justify-content: center;
+  gap: 40px;              /* Espacio entre columnas */
+  margin-bottom: 20px;
+}
+
+.footer-column {
+  flex: 1;
+  min-width: 200px;       /* Mínimo ancho para columnas */
+  max-width: 300px;       /* Máximo ancho para columnas */
+}
+
+.footer-column h4 {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+}
+
+.footer-column p,
+.footer-column a {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #fff;            /* Asegura que el texto y los enlaces sean blancos */
+  text-decoration: none;
+}
+
+.footer-column a:hover {
+  text-decoration: underline;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 5px;
+}
+
+.footer-bottom {
+  border-top: 1px solid #555;
+  padding-top: 20px;
+  font-size: 0.9rem;
+}
+
+.social-links a img {
+  width: 24px;
+  margin-right: 10px;
+}
+
+
+/* Estilos para la scrollbar en navegadores basados en Webkit (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 10px; /* Ancho de la barra */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3); /* Color oscuro translúcido */
+  border-radius: 10px; /* Bordes redondeados */
+  backdrop-filter: blur(5px); /* Efecto de desenfoque */
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1); /* Hacer que el fondo de la barra sea casi invisible */
+}
+
+@font-face {
+  font-family: 'Ghost Shadow';
+  src: url('../assets/fonts/Ghost Shadow.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
