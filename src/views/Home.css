@@ -10,6 +10,7 @@ main {
   background-color: #262522;
 }
 
+
 /* Estilos para la navegación */
 .nav {
   display: flex;
@@ -88,7 +89,6 @@ main {
   margin-bottom: 50px;
   margin-top: 10px;
 }
-
 
 /* Texto de Android */
 .android-text {

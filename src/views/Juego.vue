@@ -1,4 +1,4 @@
 <template>
-    <h1>Página del Juego</h1>
+    <h1>Página del Juego Prueba de Git</h1>
   </template>
   
