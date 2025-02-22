@@ -98,7 +98,6 @@ function slideSiguiente() {
   indiceSlide.value = (indiceSlide.value + 1) % roles.value.length;
   progreso.value = 0;
 }
-
 onMounted(() => {
   setInterval(() => {
     progreso.value += incremento;
@@ -163,6 +162,7 @@ function irARegistro() {
               </div>
 
               <div class="register-link">
+
                 <span>
                   <strong>¿No tienes cuenta?</strong>
                   <a href="#" @click.prevent="irARegistro"> Regístrate</a>
@@ -243,8 +243,12 @@ function irARegistro() {
           </div>
         </div>
       </div>
-    </div>
 
+      <!-- Botón Mostrar Todos -->
+      <div class="show-all-button">
+        <button @click="showAllRoles">Mostrar Todos</button>
+      </div>
+    </div>
     <!-- Barra horizontal -->
     <div class="horizontal-bar"></div>
 
