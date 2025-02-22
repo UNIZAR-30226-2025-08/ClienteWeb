@@ -7,36 +7,18 @@ html, body {
 }
 
 main {
-  background-color: #302E2B;
-}
-
-.title {
-  font-family: 'Ghost Shadow', sans-serif;
-  font-size: 2.1rem;
-  color: #fff;
-  text-align: center;
-  text-shadow: 
-    -2px -2px 0 #000,  
-     2px -2px 0 #000,  
-    -2px  2px 0 #000,  
-     2px  2px 0 #000,  
-    -2px  0px 0 #000,  
-     2px  0px 0 #000,  
-     0px -2px 0 #000,  
-     0px  2px 0 #000;  
-  margin-bottom: 50px;
-  margin-top: 10px;
+  background-color: #262522;
 }
 
 
 /* Estilos para la navegación */
 .nav {
   display: flex;
-  justify-content: left;  /* Centra los enlaces horizontalmente */
-  gap: 10px;  /* Espacio entre los enlaces */
+  justify-content: center;  /* Centra los enlaces horizontalmente */
+  gap: 80px;  /* Espacio entre los enlaces */
   padding: 15px 30px;  /* Aumentamos el padding para hacer la barra más alta */
-  background-color: #222;
-  font-size: 1.3rem;  /* Aumentamos el tamaño de la fuente */
+  background-color: #1F1E1C;
+  font-size: 1.5rem;  /* Aumentamos el tamaño de la fuente */
 }
 
 .nav a {
@@ -57,7 +39,7 @@ main {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 20px;
+  padding: 25px;
   background-image: url('../assets/HomeFoto.jpg');
   background-size: cover;
   background-position: center;
@@ -67,7 +49,7 @@ main {
 /* Barra horizontal */
 .horizontal-bar {
   width: 95%;             /* Ocupa todo el ancho de la página */
-  height: 0.4rem;             /* Altura de la barra */
+  height: 0.2rem;             /* Altura de la barra */
   background-color: white; /* Color blanco */
   margin: 20px 0;          /* Espaciado vertical para separar de las secciones */
   margin-left: 1.7rem;
@@ -88,6 +70,24 @@ main {
   flex-direction: column; /* Acomoda los elementos en columna */
   gap: 10px;
   margin-right: 150px;
+}
+
+.title {
+  font-family: 'Ghost Shadow', sans-serif;
+  font-size: 2.1rem;
+  color: #fff;
+  text-align: center;
+  text-shadow: 
+    -2px -2px 0 #000,  
+     2px -2px 0 #000,  
+    -2px  2px 0 #000,  
+     2px  2px 0 #000,  
+    -2px  0px 0 #000,  
+     2px  0px 0 #000,  
+     0px -2px 0 #000,  
+     0px  2px 0 #000;  
+  margin-bottom: 50px;
+  margin-top: 10px;
 }
 
 /* Texto de Android */
@@ -118,35 +118,38 @@ main {
   padding: 15px;
   border-radius: 16px;
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  max-width: 350px;
+  text-align: left;
+  max-width: 300px;
   width: 100%;
 }
 
 .login-title {
+  text-align: center;
   font-size: 1.5rem;
   font-weight: bold;
   margin-bottom: 20px;
-  font-family: 'Creepster', cursive;
+  font-family: 'Arial', cursive;
 }
 
 .login-form {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Para que todo se apile verticalmente */
+  max-width: 400px;       /* Ancho máximo del formulario */
+  margin: 0 auto;         /* Centrar en la página si quieres */
 }
 
 .login-form label {
-  text-align: left;
+  display: block;
   font-weight: bold;
-  margin-bottom: 5px;
+  margin-bottom: 0.5rem;
 }
-
 .login-form input {
+  display: block;
+  width: 92%;            /* Que ocupe todo el ancho del contenedor */
   padding: 10px;
-  border-radius: 8px;
-  border: 2px solid #ccc;
-  margin-bottom: 10px;
-  font-size: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
 .register-link {
@@ -160,7 +163,7 @@ main {
 }
 
 .login-button {
-  background-color: #28a745;
+  background-color: #a7a728;
   color: white;
   padding: 12px;
   border: none;
@@ -171,7 +174,7 @@ main {
 }
 
 .login-button:hover {
-  background-color: #218838;
+  background-color: #7c7c1e;
 }
 
 .google-login {
@@ -195,28 +198,6 @@ main {
 .google-button img {
   width: 20px;
   margin-right: 10px;
-}
-
-/* Estilos para el botón que hace scroll */
-.scroll-button {
-  display: flex;
-  justify-content: center;
-  margin-top: 30px;
-}
-
-.scroll-button button {
-  background-color: orange;
-  color: white;
-  padding: 15px 25px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.scroll-button button:hover {
-  background-color: darkorange;
 }
 
 /* Estilos para la sección de contenido sobre el juego */
@@ -244,9 +225,11 @@ main {
   padding: 30px 15px; /* Reducir el padding */
   text-align: center;
   color: white;
-  background-color: #212121;
-  margin-top: 0;
+  background-color: #262522;
+  margin-top: -1.2rem;
   border-radius: 8px; /* Reducir los bordes */
+  position: relative;
+  z-index: 1;
 }
 
 /* Título de la sección */
@@ -260,13 +243,13 @@ main {
 /* Carrusel */
 .carousel-container {
   position: relative;
-  max-width: 350px;  /* Reducir el tamaño del carrusel */
+  max-width: 250px;  /* Reducir el tamaño del carrusel */
   margin: 30px auto;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #2c2c2c;
+  background-color: #1F1E1C;
   border-radius: 8px;
   padding: 15px; /* Reducir padding */
 }
@@ -286,58 +269,45 @@ main {
 }
 
 .carousel-slide img:hover {
-  transform: scale(1.05);
+  transform: scale(1.01);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 /* Nombre del rol */
 .role-name {
   font-size: 1.5rem;  /* Reducir tamaño */
-  color: #fff;
-  margin-top: 10px;  /* Reducir margen */
+  color: #ffffff;
+  margin-top: 0px;  /* Reducir margen */
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 1px;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Reducir sombra */
 }
 
-/* Descripción del rol */
-.role-description {
-  font-size: 1rem;  /* Reducir tamaño */
-  color: #f4f4f4;
-  line-height: 1.6;
-  margin-top: 5px; /* Reducir margen */
-}
-
 /* Flechas del carrusel */
 .carousel-button {
   background: transparent;
   border: none;
-  font-size: 2rem;  /* Reducir tamaño */
+  font-size: 4rem;
   color: #fff;
-  position: fixed;
+  position: absolute;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1000;
-  padding: 0 15px; /* Reducir padding */
+  padding: 0 15px;
   transition: color 0.3s ease, transform 0.3s ease;
   cursor: pointer;
+  pointer-events: auto; /* Permitir la interacción por defecto */
 }
-
-/* Flecha izquierda */
 .carousel-button.left {
-  left: 10px;
+  left: 300px;
 }
-
-/* Flecha derecha */
 .carousel-button.right {
-  right: 10px;
+  right: 300px;
 }
-
-/* Flechas al pasar el ratón */
 .carousel-button:hover {
   color: #f5a623;
-  transform: translateY(-50%) scale(1.1);  /* Reducir el efecto de escala */
+  transform: translateY(-50%) scale(1.1);
 }
 
 /* Indicadores del carrusel */
@@ -400,54 +370,106 @@ main {
   background-color: #d68719;
 }
 
-
-/* Popup overlay */
+/* Estilos del pop-up */
 .popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 2000; /* Asegurarse de que esté por encima del contenido */
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
 }
-
 .popup-content {
-  background: white;
-  padding: 10px;
-  border-radius: 8px;
-  max-width: 500px;
-  text-align: center;
+  background: black; /* Fondo negro para el contenido */
+  color: white; /* Texto blanco */
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 80%;
+  max-height: 80%;
+  overflow-y: auto;
   position: relative;
+  z-index: 2001; /* Pop-up debe estar por encima de la capa de fondo */
 }
 
-.popup-content img {
-  max-width: 100%;
-  border-radius: 8px;
-  margin-bottom: 10px;
-}
-
-.popup-close {
-  position: absolute;
-  top: 10px;
-  right: 15px;
+/* Botón de cierre */
+.close-button {
+  background: red;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  font-size: 1.2rem;
   cursor: pointer;
-  font-size: 1.8rem;
+  position: fixed; /* Esto hace que el botón quede fijo en la pantalla */
+  top: 20px;  /* Distancia desde la parte superior */
+  right: 20px; /* Distancia desde la parte derecha */
+  z-index: 2100; /* Asegurarse de que esté por encima de otros elementos */
 }
+
+/* Lista de roles */
+.roles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Espacio entre los roles */
+}
+
+/* Cada rol */
+.role-item {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Espacio entre la imagen y el texto */
+  background: #333; /* Fondo oscuro para cada sección de rol */
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra para separar cada rol */
+  transition: background 0.3s ease; /* Efecto suave al pasar el mouse */
+}
+
+.role-item:hover {
+  background: #444; /* Fondo más claro al pasar el mouse */
+}
+
+/* Imagen del rol cuadrada */
+.role-popup-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover; /* Hace que la imagen se recorte para ajustarse al cuadrado */
+  border-radius: 8px; /* Bordes redondeados */
+}
+
+/* Información del rol */
+.role-info {
+  flex: 1;
+}
+
+.role-name-popup {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #f1c40f; /* Color dorado para el nombre */
+  margin-top: 10px;
+  text-transform: uppercase;
+}
+
+.role-description {
+  font-size: 1rem;
+  color: #f4f4f4;
+  line-height: 1.5;
+  margin-top: 5px;
+}
+
 
 /* Estilos para la nueva sección "game-obj" */
 .game-obj {
   padding: 40px 20px;
   text-align: center;
-  margin-top: 60px;
 }
 
 .game-obj h3 {
   font-size: 2rem;
-  color: #333;
+  color: #ffffff;
   font-weight: bold;
   margin-bottom: 20px;
 }
@@ -461,12 +483,12 @@ main {
   font-size: 1.2rem;
   margin-bottom: 10px;
   line-height: 1.6;
-  color: #555;
+  color: #ffffff;
 }
 
 .game-obj ul li strong {
   font-weight: bold;
-  color: #333;
+  color: #ffffff;
 }
 
 .game-obj ul li:first-child {
@@ -481,7 +503,7 @@ main {
  * SECCIÓN "¿LISTO PARA EMPEZAR?" 
  ***********************************************/
  .ready-section {
-  background-color: #222; /* Fondo oscuro */
+  background-color: #1F1E1C; /* Fondo oscuro */
   color: #fff;           /* Texto claro */
   text-align: center;
   padding: 40px 20px;
@@ -535,7 +557,7 @@ main {
  * FOOTER
  ***********************************************/
 .footer-section {
-  background-color: #222; /* Fondo oscuro */
+  background-color: #1F1E1C; /* Fondo oscuro */
   color: #fff;           /* Texto blanco */
   padding: 40px 20px;
   text-align: left;
@@ -608,7 +630,7 @@ main {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1); /* Hacer que el fondo de la barra sea casi invisible */
+  background: rgb(37, 37, 37); /* Hacer que el fondo de la barra sea casi invisible */
 }
 
 @font-face {
@@ -616,4 +638,14 @@ main {
   src: url('../assets/fonts/Ghost Shadow.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  top: 5px;  
 }
