@@ -1,4 +1,3 @@
-
 html, body {
   margin: 0;
   padding: 0;
@@ -7,20 +6,28 @@ html, body {
   overflow-x: hidden; /* Evita el scroll horizontal */
 }
 
-html {
-  scroll-behavior: smooth;
+main {
+  background-color: #302E2B;
 }
-
 
 .title {
   font-family: 'Ghost Shadow', sans-serif;
   font-size: 2.1rem;
   color: #fff;
   text-align: center;
-  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.7); /* Efecto de sombra */
+  text-shadow: 
+    -2px -2px 0 #000,  
+     2px -2px 0 #000,  
+    -2px  2px 0 #000,  
+     2px  2px 0 #000,  
+    -2px  0px 0 #000,  
+     2px  0px 0 #000,  
+     0px -2px 0 #000,  
+     0px  2px 0 #000;  
   margin-bottom: 50px;
   margin-top: 10px;
 }
+
 
 /* Estilos para la navegación */
 .nav {
@@ -57,6 +64,15 @@ html {
   background-repeat: no-repeat;
 }
 
+/* Barra horizontal */
+.horizontal-bar {
+  width: 95%;             /* Ocupa todo el ancho de la página */
+  height: 0.4rem;             /* Altura de la barra */
+  background-color: white; /* Color blanco */
+  margin: 20px 0;          /* Espaciado vertical para separar de las secciones */
+  margin-left: 1.7rem;
+  border-radius: 10px;     /* Redondea los extremos de la barra */
+}
 
 /* Sección izquierda (Título + Formulario) */
 .left-section {
@@ -69,12 +85,23 @@ html {
   display: flex;
   align-items: center;
   text-align: center;
+  flex-direction: column; /* Acomoda los elementos en columna */
+  gap: 10px;
+  margin-right: 150px;
+}
+
+/* Texto de Android */
+.android-text {
+  font-size: 1.2rem;
+  font-weight: bold;
+  white-space: nowrap; /* Evita que se divida en varias líneas */
+  color: white;
 }
 
 /* Imagen del mockup */
 .right-section img {
   max-width: 100%;
-  height: 550px;
+  height: 420px;
 }
 
 /* Formulario de login */
@@ -87,7 +114,7 @@ html {
 }
 
 .login-box {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   padding: 15px;
   border-radius: 16px;
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
@@ -195,9 +222,9 @@ html {
 /* Estilos para la sección de contenido sobre el juego */
 .game-intro {
   padding: 50px 20px;
-  background-color: #f4f4f4;
   text-align: center;
-  margin-top: 60px;
+  color: white;
+  margin-top: 0px;
 }
 
 .game-intro h3 {
@@ -212,131 +239,167 @@ html {
   margin: 0 auto;
 }
 
-/* Estilos para la sección de Roles */
+/* Estilos generales */
 .roles-info {
-  padding: 50px 20px;
-  background-color: #e4e4e4;
+  padding: 30px 15px; /* Reducir el padding */
   text-align: center;
-  margin-top: 60px;
+  color: white;
+  background-color: #212121;
+  margin-top: 0;
+  border-radius: 8px; /* Reducir los bordes */
 }
 
+/* Título de la sección */
 .roles-info h3 {
-  font-size: 2rem;
-  margin-bottom: 20px;
+  font-size: 2rem;  /* Reducir el tamaño */
+  margin-bottom: 15px; /* Reducir el margen */
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
-.roles-info p {
-  font-size: 1.2rem;
-  line-height: 1.6;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-/* Indicadores del carrusel */
-.carousel-indicators {
-  display: flex;
-  justify-content: center;
-  margin-top: -40px;
-}
-
-.carousel-indicators span {
-  height: 16px;  /* Mayor tamaño */
-  width: 16px;   /* Mayor tamaño */
-  margin: 0 8px;
-  background-color: #bbb;
-  border-radius: 50%;
-  display: inline-block;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.carousel-indicators span.active-indicator {
-  background-color: #717171;
-}
-
-/* Barra de progreso */
-.progress-bar {
-  height: 10px;
-  background: #ddd;
-  border-radius: 5px;
-  margin-top: 10px;
-  overflow: hidden;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.progress-fill {
-  height: 100%;
-  background: #717171;
-  width: 0%;
-  transition: width 0.05s linear;
-}
-
-/* Resto del código del carrusel y popup se mantiene igual */
+/* Carrusel */
 .carousel-container {
   position: relative;
-  max-width: 600px;
-  margin: 50px auto;
+  max-width: 350px;  /* Reducir el tamaño del carrusel */
+  margin: 30px auto;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #2c2c2c;
+  border-radius: 8px;
+  padding: 15px; /* Reducir padding */
 }
 
 .carousel-slide {
   width: 100%;
   text-align: center;
+  position: relative;
 }
 
 .carousel-slide img {
-  max-width: 100%;
+  width: 100%;
+  height: 100%;  /* Hacer la imagen cuadrada */
+  object-fit: cover;  /* Mantener la imagen dentro del cuadrado */
   border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Cambiamos la transición */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .carousel-slide img:hover {
-  transform: none; /* Elimina el zoom */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Añadimos un efecto de sombra */
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 /* Nombre del rol */
 .role-name {
-  margin-top: 10px;
-  font-size: 2rem; /* Aumentamos el tamaño */
+  font-size: 1.5rem;  /* Reducir tamaño */
+  color: #fff;
+  margin-top: 10px;  /* Reducir margen */
   font-weight: bold;
-  color: #333;
-  transition: color 0.3s ease-in-out; /* Añadimos un efecto de transición al color */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Reducir sombra */
+}
+
+/* Descripción del rol */
+.role-description {
+  font-size: 1rem;  /* Reducir tamaño */
+  color: #f4f4f4;
+  line-height: 1.6;
+  margin-top: 5px; /* Reducir margen */
 }
 
 /* Flechas del carrusel */
 .carousel-button {
   background: transparent;
   border: none;
-  font-size: 3rem;
-  cursor: pointer;
-  color: #333;
-  position: absolute;
+  font-size: 2rem;  /* Reducir tamaño */
+  color: #fff;
+  position: fixed;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 1;
-  padding: 0 20px; /* Aumentamos el padding para separarlas más */
-  transition: color 0.3s ease, transform 0.3s ease; /* Añadimos transición */
+  z-index: 1000;
+  padding: 0 15px; /* Reducir padding */
+  transition: color 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
 }
 
+/* Flecha izquierda */
 .carousel-button.left {
-  left: -20px;  /* Mayor separación */
+  left: 10px;
 }
 
+/* Flecha derecha */
 .carousel-button.right {
-  right: -20px; /* Mayor separación */
+  right: 10px;
 }
 
+/* Flechas al pasar el ratón */
 .carousel-button:hover {
-  color: #f5a623; /* Cambiamos el color al pasar el ratón */
-  transform: translateY(-50%) scale(1.2); /* Añadimos un pequeño efecto de escala */
+  color: #f5a623;
+  transform: translateY(-50%) scale(1.1);  /* Reducir el efecto de escala */
 }
+
+/* Indicadores del carrusel */
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;  /* Reducir margen */
+}
+
+.carousel-indicators span {
+  height: 12px; /* Reducir el tamaño */
+  width: 12px;  /* Reducir el tamaño */
+  margin: 0 6px;  /* Reducir el espacio */
+  border-radius: 50%;
+  background-color: #bbb;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.carousel-indicators span.active-indicator {
+  background-color: #f5a623;
+}
+
+/* Barra de progreso */
+.progress-bar {
+  height: 8px;  /* Reducir el tamaño */
+  background: #ddd;
+  border-radius: 5px;
+  margin-top: 15px;
+  overflow: hidden;
+  max-width: 350px;  /* Reducir el tamaño */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #f5a623;
+  width: 0%;
+  transition: width 0.05s linear;
+}
+
+/* Botón Mostrar Todos */
+.show-all-button {
+  margin-top: 20px;  /* Reducir margen */
+}
+
+.show-all-button button {
+  padding: 10px 25px;  /* Reducir padding */
+  font-size: 0.9rem;  /* Reducir tamaño */
+  background-color: #f5a623;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.show-all-button button:hover {
+  background-color: #d68719;
+}
+
 
 /* Popup overlay */
 .popup-overlay {
@@ -377,7 +440,6 @@ html {
 
 /* Estilos para la nueva sección "game-obj" */
 .game-obj {
-  background-color: #f8f9fa;
   padding: 40px 20px;
   text-align: center;
   margin-top: 60px;
