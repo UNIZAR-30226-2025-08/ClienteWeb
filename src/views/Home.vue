@@ -243,11 +243,6 @@ function irARegistro() {
           </div>
         </div>
       </div>
-
-      <!-- Botón Mostrar Todos -->
-      <div class="show-all-button">
-        <button @click="showAllRoles">Mostrar Todos</button>
-      </div>
     </div>
     <!-- Barra horizontal -->
     <div class="horizontal-bar"></div>

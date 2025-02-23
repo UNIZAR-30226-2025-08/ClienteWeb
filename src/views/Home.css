@@ -383,6 +383,7 @@ main {
   align-items: center;
   justify-content: center;
 }
+
 .popup-content {
   background: black; /* Fondo negro para el contenido */
   color: white; /* Texto blanco */
