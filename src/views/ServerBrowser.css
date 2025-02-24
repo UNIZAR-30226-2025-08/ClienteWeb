@@ -1,0 +1,199 @@
+/* 
+   Paleta de colores (de claro a oscuro):
+   #302E2B (más claro)
+   #262522 (intermedio)
+   #1F1E1C (más oscuro)
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap');
+
+.server-browser {
+  width: 100%;
+  height: 100vh;
+  background-color: #262522; /* Fondo intermedio */
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  font-family: 'Open Sans', sans-serif;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* --------------------- */
+/* BARRA SUPERIOR        */
+/* --------------------- */
+.top-bar {
+  background-color: #302E2B; /* Color más claro */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+}
+
+.user-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  margin-right: 10px;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.user-name {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.level-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.level {
+  font-size: 0.9rem;
+}
+
+/* Barra de XP más larga */
+.xp-bar {
+  width: 160px;
+  height: 10px;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 4px;
+}
+
+.xp-bar::-webkit-progress-bar {
+  background-color: #333;
+  border-radius: 4px;
+}
+
+.xp-bar::-webkit-progress-value {
+  background-color: #999;
+  border-radius: 4px;
+}
+
+/* --------------------- */
+/* CONTENEDOR DE TABLA   */
+/* --------------------- */
+/* Contenedor de la tabla con bordes redondeados */
+.table-container {
+  flex: 1;
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px; /* Hace que la tabla tenga bordes redondeados */
+  overflow: hidden; /* Evita que el contenido sobresalga de los bordes redondeados */
+}
+
+/* Tabla de servidores */
+.server-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #1F1E1C; /* Más oscuro */
+  border-radius: 12px; /* Bordes redondeados */
+  overflow: hidden;
+}
+
+/* Encabezado con bordes redondeados arriba */
+.server-table thead {
+  background-color: #302E2B; /* Más claro */
+}
+
+.server-table thead th {
+  text-align: left;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* Bordes redondeados en las esquinas superiores de la tabla */
+.server-table thead tr:first-child th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.server-table thead tr:first-child th:last-child {
+  border-top-right-radius: 12px;
+}
+
+/* Bordes redondeados en las esquinas inferiores de la tabla */
+.server-table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 12px;
+}
+
+.server-table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 12px;
+}
+
+/* Borde en cada celda para líneas verticales y horizontales */
+.server-table th,
+.server-table td {
+  border: 1px solid #262522; /* Líneas para separar */
+}
+
+/* Cuerpo */
+.server-table td {
+  padding: 12px;
+  font-size: 0.95rem;
+  vertical-align: middle;
+}
+
+/* Icono del candado más grande */
+.lock-icon {
+  width: 24x; 
+  height: 36px;
+}
+
+
+/* --------------------- */
+/* BARRA INFERIOR        */
+/* --------------------- */
+.bottom-bar {
+  background-color: #302E2B; /* Mismo color que la barra superior */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+}
+
+.btn-back,
+.btn-join {
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: color 0.3s, transform 0.3s;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-back:hover,
+.btn-join:hover {
+  color: #ccc;
+  transform: scale(1.05);
+}
