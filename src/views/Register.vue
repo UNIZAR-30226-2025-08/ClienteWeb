@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import './Register.css';
+import '../assets/styles/Register.css';
 
 const router = useRouter();
 

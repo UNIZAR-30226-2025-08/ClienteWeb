@@ -1,9 +1,8 @@
-
 body {
-    background-image: url('../assets/HomeFoto.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;   
+  background-image: url('../HomeFoto.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .register-container {

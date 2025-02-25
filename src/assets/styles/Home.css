@@ -40,7 +40,7 @@ main {
   align-items: flex-start;
   justify-content: space-between;
   padding: 25px;
-  background-image: url('../assets/HomeFoto.jpg');
+  background-image: url('../HomeFoto.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -110,7 +110,7 @@ main {
   justify-content: center;
   align-items: center;
   height: 50vh;
-  background: url('../assets/background.jpg') center/cover no-repeat;
+  background: url('../background.jpg') center/cover no-repeat;
 }
 
 .login-box {
@@ -636,7 +636,7 @@ main {
 
 @font-face {
   font-family: 'Ghost Shadow';
-  src: url('../assets/fonts/Ghost Shadow.ttf') format('truetype');
+  src: url('../fonts/Ghost Shadow.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
