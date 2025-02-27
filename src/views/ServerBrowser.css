@@ -9,28 +9,38 @@
 
 .server-browser {
   width: 100%;
-  height: 100vh;
-  background-color: #262522; /* Fondo intermedio */
+  min-height: 100vh;
+  background-color: #302E2B;
   display: flex;
   flex-direction: column;
   color: #fff;
   font-family: 'Open Sans', sans-serif;
   margin: 0;
+  margin-top: 1rem;
   box-sizing: border-box;
 }
 
+/* 
+   NUEVO contenedor para que ocupe todo el ancho 
+   y tenga más espacio arriba y abajo 
+*/
+.server-container {
+  background-color: #262522;
+  border-radius: 0px;
+  margin: 20px 0;       /* Espacio vertical arriba y abajo */
+  width: 100%;          /* Ocupa todo el ancho */
+  padding: 60px;        /* Separación interna */
+  box-sizing: border-box;
+}
 
-/* --------------------- */
-/* CONTENEDOR DE TABLA   */
-/* --------------------- */
-/* Contenedor de la tabla con bordes redondeados */
+/* Contenedor de la tabla */
 .table-container {
   flex: 1;
-  margin: 20px;
   display: flex;
   flex-direction: column;
-  border-radius: 12px; /* Hace que la tabla tenga bordes redondeados */
-  overflow: hidden; /* Evita que el contenido sobresalga de los bordes redondeados */
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0; /* Elimina margen para que llene .server-container */
 }
 
 /* Tabla de servidores */
@@ -38,7 +48,7 @@
   width: 100%;
   border-collapse: collapse;
   background-color: #1F1E1C; /* Más oscuro */
-  border-radius: 12px; /* Bordes redondeados */
+  border-radius: 12px;
   overflow: hidden;
 }
 
@@ -54,28 +64,25 @@
   font-weight: 700;
 }
 
-/* Bordes redondeados en las esquinas superiores de la tabla */
 .server-table thead tr:first-child th:first-child {
   border-top-left-radius: 12px;
 }
-
 .server-table thead tr:first-child th:last-child {
   border-top-right-radius: 12px;
 }
 
-/* Bordes redondeados en las esquinas inferiores de la tabla */
+/* Bordes redondeados en la última fila */
 .server-table tbody tr:last-child td:first-child {
   border-bottom-left-radius: 12px;
 }
-
 .server-table tbody tr:last-child td:last-child {
   border-bottom-right-radius: 12px;
 }
 
-/* Borde en cada celda para líneas verticales y horizontales */
+/* Líneas de separación */
 .server-table th,
 .server-table td {
-  border: 1px solid #262522; /* Líneas para separar */
+  border: 1px solid #262522;
 }
 
 /* Cuerpo */
@@ -87,7 +94,7 @@
 
 /* Icono del candado más grande */
 .lock-icon {
-  width: 24x; 
+  width: 24px; 
   height: 36px;
 }
 
@@ -95,7 +102,7 @@
 /* BARRA INFERIOR        */
 /* --------------------- */
 .bottom-bar {
-  background-color: #302E2B; /* Mismo color que la barra superior */
+  background-color: #302E2B;
   display: flex;
   justify-content: space-between;
   align-items: center;
