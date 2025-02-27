@@ -86,7 +86,6 @@ async function registerUser() {
           :type="showPassword ? 'text' : 'password'" 
           placeholder="********" 
           required
-          required
         />
         <button type="button" class="toggle-password" @click="togglePasswordVisibility('password')">
           {{ showPassword ? '👁️' : '🙈' }}
