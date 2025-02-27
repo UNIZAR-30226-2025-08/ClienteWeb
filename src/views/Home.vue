@@ -113,6 +113,13 @@ function cerrarPopup() {
 function irARegistro() {
   router.push('/register')
 }
+
+// Función para manejar el login y redirigir al juego
+function handleLogin(event) {
+  event.preventDefault(); // Evita que el formulario recargue la página
+  router.push('/juego'); // Redirige a la vista "Juego"
+}
+
 </script>
 
 <template>
@@ -155,7 +162,6 @@ function irARegistro() {
               </div>
 
               <div class="register-link">
-
                 <span>
                   <strong>¿No tienes cuenta?</strong>
                   <a href="#" @click.prevent="irARegistro"> Regístrate ya</a>

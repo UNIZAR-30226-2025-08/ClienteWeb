@@ -6,10 +6,12 @@ import axios from 'axios'; // Vamos a capturar los datos del formulario y enviar
 
 const router = useRouter();
 
+// Función para volver a la pantalla principal
 function volver() {
   router.push('/');
 }
 
+// Función para ir a la pantalla de inicio de sesión
 function irALogin() {
   router.push('/login-email');
 }
@@ -83,6 +85,7 @@ async function registerUser() {
           v-model="contrasena"
           :type="showPassword ? 'text' : 'password'" 
           placeholder="********" 
+          required
           required
         />
         <button type="button" class="toggle-password" @click="togglePasswordVisibility('password')">
