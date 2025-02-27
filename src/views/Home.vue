@@ -3,8 +3,13 @@ import '../assets/styles/Home.css';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { roles } from '../assets/data/roles.js';
+import axios from 'axios'; // Importar axios para poder hacer la petición de login al backend
 
 const router = useRouter();
+
+const correo = ref('');
+const contrasena = ref('');
+const mensajeError = ref('');
 
 // Control de visibilidad de la contraseña
 const showPassword = ref(false);
@@ -66,6 +71,33 @@ onMounted(() => {
   }, tiempoIntervalo);
 });
 
+// Función para manejar el login
+async function loginUser() {
+  mensajeError.value = '';
+
+  if (!correo.value || !contrasena.value) {
+    mensajeError.value = 'Todos los campos son obligatorios';
+    return;
+  }
+
+  try {
+    // Enviar los datos de login al backend con axios
+    const response = await axios.post('/api/usuario/login', {
+      correo: correo.value,
+      contrasena: contrasena.value,
+    });
+
+    if (response.status === 200) {
+      // Si el login es exitoso, redirigir al usuario
+      router.push('/servidores'); // !!! Cambiar la ruta si fuera necesario !!!
+    } else {
+      mensajeError.value = 'Correo o contraseña incorrectos';
+    }
+  } catch (error) {
+    mensajeError.value = error.response?.data?.message || 'Error al iniciar sesión';
+  }
+}
+
 /* ----------------------------
    Botón "Mostrar Todos"
 ---------------------------- */
@@ -97,7 +129,7 @@ function handleLogin(event) {
   <!-- Navbar -->
   <nav class="nav">
     <a href="#como-jugar" @click.prevent="desplazarAbajo" class="hover:underline">Cómo Jugar</a>
-    <a href="#roles" @click.prevent="desplazarAbajoRoles" class="hover:underline">Roles</a>
+    <a href="#roles" @click.prevent="desplazarAbajoRoles" class="hover:underline">Roles y Cargos</a>
     <a href="#desarrollo" @click.prevent="desplazarAbajoDesarrollo" class="hover:underline">Desarrollo de la Partida</a>
     <a href="#descargar" @click.prevent="desplazarAbajoDescargar" class="hover:underline">Descargar</a>
     <a href="#contacto" @click.prevent="desplazarAbajoContacto" class="hover:underline">Contacto</a>
@@ -107,20 +139,21 @@ function handleLogin(event) {
     <!-- Sección principal (login + mockup) -->
     <div class="home-container">
       <div class="left-section">
-        <h2 class="title">LOS HOMBRES LOBO <br> DE CASTONEGRO</h2>
+        <h2 class="title">LOS HOMBRES LOBO <br> DE CASTRONEGRO</h2>
         <div class="login-container">
           <div class="login-box">
             <h2 class="login-title">Inicia Sesión</h2>
-            <form class="login-form" @submit.prevent="handleLogin">
-              <label for="email">Correo electrónico</label>
-              <input id="email" type="email" placeholder="Ingresa tu correo" required />
+            <form class="login-form" @submit.prevent="loginUser">
+              <label for="correo">Correo electrónico</label>
+              <input id="correo" v-model="correo" type="email" placeholder="Ingresa tu correo" required />
 
-              <label for="password">Contraseña</label>
+              <label for="contrasena">Contraseña</label>
               <div class="password-container">
                 <input 
-                  id="password" 
+                  id="contrasena"
+                  v-model="contrasena"
                   :type="showPassword ? 'text' : 'password'" 
-                  placeholder="********" 
+                  placeholder="********"
                   required
                 />
                 <button type="button" class="toggle-password" @click="togglePasswordVisibility">
@@ -131,7 +164,7 @@ function handleLogin(event) {
               <div class="register-link">
                 <span>
                   <strong>¿No tienes cuenta?</strong>
-                  <a href="#" @click.prevent="router.push('/register')"> Regístrate</a>
+                  <a href="#" @click.prevent="irARegistro"> Regístrate ya</a>
                 </span>
               </div>
 
@@ -157,9 +190,12 @@ function handleLogin(event) {
 
     <!-- Sección "Cómo jugar" -->
     <div ref="scrollSeccionJuego" class="game-intro" id="como-jugar">
-      <h3>¿Cómo jugar a Los Hombres Lobos de Casonegro?</h3>
+      <h3>¿Cómo jugar a Los Hombres Lobos de Castonegro?</h3>
       <p>
-        Los Hombres Lobos de Casonegro es un juego de roles ocultos y deducción social en el que los jugadores asumen diferentes papeles dentro de una aldea. El objetivo varía según el rol: los aldeanos intentan descubrir y eliminar a los hombres lobo, mientras que los hombres lobo intentan eliminar a los aldeanos sin ser descubiertos.
+        Los Hombres Lobos de Castonegro es un juego de roles ocultos y deducción social en el que 
+        los jugadores asumen diferentes papeles dentro de una aldea.
+        El objetivo varía según el bando: los aldeanos intentan descubrir y eliminar a los hombres lobo,
+        mientras que los hombres lobo intentan eliminar a los aldeanos sin ser descubiertos.
       </p>
     </div>
 
@@ -168,7 +204,7 @@ function handleLogin(event) {
 
     <!-- Sección "Roles" -->
     <div ref="scrollSeccionRoles" class="roles-info" id="roles">
-      <h3>Roles En El Juego</h3>
+      <h3>Roles y Cargos En El Juego</h3>
       <button class="carousel-button left" @click="slideAnterior">&#9664;</button>
       <div class="carousel-container">
         <div class="carousel-slide">
@@ -217,21 +253,22 @@ function handleLogin(event) {
     <div ref="scrollSeccionDesarrollo" class="game-intro" id="desarrollo">
       <h3>Desarrollo de la partida</h3>
       <p>
-        <strong>Fase Nocturna</strong><br />
-        Todos los jugadores cierran los ojos.<br />
-        El narrador llama a los roles en orden (vidente, hombres lobo, bruja, etc.).<br />
-        Los hombres lobo eligen a su víctima en secreto.<br />
-        Los personajes con habilidades especiales actúan según sus poderes.
+        <strong><u>Fase Nocturna</u></strong><br/>
+        Todos los jugadores cierran los ojos.<br/>
+        Se llama a los roles en el siguiente orden: primero la vidente, luego los hombres lobo y por último la bruja.<br/>
+        La vidente elige a un jugador para conocer su rol.<br/>
+        Los hombres lobo eligen a su víctima en secreto.<br/>
+        La bruja puede emplear sus pociones para salvar a una víctima o eliminar a otro jugador.<br/>
       </p>
       <p>
-        <strong>Fase Diurna</strong><br />
-        El narrador anuncia quién ha sido eliminado.<br />
-        Se abre un debate entre los jugadores.<br />
-        Se realiza una votación para linchar a un posible lobo.<br />
-        El jugador con más votos es eliminado y revela su identidad.
+        <br/><strong><u>Fase Diurna</u></strong><br/>
+        Se anuncia qué jugador ha sido eliminado en la última noche.<br/>
+        Se abre un debate entre todos los jugadores.<br/>
+        Se realiza una votación para linchar a un posible hombre lobo.<br/>
+        El jugador con más votos es eliminado y se revela su identidad.
       </p>
       <p>
-        El ciclo se repite hasta que un equipo logra su objetivo.
+        <br/>El ciclo se repite hasta que un bando logra su objetivo.
       </p>
     </div>
 
@@ -242,8 +279,8 @@ function handleLogin(event) {
     <div class="game-obj" id="objetivo">
       <h3>Objetivo del Juego</h3>
       <ul>
-        <li><strong>Los Aldeanos</strong> ganan si eliminan a todos los hombres lobo.</li>
-        <li><strong>Los Hombres Lobo</strong> ganan si igualan o superan en número a los aldeanos.</li>
+        <li><strong><u>Los Aldeanos</u></strong> ganan si eliminan a todos los hombres lobo.</li>
+        <li><strong><u>Los Hombres Lobo</u></strong> ganan si eliminan a todos los aldeanos.</li>
       </ul>
     </div>
 
@@ -265,7 +302,7 @@ function handleLogin(event) {
       <div class="footer-content">
         <div class="footer-column">
           <h4>Contacto</h4>
-          <p>Email: <strong>casonegro@gmail.com</strong></p>
+          <p>Email: <strong>castonegro@gmail.com</strong></p>
           <div class="social-links">
             <a href="#"><img src="../assets/facebook-icon.jpg" alt="Facebook" /></a>
             <a href="#"><img src="../assets/instagram.webp" alt="Instagram" /></a>
@@ -282,13 +319,13 @@ function handleLogin(event) {
         </div>
         <div class="footer-column">
           <h4>Créditos</h4>
-          <p>Desarrollo Web: [Tu Nombre/Estudio]</p>
-          <p>Ilustraciones: [Nombre del artista]</p>
+          <p>Equipo 08 - Roberta Williams</p>
+          <p>Curso 2024/2025 - Proyecto Software</p>
           <p>Basado en el juego original</p>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>© 2024 Castonegro. Todos los derechos reservados</p>
+        <p>© 2025 Los Hombres Lobos de Castonegro. Todos los derechos reservados</p>
       </div>
     </footer>
   </main>
