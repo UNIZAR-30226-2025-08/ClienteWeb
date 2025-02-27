@@ -81,6 +81,13 @@ function cerrarPopup() {
 function irARegistro() {
   router.push('/register')
 }
+
+// Función para manejar el login y redirigir al juego
+function handleLogin(event) {
+  event.preventDefault(); // Evita que el formulario recargue la página
+  router.push('/juego'); // Redirige a la vista "Juego"
+}
+
 </script>
 
 <template>
@@ -104,16 +111,17 @@ function irARegistro() {
         <div class="login-container">
           <div class="login-box">
             <h2 class="login-title">Inicia Sesión</h2>
-            <form class="login-form">
+            <form class="login-form" @submit.prevent="handleLogin">
               <label for="email">Correo electrónico</label>
-              <input id="email" type="email" placeholder="Ingresa tu correo" />
+              <input id="email" type="email" placeholder="Ingresa tu correo" required />
 
               <label for="password">Contraseña</label>
               <div class="password-container">
                 <input 
                   id="password" 
                   :type="showPassword ? 'text' : 'password'" 
-                  placeholder="********"
+                  placeholder="********" 
+                  required
                 />
                 <button type="button" class="toggle-password" @click="togglePasswordVisibility">
                   {{ showPassword ? '👁️' : '🙈' }}
@@ -121,10 +129,9 @@ function irARegistro() {
               </div>
 
               <div class="register-link">
-
                 <span>
                   <strong>¿No tienes cuenta?</strong>
-                  <a href="#" @click.prevent="irARegistro"> Regístrate</a>
+                  <a href="#" @click.prevent="router.push('/register')"> Regístrate</a>
                 </span>
               </div>
 
