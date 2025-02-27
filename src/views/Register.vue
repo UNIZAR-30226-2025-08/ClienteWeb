@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import '../assets/styles/Register.css';
+import axios from 'axios'; // Vamos a capturar los datos del formulario y enviarlos a /api/usuario/crear con axios
 
 const router = useRouter();
 
@@ -15,7 +16,13 @@ function irALogin() {
   router.push('/login-email');
 }
 
-// Control de visibilidad de la contraseña
+const nombre = ref('');
+const correo = ref('');
+const contrasena = ref('');
+const confirmacionContrasena = ref('');
+const mensajeError = ref('');
+
+// Control de visibilidad de contraseña
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 
@@ -27,29 +34,55 @@ function togglePasswordVisibility(field) {
   }
 }
 
-// Función para manejar el registro y redirigir a la pantalla de juego
-function handleRegister(event) {
-  event.preventDefault(); // Evita que el formulario recargue la página
-  router.push('/juego'); // Redirige a la vista "Juego"
+// Verificar si las contraseñas coinciden y enviar los datos del formulario al backend
+async function registerUser() {
+  mensajeError.value = '';
+
+  if (!nombre.value || !correo.value || !contrasena.value || !confirmacionContrasena.value) {
+    mensajeError.value = 'Todos los campos son obligatorios';
+    return;
+  }
+
+  if (contrasena.value !== confirmacionContrasena.value) {
+    mensajeError.value = 'Las contraseñas no coinciden';
+    return;
+  }
+
+  try {
+    const response = await axios.post('/api/usuario/crear', {
+      nombre: nombre.value,
+      correo: correo.value,
+      contrasena: contrasena.value
+    });
+
+    if (response.status === 201) {
+      router.push('/login-email');
+    } else {
+      mensajeError.value = 'No se pudo completar el registro';
+    }
+  } catch (error) {
+    mensajeError.value = error.response?.data?.message || 'Error al registrar usuario';
+  }
 }
 </script>
 
 <template>
   <div class="register-container">
     <button class="back-button" @click="volver">← Volver</button>
-    <h2 class="register-title">Únete a los hombres lobo de Castonegro</h2>
+    <h2 class="register-title">Únete a los hombres lobo de Castronegro</h2>
     
-    <form class="register-form" @submit.prevent="handleRegister">
-      <label for="username">Nombre de usuario</label>
-      <input id="username" type="text" placeholder="Ingresa tu nombre de usuario" required />
+    <form class="register-form" @submit.prevent="registerUser">
+      <label for="nombre">Nombre de usuario</label>
+      <input id="nombre" v-model="nombre" type="text" placeholder="Ingresa tu nombre de usuario" required />
 
-      <label for="email">Correo electrónico</label>
-      <input id="email" type="email" placeholder="Ingresa tu correo" required />
+      <label for="correo">Correo electrónico</label>
+      <input id="correo" v-model="correo" type="email" placeholder="Ingresa tu correo" required/>
 
-      <label for="password">Contraseña</label>
+      <label for="contrasena">Contraseña</label>
       <div class="password-container">
         <input 
-          id="password" 
+          id="contrasena" 
+          v-model="contrasena"
           :type="showPassword ? 'text' : 'password'" 
           placeholder="********" 
           required
@@ -62,15 +95,18 @@ function handleRegister(event) {
       <label for="confirm-password">Confirmar Contraseña</label>
       <div class="password-container">
         <input 
-          id="confirm-password" 
+          id="confirm-password"
+          v-model="confirmacionContrasena"
           :type="showConfirmPassword ? 'text' : 'password'" 
-          placeholder="Repite la contraseña" 
+          placeholder="Repite la contraseña"
           required
         />
         <button type="button" class="toggle-password" @click="togglePasswordVisibility('confirm-password')">
           {{ showConfirmPassword ? '👁️' : '🙈' }}
         </button>
       </div>
+
+      <p v-if="mensajeError" class="error-message">{{ mensajeError }}</p>
 
       <button type="submit" class="submit-button">REGISTRARSE</button>
     </form>

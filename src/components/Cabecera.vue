@@ -1,24 +1,20 @@
 <template>
   <header class="cabecera">
     <div class="contenido">
-      <!-- Título -->
+      <!-- Título a la izquierda -->
       <h1>{{ titulo }}</h1>
 
-      <!-- Contenedor flexible para perfil y notificaciones -->
+      <!-- Perfil + notificaciones a la derecha -->
       <div class="perfil-notificaciones">
-        <!-- Perfil (Imagen + Nombre + Nivel + Barra XP) -->
         <div class="profile" :class="{ compacto: compacto }">
           <img src="../assets/profile_icon.jpg" alt="User Icon" class="user-icon" />
           
-          <!-- Info del usuario en columna -->
           <div class="profile-info">
             <span class="user-name">NombreCuenta</span>
             <span class="level">Nivel 10</span>
             <progress class="xp-bar" value="2000" max="3000"></progress>
           </div>
         </div>
-
-        <!-- Notificaciones alineadas a la derecha -->
         <div class="notifications">
           <button class="notification-button">
             <img src="../assets/noti_icon.png" alt="Notificaciones" class="notification-icon" />
@@ -38,7 +34,7 @@ const props = defineProps({
   },
   compacto: {
     type: Boolean,
-    default: false // Por defecto usa el margen grande
+    default: false // Ajusta margenes si es "compacto"
   }
 });
 </script>
@@ -51,8 +47,9 @@ const props = defineProps({
   width: 100%;
   background-color: #262522; /* Fondo oscuro */
   color: #fff;
-  padding: 1rem;
+  padding: 0.5rem 1rem;      /* Reducimos padding para ver fondo */
   box-sizing: border-box;
+  margin-bottom: 2rem;       /* Más espacio debajo de la cabecera */
 }
 
 .contenido {
@@ -60,29 +57,33 @@ const props = defineProps({
   margin: 0 auto;
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Distribuye los elementos */
 }
 
-/* --------------------- */
-/* PERFIL Y NOTIFICACIONES */
-/* --------------------- */
+/* Mantener en una sola línea "Server Browser" */
+.contenido h1 {
+  margin: 0;
+  padding: 0;
+  white-space: nowrap; /* Evita salto de línea en el título */
+  margin-right: auto;  /* Lo empuja a la izquierda */
+}
+
+/* PERFIL + NOTIFICACIONES a la derecha */
 .perfil-notificaciones {
   display: flex;
   align-items: center;
-  width: 100%;
-  justify-content: space-between; /* Asegura que las notificaciones vayan a la derecha */
+  gap: 1rem;
+  margin-left: auto; /* Empuja este bloque a la derecha */
 }
 
-/* PERFIL */
+/* Info de perfil */
 .profile {
   display: flex;
   align-items: center;
-  gap: 1rem; /* Espaciado entre la imagen y la info del usuario */
+  gap: 1rem;
 }
 
-/* Clase para compactar el margen */
 .profile.compacto {
-  margin-left: 5rem; /* Margen más pequeño si es compacto */
+  margin-left: 5rem;
 }
 
 .user-icon {
@@ -91,7 +92,6 @@ const props = defineProps({
   border-radius: 10px;
 }
 
-/* Info del usuario en columna */
 .profile-info {
   display: flex;
   flex-direction: column;
@@ -126,12 +126,9 @@ const props = defineProps({
   border-radius: 4px;
 }
 
-/* --------------------- */
-/* NOTIFICACIONES        */
-/* --------------------- */
+/* NOTIFICACIONES */
 .notifications {
   position: relative;
-  margin-left: auto; /* Empuja las notificaciones a la derecha */
 }
 
 .notification-button {
