@@ -4,16 +4,15 @@ import Register from '../views/Register.vue';
 import CrearSala from '../views/CrearSala.vue';
 import Juego from '../views/Juego.vue';
 import Reglas from '../views/Reglas.vue';
-import Servidores from '../views/ServerBrowser.vue'
+import Servidores from '../views/ServerBrowser.vue';
 
 const routes = [
-  { path: '/', component: Home },
-  { path: '/crearSala', component: CrearSala },
+  { path: '/', component: Home }, // Página principal
   { path: '/register', component: Register },
+  { path: '/crear-sala', component: CrearSala },
   { path: '/juego', component: Juego },
   { path: '/reglas', component: Reglas },
-  { path: '/servidores', component: Servidores },
-  // Otras rutas que necesites como Juego, Reglas, etc.
+  { path: '/servidores', component: Servidores }
 ];
 
 const router = createRouter({
