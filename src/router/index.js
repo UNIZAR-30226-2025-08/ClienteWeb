@@ -5,9 +5,11 @@ import CrearSala from '../views/CrearSala.vue';
 import Juego from '../views/Juego.vue';
 import Reglas from '../views/Reglas.vue';
 import Servidores from '../views/ServerBrowser.vue';
+import Roles from '../views/Roles.vue';
 
 const routes = [
-  { path: '/', component: Home }, // Página principal
+  { path: '/', component: Roles }, // Página principal
+  { path: '/Home', component: Home }, // Página principal
   { path: '/register', component: Register },
   { path: '/crear-sala', component: CrearSala },
   { path: '/juego', component: Juego },
