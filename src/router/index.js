@@ -7,7 +7,12 @@ import Reglas from '../views/Reglas.vue';
 import Servidores from '../views/ServerBrowser.vue'
 
 const routes = [
-  { path: '/', component: CrearSala }, // Cambié la ruta principal a CrearSala
+  { path: '/', component: Home },
+  { path: '/crearSala', component: CrearSala },
+  { path: '/register', component: Register },
+  { path: '/juego', component: Juego },
+  { path: '/reglas', component: Reglas },
+  { path: '/servidores', component: Servidores },
   // Otras rutas que necesites como Juego, Reglas, etc.
 ];
 
