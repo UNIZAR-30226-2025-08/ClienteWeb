@@ -11,10 +11,10 @@ export default {}
 html, body {
   margin: 0;
   padding: 0;
-  background-color: #302E2B;
+  background-color: #302E2B !important;
   /* Fuerza a que no haya imagen de fondo */
-  background-image: none;
-  background-repeat: no-repeat;
-  background-size: auto;
+  background-image: none !important;
+  background-repeat: no-repeat !important;
+  background-size: auto !important;
 }
 </style>
