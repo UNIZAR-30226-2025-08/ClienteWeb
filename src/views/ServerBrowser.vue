@@ -6,7 +6,7 @@ import Cabecera from '../components/Cabecera.vue'; // Importamos la cabecera
 <template>
   <div class="server-browser">
     <!-- Cabecera con título -->
-    <Cabecera titulo="Server Browser" />
+    <Cabecera titulo="Server Browser" :compacto="true" />
 
     <!-- Contenedor de la tabla -->
     <div class="table-container">
