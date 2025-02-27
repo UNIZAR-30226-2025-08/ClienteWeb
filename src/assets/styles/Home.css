@@ -111,6 +111,7 @@ main {
   align-items: center;
   height: 50vh;
   background: url('../background.jpg') center/cover no-repeat;
+  margin-top: 4rem;
 }
 
 .login-box {
