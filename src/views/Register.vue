@@ -34,6 +34,16 @@ function togglePasswordVisibility(field) {
   }
 }
 
+// Función para realizar el hash SHA-256
+async function generarHashSHA256(contrasena) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(contrasena);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
+
 // Verificar si las contraseñas coinciden y enviar los datos del formulario al backend
 async function registerUser() {
   mensajeError.value = '';
@@ -49,10 +59,13 @@ async function registerUser() {
   }
 
   try {
+    // Generar hash SHA-256 en el cliente
+    const hashContrasena = await generarHashSHA256(contrasena.value);
+
     const response = await axios.post('/api/usuario/crear', {
       nombre: nombre.value,
       correo: correo.value,
-      contrasena: contrasena.value
+      contrasena: hashContrasena // Enviar la contraseña encriptada
     });
 
     if (response.status === 201) {

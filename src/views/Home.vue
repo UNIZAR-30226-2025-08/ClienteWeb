@@ -71,6 +71,16 @@ onMounted(() => {
   }, tiempoIntervalo);
 });
 
+// Función para realizar el hash SHA-256
+async function generarHashSHA256(contrasena) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(contrasena);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
+
 // Función para manejar el login
 async function loginUser() {
   mensajeError.value = '';
@@ -81,10 +91,13 @@ async function loginUser() {
   }
 
   try {
+    // Generar hash SHA-256 en el cliente
+    const hashContrasena = await generarHashSHA256(contrasena.value);
+    
     // Enviar los datos de login al backend con axios
     const response = await axios.post('/api/usuario/login', {
       correo: correo.value,
-      contrasena: contrasena.value,
+      contrasena: hashContrasena, // Enviar la contraseña encriptada
     });
 
     if (response.status === 200) {
