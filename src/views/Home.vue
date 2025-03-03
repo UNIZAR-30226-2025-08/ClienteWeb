@@ -89,7 +89,7 @@ async function loginUser() {
 
     if (response.status === 200) {
       // Si el login es exitoso, redirigir al usuario
-      router.push('/servidores'); // !!! Cambiar la ruta si fuera necesario !!!
+      router.push('/juego'); // !!! Cambiar la ruta si fuera necesario !!!
     } else {
       mensajeError.value = 'Correo o contraseña incorrectos';
     }
@@ -129,7 +129,7 @@ function handleLogin(event) {
   <!-- Navbar -->
   <nav class="nav">
     <a href="#como-jugar" @click.prevent="desplazarAbajo" class="hover:underline">Cómo Jugar</a>
-    <a href="#roles" @click.prevent="desplazarAbajoRoles" class="hover:underline">Roles y Cargos</a>
+    <a href="#roles" @click.prevent="desplazarAbajoRoles" class="hover:underline">Roles</a>
     <a href="#desarrollo" @click.prevent="desplazarAbajoDesarrollo" class="hover:underline">Desarrollo de la Partida</a>
     <a href="#descargar" @click.prevent="desplazarAbajoDescargar" class="hover:underline">Descargar</a>
     <a href="#contacto" @click.prevent="desplazarAbajoContacto" class="hover:underline">Contacto</a>
