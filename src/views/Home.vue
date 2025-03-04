@@ -4,6 +4,9 @@ import { useRouter } from 'vue-router';
 import { roles } from '../assets/data/roles.js';
 import axios from 'axios'; // Importar axios para poder hacer la petición de login al backend
 import Musica from '../components/musica/musica.vue';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
+
 const router = useRouter();
 
 const correo = ref('');
@@ -37,6 +40,9 @@ function desplazarAbajoDesarrollo() {
   scrollSeccionDesarrollo.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 function desplazarAbajoDescargar() {
+  scrollSeccionDescargar.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function desplazarAbajoContacto() {
   scrollSeccionDescargar.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 function desplazarArriba() {
@@ -82,17 +88,18 @@ async function generarHashSHA256(contrasena) {
 
 // Función para manejar el login
 async function loginUser() {
-  mensajeError.value = '';
+  mensajeError.value = ''; // Limpiar el mensaje de error anterior
 
   if (!correo.value || !contrasena.value) {
     mensajeError.value = 'Todos los campos son obligatorios';
+    toast.error(mensajeError.value); // Mostrar alerta de error
     return;
   }
 
   try {
     // Generar hash SHA-256 en el cliente
     const hashContrasena = await generarHashSHA256(contrasena.value);
-    
+
     // Enviar los datos de login al backend con axios
     const response = await axios.post('/api/usuario/login', {
       correo: correo.value,
@@ -100,13 +107,18 @@ async function loginUser() {
     });
 
     if (response.status === 200) {
-      // Si el login es exitoso, redirigir al usuario
-      router.push('/juego'); // !!! Cambiar la ruta si fuera necesario !!!
+      // Si el login es exitoso, almacenar el mensaje de éxito
+      localStorage.setItem('loginSuccess', 'true');  // Almacenar en localStorage
+      router.push('/juego'); // Redirigir al juego
     } else {
+      // Si la respuesta no es 200 (exitoso), mostrar error
       mensajeError.value = 'Correo o contraseña incorrectos';
+      toast.error(mensajeError.value, { autoClose: 3000 }); // Mostrar alerta de error
     }
   } catch (error) {
+    // Si hay un error en la petición, mostrar un mensaje de error general
     mensajeError.value = error.response?.data?.message || 'Error al iniciar sesión';
+    toast.error(mensajeError.value, { autoClose: 3000 }); // Mostrar alerta de error
   }
 }
 
@@ -127,12 +139,6 @@ function irARegistro() {
   router.push('/register')
 }
 
-// Función para manejar el login y redirigir al juego
-function handleLogin(event) {
-  event.preventDefault(); // Evita que el formulario recargue la página
-  router.push('/juego'); // Redirige a la vista "Juego"
-}
-
 </script>
 
 <template>
@@ -142,11 +148,14 @@ function handleLogin(event) {
 
   <!-- Navbar -->
   <nav class="nav">
-    <a href="#como-jugar" @click.prevent="desplazarAbajo" class="hover:underline">Cómo Jugar</a>
-    <a href="#roles" @click.prevent="desplazarAbajoRoles" class="hover:underline">Roles</a>
-    <a href="#desarrollo" @click.prevent="desplazarAbajoDesarrollo" class="hover:underline">Desarrollo de la Partida</a>
-    <a href="#descargar" @click.prevent="desplazarAbajoDescargar" class="hover:underline">Descargar</a>
-    <a href="#contacto" @click.prevent="desplazarAbajoContacto" class="hover:underline">Contacto</a>
+    <img src="/lobo.png" alt="Logo Lobo" class="logo" />
+    <div class="nav-links">
+        <a href="#como-jugar" @click.prevent="desplazarAbajo" class="hover:underline">Cómo Jugar</a>
+        <a href="#roles" @click.prevent="desplazarAbajoRoles" class="hover:underline">Roles</a>
+        <a href="#desarrollo" @click.prevent="desplazarAbajoDesarrollo" class="hover:underline">Desarrollo de la Partida</a>
+        <a href="#descargar" @click.prevent="desplazarAbajoDescargar" class="hover:underline">Descargar</a>
+        <a href="#contacto" @click.prevent="desplazarAbajoContacto" class="hover:underline">Contacto</a>
+    </div>
   </nav>
 
   <main>
@@ -356,39 +365,43 @@ html, body {
 }
 
 main {
-  background-color: #262522;
+  background-color: #1a1917;
 }
 
 
-/* Estilos para la navegación */
 .nav {
   display: flex;
-  justify-content: center;  /* Centra los enlaces horizontalmente */
-  gap: 80px;  /* Espacio entre los enlaces */
-  padding: 15px 30px;  /* Aumentamos el padding para hacer la barra más alta */
-  background-color: #1F1E1C;
-  font-size: 1.5rem;  /* Aumentamos el tamaño de la fuente */
+  align-items: center;
+  justify-content: space-between; /* Separa logo e ítems */
+  background-color: #1a1917;
+  padding: 1rem;
 }
 
-.nav a {
+.logo {
+  width: 50px; /* Ajusta el tamaño del logo */
+  height: auto;
+}
+
+.nav-links {
+  display: flex;
+  gap: 5rem; /* Espaciado entre los enlaces */
+}
+
+.nav-links a {
   color: white;
   text-decoration: none;
-  font-weight: bold;
-  transition: color 0.3s ease;
-  margin: 0 20px; /* Espacio entre los enlaces */
+  font-size: 1.6rem;
 }
 
-.nav a:hover {
-  color: #34b7f1; /* Efecto hover con color azul */
+.nav-links a:hover {
+  text-decoration: underline;
 }
-
 
 /* Contenedor principal de Home */
 .home-container {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 25px;
   background-image: url('../assets/HomeFoto.jpg');
   background-size: cover;
   background-position: center;
@@ -407,8 +420,7 @@ main {
 
 /* Sección izquierda (Título + Formulario) */
 .left-section {
-  flex: 1;
-  margin-right: 20px;
+  flex: 0.6;
 }
 
 /* Sección derecha (Mockup) */
@@ -417,27 +429,28 @@ main {
   align-items: center;
   text-align: center;
   flex-direction: column; /* Acomoda los elementos en columna */
-  gap: 10px;
-  margin-right: 150px;
+  gap: 2  rem;
+  margin-right: 20%;
+  margin-top: 2%;
 }
 
 .title {
   font-family: 'Ghost Shadow', sans-serif;
-  font-size: 2.1rem;
-  color: #fff;
+  font-size: 300%; /* Aumenté el tamaño del texto para hacerlo más impactante */
+  color: #fff; /* El texto sigue siendo blanco */
   text-align: center;
   text-shadow: 
-    -2px -2px 0 #000,  
-     2px -2px 0 #000,  
-    -2px  2px 0 #000,  
-     2px  2px 0 #000,  
-    -2px  0px 0 #000,  
-     2px  0px 0 #000,  
-     0px -2px 0 #000,  
-     0px  2px 0 #000;  
-  margin-bottom: 50px;
-  margin-top: 10px;
+    -4px -4px 5px rgba(0, 0, 0, 0.7), /* Sombras más gruesas y difusas */
+     4px -4px 5px rgba(0, 0, 0, 0.7), 
+    -4px  4px 5px rgba(0, 0, 0, 0.7), 
+     4px  4px 5px rgba(0, 0, 0, 0.7), 
+    -4px  0px 5px rgba(0, 0, 0, 0.7), 
+     4px  0px 5px rgba(0, 0, 0, 0.7), 
+     0px -4px 5px rgba(0, 0, 0, 0.7), 
+     0px  4px 5px rgba(0, 0, 0, 0.7);   
+  margin-top: 5%;
 }
+
 
 /* Texto de Android */
 .android-text {
@@ -450,85 +463,124 @@ main {
 /* Imagen del mockup */
 .right-section img {
   max-width: 100%;
-  height: 420px;
+  height: 60vh;
 }
 
-/* Formulario de login */
+/* Contenedor del login */
 .login-container {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 50vh;
-  background: url('../assets/background.jpg') center/cover no-repeat;
-  margin-top: 4rem;
+  height: 50vh; /* Reducimos la altura */
+  max-width: 50vh; /* Limitamos el ancho para que no ocupe toda la pantalla */
+  margin: 0 auto; /* Centrado automático en la página */
+  background: linear-gradient(135deg, #2b2b2b, #1f1f1f); /* Fondo oscuro con gradiente */
+  border-radius: 15px; /* Bordes redondeados */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); /* Sombra más prominente */
+  padding: 30px; /* Espaciado interno */
+  border: 2px solid #500043; /* Borde color verde */
 }
 
+/* Resto del formulario y contenido */
 .login-box {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 15px;
-  border-radius: 16px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
-  text-align: left;
-  max-width: 300px;
-  width: 100%;
-}
-
-.login-title {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
   text-align: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 20px;
-  font-family: 'Arial', cursive;
+  width: 100%;
+  backdrop-filter: blur(5px);
 }
 
+
+/* Título del login */
+.login-title {
+  font-size: 2rem;
+  font-weight: bold;
+  font-family: 'Arial', sans-serif;
+  color: #fff;
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+}
+
+/* Formulario del login */
 .login-form {
   display: flex;
-  flex-direction: column; /* Para que todo se apile verticalmente */
-  max-width: 400px;       /* Ancho máximo del formulario */
-  margin: 0 auto;         /* Centrar en la página si quieres */
+  flex-direction: column;
+  color: #fff;
 }
 
+/* Etiquetas del formulario */
 .login-form label {
-  display: block;
   font-weight: bold;
   margin-bottom: 0.5rem;
-}
-.login-form input {
-  display: block;
-  width: 92%;            /* Que ocupe todo el ancho del contenedor */
-  padding: 10px;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
+/* Campos de texto */
+.login-form input {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 2px solid #444;
+  border-radius: 8px;
+  background-color: #333;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.login-form input:focus {
+  border-color: #a7a728; /* Color verde cuando el campo está enfocado */
+}
+
+/* Enlace de registro */
 .register-link {
-  font-size: 0.9rem;
-  margin-bottom: 15px;
+  font-size: 1rem;
+  margin-top: 10px;
 }
 
 .register-link a {
-  color: #007bff;
+  color: #a7a728;
   text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s;
 }
 
+.register-link a:hover {
+  color: #500043;
+}
+
+/* Botón de login */
 .login-button {
-  background-color: #a7a728;
+  background-color: #500043;
   color: white;
-  padding: 12px;
+  padding: 14px;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 1.1rem;
   cursor: pointer;
   font-weight: bold;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 .login-button:hover {
-  background-color: #7c7c1e;
+  background-color: #790063;
+  transform: translateY(3px);
 }
 
+.login-button:active {
+  transform: translateY(1px);
+}
+
+/* Sección de login con Google */
 .google-login {
-  margin-top: 15px;
+  margin-top: 20px;
 }
 
 .google-button {
@@ -536,19 +588,29 @@ main {
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border: none;
   border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background: #db4437; /* Rojo característico de Google */
   font-weight: bold;
   cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.google-button:hover {
+  background-color: #c1351d;
+  transform: translateY(-3px);
+}
+
+.google-button:active {
+  transform: translateY(1px);
 }
 
 .google-button img {
   width: 20px;
-  margin-right: 10px;
+  margin-right: 12px;
 }
+
 
 /* Estilos para la sección de contenido sobre el juego */
 .game-intro {
@@ -879,6 +941,7 @@ main {
 /* Botones de la sección */
 .btn-download,
 .btn-home {
+  margin-top: 30px;
   padding: 15px 30px;
   border-radius: 5px;
   text-decoration: none;

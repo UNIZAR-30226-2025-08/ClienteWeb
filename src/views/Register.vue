@@ -1,17 +1,14 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios'; // Vamos a capturar los datos del formulario y enviarlos a /api/usuario/crear con axios
+import axios from 'axios';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 const router = useRouter();
 
 // Función para volver a la pantalla principal
 function volver() {
-  router.push('/');
-}
-
-// Función para ir a la pantalla de inicio de sesión
-function irALogin() {
   router.push('/');
 }
 
@@ -43,17 +40,25 @@ async function generarHashSHA256(contrasena) {
   return hashHex;
 }
 
-// Verificar si las contraseñas coinciden y enviar los datos del formulario al backend
+// Función para registrar usuario
 async function registerUser() {
   mensajeError.value = '';
 
   if (!nombre.value || !correo.value || !contrasena.value || !confirmacionContrasena.value) {
     mensajeError.value = 'Todos los campos son obligatorios';
+    toast.error(mensajeError.value, { autoClose: 3000 });
+    return;
+  }
+
+  if (contrasena.value.length < 6) {
+    mensajeError.value = 'La contraseña debe tener al menos 6 caracteres';
+    toast.error(mensajeError.value, { autoClose: 3000 });
     return;
   }
 
   if (contrasena.value !== confirmacionContrasena.value) {
     mensajeError.value = 'Las contraseñas no coinciden';
+    toast.error(mensajeError.value, { autoClose: 3000 });
     return;
   }
 
@@ -64,16 +69,21 @@ async function registerUser() {
     const response = await axios.post('/api/usuario/crear', {
       nombre: nombre.value,
       correo: correo.value,
-      contrasena: hashContrasena // Enviar la contraseña encriptada
+      contrasena: hashContrasena, // Enviar la contraseña encriptada
     });
 
     if (response.status === 201) {
-      router.push('/login-email');
+      toast.success('Registro exitoso. Redirigiendo...', { autoClose: 3000 });
+      setTimeout(() => {
+        router.push('/juego'); // Redirigir al login tras éxito
+      }, 3000);
     } else {
       mensajeError.value = 'No se pudo completar el registro';
+      toast.error(mensajeError.value, { autoClose: 3000 });
     }
   } catch (error) {
     mensajeError.value = error.response?.data?.message || 'Error al registrar usuario';
+    toast.error(mensajeError.value, { autoClose: 3000 });
   }
 }
 </script>
@@ -88,7 +98,7 @@ async function registerUser() {
       <input id="nombre" v-model="nombre" type="text" placeholder="Ingresa tu nombre de usuario" required />
 
       <label for="correo">Correo electrónico</label>
-      <input id="correo" v-model="correo" type="email" placeholder="Ingresa tu correo" required/>
+      <input id="correo" v-model="correo" type="email" placeholder="Ingresa tu correo" required />
 
       <label for="contrasena">Contraseña</label>
       <div class="password-container">
@@ -117,8 +127,6 @@ async function registerUser() {
           {{ showConfirmPassword ? '👁️' : '🙈' }}
         </button>
       </div>
-
-      <p v-if="mensajeError" class="error-message">{{ mensajeError }}</p>
 
       <button type="submit" class="submit-button">REGISTRARSE</button>
     </form>
