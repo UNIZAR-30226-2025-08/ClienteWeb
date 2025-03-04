@@ -1,9 +1,24 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { toast } from 'vue3-toastify'; // Asegúrate de que está importado en tu archivo
+import 'vue3-toastify/dist/index.css'; // Asegúrate de que los estilos estén importados
 
 const router = useRouter();
-const mostrarConfirmacion = ref(false); // Estado para el pop-up
+const loginSuccess = localStorage.getItem('loginSuccess'); // Verificar si ya hubo un login exitoso
+
+onMounted(() => {
+  // Mostrar la alerta solo si la variable de loginSuccess está almacenada en el localStorage
+  if (loginSuccess === 'true') {
+    toast.success('Conexión exitosa, bienvenido!', { autoClose: 3000 }); // Mostrar alerta de éxito durante 5 segundos
+    localStorage.removeItem('loginSuccess'); // Eliminar la variable del localStorage después de mostrarla
+  }
+});
+
+// Lógica de navegación (por ejemplo, para navegar a otras páginas)
+function irAHome() {
+  router.push('/'); // Redirigir al home
+}
 
 function irACrearSala() {
   router.push('/crear-sala');
@@ -19,19 +34,6 @@ function irAReglas() {
 
 function irAConfiguracion() {
   router.push('/configuracion');
-}
-
-function irAHome() {
-  mostrarConfirmacion.value = true; // Solo muestra el pop-up
-}
-
-function confirmarSalida() {
-  mostrarConfirmacion.value = false; // Cierra el pop-up
-  router.push('/'); // Redirige al home
-}
-
-function cancelarSalida() {
-  mostrarConfirmacion.value = false; // Cierra el pop-up sin redirigir
 }
 
 function irABuscarSalas() {
@@ -106,18 +108,8 @@ function irABuscarSalas() {
       </div>
     </div>
   </div>
-
-  <!-- Pop-up de confirmación -->
-  <div v-if="mostrarConfirmacion" class="modal-overlay">
-    <div class="modal">
-      <p>¿Seguro que quieres salir?</p>
-      <div class="modal-buttons">
-        <button class="confirm-button" @click="confirmarSalida">Sí</button>
-        <button class="cancel-button" @click="cancelarSalida">No</button>
-      </div>
-    </div>
-  </div>
 </template>
+
 
 
 <style scoped>
