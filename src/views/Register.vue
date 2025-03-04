@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import '../assets/styles/Register.css';
 import axios from 'axios'; // Vamos a capturar los datos del formulario y enviarlos a /api/usuario/crear con axios
 
 const router = useRouter();
@@ -13,7 +12,7 @@ function volver() {
 
 // Función para ir a la pantalla de inicio de sesión
 function irALogin() {
-  router.push('/login-email');
+  router.push('/');
 }
 
 const nombre = ref('');
@@ -125,3 +124,107 @@ async function registerUser() {
     </form>
   </div>
 </template>
+
+<style scoped>
+
+.register-container {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #302E2B;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  font-family: 'Roboto', sans-serif;
+  text-align: left;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  margin-bottom: 10px;
+  color: #ffffff;
+}
+
+.back-button:hover {
+    color: #d1d134;
+}
+.register-title {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 20px;
+  font-family: 'Poppins', sans-serif;
+  color: #ffffff;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.register-form label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  color: #ffffff;
+}
+
+.register-form input {
+  width: 95%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.submit-button {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: #007bff;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+  background-color: #0069d9;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+.login-link a {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+.password-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-container input {
+  width: 100%;
+  padding-right: 40px; /* Espacio para el botón */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+</style>
