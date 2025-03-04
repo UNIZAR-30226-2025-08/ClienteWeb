@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap');
+
+/* Paleta de colores:
+   #302E2B (más claro)
+   #262522 (intermedio)
+   #1F1E1C (más oscuro)
+   #A2D060 (verde)
+*/
+
+/* Página principal */
+.amigos-page {
+    width: 100%;
+    min-height: 100vh; /* Para ocupar toda la ventana */
+    background-color: #302E2B;
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+    font-family: 'Open Sans', sans-serif;
+    margin: 0;
+    margin-top: 1rem;
+    box-sizing: border-box;
+}
+  
+
+.amigos-container {
+    background-color: #262522;
+    width: 100%;
+    margin: 20px 0;
+    padding: 20px;
+    box-sizing: border-box;
+    flex: 1; /* Hace que ocupe el espacio vertical sobrante */
+}
+  
+  
+/* Fila individual de amigo */
+.friend-row {
+  background-color: #1F1E1C; /* Fondo intermedio */
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Info a la izquierda, botones a la derecha */
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+/* Información del amigo (icono + texto) */
+.friend-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.friend-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+}
+
+.friend-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.friend-name {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  padding: 0;
+}
+
+.friend-status {
+  font-size: 0.9rem;
+  color: #ccc;
+  margin: 0;
+  padding: 0;
+}
+
+/* Botones (Unirse, Invitar) */
+.friend-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.green-button {
+  background-color: #A2D060; /* Botón verde */
+  border: none;
+  border-radius: 8px;
+  padding: 16px 64px;
+  color: #ffffff; /* Texto oscuro para buen contraste */
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.green-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+}
+
+/* Barra inferior para el botón Volver */
+.bottom-bar {
+  margin-top: auto; /* Empuja la barra al final */
+  background-color: #302E2B;
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+}
+
+.bottom-bar button,
+.bottom-bar a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
