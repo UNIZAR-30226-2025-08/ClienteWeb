@@ -6,6 +6,8 @@ import Juego from '../views/Juego.vue';
 import Reglas from '../views/Reglas.vue';
 import Servidores from '../views/ServerBrowser.vue';
 import Roles from '../views/Roles.vue';
+import Sala from '../views/Sala.vue';
+import Amigos from '../views/Amigos.vue'
 
 const routes = [
   { path: '/', component: Home }, // Página principal
@@ -14,7 +16,9 @@ const routes = [
   { path: '/crear-sala', component: CrearSala },
   { path: '/juego', component: Juego },
   { path: '/reglas', component: Reglas },
-  { path: '/servidores', component: Servidores }
+  { path: '/servidores', component: Servidores },
+  { path: '/sala', component: Sala },
+  { path: '/amigos', component: Amigos }
 ];
 
 const router = createRouter({
