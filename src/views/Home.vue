@@ -1,10 +1,9 @@
 <script setup>
-import '../assets/styles/Home.css';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { roles } from '../assets/data/roles.js';
 import axios from 'axios'; // Importar axios para poder hacer la petición de login al backend
-
+import Musica from '../components/musica/musica.vue';
 const router = useRouter();
 
 const correo = ref('');
@@ -118,6 +117,7 @@ const mostrarPopup = ref(false);
 function mostrarTodosLosRoles() {
   mostrarPopup.value = true;
 }
+
 function cerrarPopup() {
   mostrarPopup.value = false;
 }
@@ -136,6 +136,7 @@ function handleLogin(event) {
 </script>
 
 <template>
+  <Musica />
   <!-- Referencia para volver al inicio -->
   <div ref="scrollInicio" id="home"></div>
 
@@ -259,6 +260,7 @@ function handleLogin(event) {
         </div>
       </div>
     </div>
+    
     <!-- Barra horizontal -->
     <div class="horizontal-bar"></div>
 
@@ -343,3 +345,664 @@ function handleLogin(event) {
     </footer>
   </main>
 </template>
+
+<style scoped>
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden; /* Evita el scroll horizontal */
+}
+
+main {
+  background-color: #262522;
+}
+
+
+/* Estilos para la navegación */
+.nav {
+  display: flex;
+  justify-content: center;  /* Centra los enlaces horizontalmente */
+  gap: 80px;  /* Espacio entre los enlaces */
+  padding: 15px 30px;  /* Aumentamos el padding para hacer la barra más alta */
+  background-color: #1F1E1C;
+  font-size: 1.5rem;  /* Aumentamos el tamaño de la fuente */
+}
+
+.nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+  margin: 0 20px; /* Espacio entre los enlaces */
+}
+
+.nav a:hover {
+  color: #34b7f1; /* Efecto hover con color azul */
+}
+
+
+/* Contenedor principal de Home */
+.home-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 25px;
+  background-image: url('../assets/HomeFoto.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Barra horizontal */
+.horizontal-bar {
+  width: 95%;             /* Ocupa todo el ancho de la página */
+  height: 0.2rem;             /* Altura de la barra */
+  background-color: white; /* Color blanco */
+  margin: 20px 0;          /* Espaciado vertical para separar de las secciones */
+  margin-left: 1.7rem;
+  border-radius: 10px;     /* Redondea los extremos de la barra */
+}
+
+/* Sección izquierda (Título + Formulario) */
+.left-section {
+  flex: 1;
+  margin-right: 20px;
+}
+
+/* Sección derecha (Mockup) */
+.right-section {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  flex-direction: column; /* Acomoda los elementos en columna */
+  gap: 10px;
+  margin-right: 150px;
+}
+
+.title {
+  font-family: 'Ghost Shadow', sans-serif;
+  font-size: 2.1rem;
+  color: #fff;
+  text-align: center;
+  text-shadow: 
+    -2px -2px 0 #000,  
+     2px -2px 0 #000,  
+    -2px  2px 0 #000,  
+     2px  2px 0 #000,  
+    -2px  0px 0 #000,  
+     2px  0px 0 #000,  
+     0px -2px 0 #000,  
+     0px  2px 0 #000;  
+  margin-bottom: 50px;
+  margin-top: 10px;
+}
+
+/* Texto de Android */
+.android-text {
+  font-size: 1.2rem;
+  font-weight: bold;
+  white-space: nowrap; /* Evita que se divida en varias líneas */
+  color: white;
+}
+
+/* Imagen del mockup */
+.right-section img {
+  max-width: 100%;
+  height: 420px;
+}
+
+/* Formulario de login */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  background: url('../assets/background.jpg') center/cover no-repeat;
+  margin-top: 4rem;
+}
+
+.login-box {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 15px;
+  border-radius: 16px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+  text-align: left;
+  max-width: 300px;
+  width: 100%;
+}
+
+.login-title {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  font-family: 'Arial', cursive;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column; /* Para que todo se apile verticalmente */
+  max-width: 400px;       /* Ancho máximo del formulario */
+  margin: 0 auto;         /* Centrar en la página si quieres */
+}
+
+.login-form label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.login-form input {
+  display: block;
+  width: 92%;            /* Que ocupe todo el ancho del contenedor */
+  padding: 10px;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.register-link {
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+}
+
+.register-link a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.login-button {
+  background-color: #a7a728;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.login-button:hover {
+  background-color: #7c7c1e;
+}
+
+.google-login {
+  margin-top: 15px;
+}
+
+.google-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.google-button img {
+  width: 20px;
+  margin-right: 10px;
+}
+
+/* Estilos para la sección de contenido sobre el juego */
+.game-intro {
+  padding: 50px 20px;
+  text-align: center;
+  color: white;
+  margin-top: 0px;
+}
+
+.game-intro h3 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.game-intro p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Estilos generales */
+.roles-info {
+  padding: 30px 15px; /* Reducir el padding */
+  text-align: center;
+  color: white;
+  background-color: #262522;
+  margin-top: -1.2rem;
+  border-radius: 8px; /* Reducir los bordes */
+  position: relative;
+  z-index: 1;
+}
+
+/* Título de la sección */
+.roles-info h3 {
+  font-size: 2rem;  /* Reducir el tamaño */
+  margin-bottom: 15px; /* Reducir el margen */
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Carrusel */
+.carousel-container {
+  position: relative;
+  max-width: 250px;  /* Reducir el tamaño del carrusel */
+  margin: 30px auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1F1E1C;
+  border-radius: 8px;
+  padding: 15px; /* Reducir padding */
+}
+
+.carousel-slide {
+  width: 100%;
+  text-align: center;
+  position: relative;
+}
+
+.carousel-slide img {
+  width: 100%;
+  height: 100%;  /* Hacer la imagen cuadrada */
+  object-fit: cover;  /* Mantener la imagen dentro del cuadrado */
+  border-radius: 8px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.carousel-slide img:hover {
+  transform: scale(1.01);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Nombre del rol */
+.role-name {
+  font-size: 1.5rem;  /* Reducir tamaño */
+  color: #ffffff;
+  margin-top: 0px;  /* Reducir margen */
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Reducir sombra */
+}
+
+/* Flechas del carrusel */
+.carousel-button {
+  background: transparent;
+  border: none;
+  font-size: 4rem;
+  color: #fff;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  padding: 0 15px;
+  transition: color 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
+  pointer-events: auto; /* Permitir la interacción por defecto */
+}
+.carousel-button.left {
+  left: 300px;
+}
+.carousel-button.right {
+  right: 300px;
+}
+.carousel-button:hover {
+  color: #f5a623;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Indicadores del carrusel */
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;  /* Reducir margen */
+}
+
+.carousel-indicators span {
+  height: 12px; /* Reducir el tamaño */
+  width: 12px;  /* Reducir el tamaño */
+  margin: 0 6px;  /* Reducir el espacio */
+  border-radius: 50%;
+  background-color: #bbb;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.carousel-indicators span.active-indicator {
+  background-color: #f5a623;
+}
+
+/* Barra de progreso */
+.progress-bar {
+  height: 8px;  /* Reducir el tamaño */
+  background: #ddd;
+  border-radius: 5px;
+  margin-top: 15px;
+  overflow: hidden;
+  max-width: 350px;  /* Reducir el tamaño */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #f5a623;
+  width: 0%;
+  transition: width 0.05s linear;
+}
+
+/* Botón Mostrar Todos */
+.show-all-button {
+  margin-top: 20px;  /* Reducir margen */
+}
+
+.show-all-button button {
+  padding: 10px 25px;  /* Reducir padding */
+  font-size: 0.9rem;  /* Reducir tamaño */
+  background-color: #f5a623;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.show-all-button button:hover {
+  background-color: #d68719;
+}
+
+/* Estilos del pop-up */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro con transparencia */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.popup-content {
+  background: black; /* Fondo negro para el contenido */
+  color: white; /* Texto blanco */
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 80%;
+  max-height: 80%;
+  overflow-y: auto; /* Si el contenido del pop-up es largo, se puede desplazar dentro del pop-up */
+  position: relative;
+  z-index: 2001; /* Pop-up debe estar por encima de la capa de fondo */
+}
+
+/* Botón de cierre */
+.close-button {
+  background: red;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  position: fixed; /* Esto hace que el botón quede fijo en la pantalla */
+  top: 20px;  /* Distancia desde la parte superior */
+  right: 20px; /* Distancia desde la parte derecha */
+  z-index: 2100; /* Asegurarse de que esté por encima de otros elementos */
+}
+
+/* Lista de roles */
+.roles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Espacio entre los roles */
+}
+
+/* Cada rol */
+.role-item {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Espacio entre la imagen y el texto */
+  background: #333; /* Fondo oscuro para cada sección de rol */
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra para separar cada rol */
+  transition: background 0.3s ease; /* Efecto suave al pasar el mouse */
+}
+
+.role-item:hover {
+  background: #444; /* Fondo más claro al pasar el mouse */
+}
+
+/* Imagen del rol cuadrada */
+.role-popup-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover; /* Hace que la imagen se recorte para ajustarse al cuadrado */
+  border-radius: 8px; /* Bordes redondeados */
+}
+
+/* Información del rol */
+.role-info {
+  flex: 1;
+}
+
+.role-name-popup {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #f1c40f; /* Color dorado para el nombre */
+  margin-top: 10px;
+  text-transform: uppercase;
+}
+
+.role-description {
+  font-size: 1rem;
+  color: #f4f4f4;
+  line-height: 1.5;
+  margin-top: 5px;
+}
+
+
+/* Estilos para la nueva sección "game-obj" */
+.game-obj {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.game-obj h3 {
+  font-size: 2rem;
+  color: #ffffff;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.game-obj ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.game-obj ul li {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  line-height: 1.6;
+  color: #ffffff;
+}
+
+.game-obj ul li strong {
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.game-obj ul li:first-child {
+  margin-top: 20px; /* Un pequeño margen arriba para el primer item */
+}
+
+.game-obj ul li:last-child {
+  margin-bottom: 0; /* Elimina el margen de abajo en el último elemento */
+}
+
+/***********************************************
+ * SECCIÓN "¿LISTO PARA EMPEZAR?" 
+ ***********************************************/
+ .ready-section {
+  background-color: #1F1E1C; /* Fondo oscuro */
+  color: #fff;           /* Texto claro */
+  text-align: center;
+  padding: 40px 20px;
+  margin-top: 40px;      /* Separación respecto a la sección anterior */
+}
+
+.ready-section h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.ready-section p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+/* Contenedor de botones en línea */
+.ready-buttons {
+  display: inline-flex;
+  gap: 20px;
+}
+
+/* Botones de la sección */
+.btn-download,
+.btn-home {
+  padding: 15px 30px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  color: #fff; /* Texto blanco */
+  transition: background-color 0.3s ease;
+}
+
+/* Botón DESCARGAR (verde) */
+.btn-download {
+  background-color: #28a745;
+}
+.btn-download:hover {
+  background-color: #218838;
+}
+
+/* Botón VOLVER AL INICIO (azul) */
+.btn-home {
+  background-color: #007bff;
+}
+.btn-home:hover {
+  background-color: #0069d9;
+}
+
+/***********************************************
+ * FOOTER
+ ***********************************************/
+.footer-section {
+  background-color: #1F1E1C; /* Fondo oscuro */
+  color: #fff;           /* Texto blanco */
+  padding: 40px 20px;
+  text-align: left;
+  margin-top: 40px;      /* Separación respecto a la sección anterior */
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;        /* Para ajustarse en pantallas pequeñas */
+  justify-content: center;
+  gap: 40px;              /* Espacio entre columnas */
+  margin-bottom: 20px;
+}
+
+.footer-column {
+  flex: 1;
+  min-width: 200px;       /* Mínimo ancho para columnas */
+  max-width: 300px;       /* Máximo ancho para columnas */
+}
+
+.footer-column h4 {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+}
+
+.footer-column p,
+.footer-column a {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #fff;            /* Asegura que el texto y los enlaces sean blancos */
+  text-decoration: none;
+}
+
+.footer-column a:hover {
+  text-decoration: underline;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 5px;
+}
+
+.footer-bottom {
+  border-top: 1px solid #555;
+  padding-top: 20px;
+  font-size: 0.9rem;
+}
+
+.social-links a img {
+  width: 24px;
+  margin-right: 10px;
+}
+
+
+/* Estilos para la scrollbar en navegadores basados en Webkit (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 10px; /* Ancho de la barra */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3); /* Color oscuro translúcido */
+  border-radius: 10px; /* Bordes redondeados */
+  backdrop-filter: blur(5px); /* Efecto de desenfoque */
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(37, 37, 37); /* Hacer que el fondo de la barra sea casi invisible */
+}
+
+@font-face {
+  font-family: 'Ghost Shadow';
+  src: url('../assets/fonts/Ghost Shadow.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.password-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 30%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+</style>
