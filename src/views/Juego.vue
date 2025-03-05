@@ -32,6 +32,10 @@ function irAReglas() {
   router.push('/reglas');
 }
 
+function irARanking() {
+  router.push('/ranking');
+}
+
 function irAConfiguracion() {
   router.push('/configuracion');
 }
@@ -45,6 +49,7 @@ function irABuscarSalas() {
   <div class="juego-container">
     <!-- Barra lateral -->
     <div class="sidebar">
+      <button class="action-button-sidebar" @click="irARanking">Ranking</button>
       <button class="action-button-sidebar" @click="irARoles">Roles</button>
       <button class="action-button-sidebar" @click="irAReglas">Reglas</button>
       <button class="action-button-sidebar" @click="irAConfiguracion">Configuración</button>
