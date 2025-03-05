@@ -134,18 +134,20 @@ async function registerUser() {
 </template>
 
 <style scoped>
-
+/* Contenedor del formulario de registro */
 .register-container {
-  max-width: 500px;
-  margin: 40px auto;
-  padding: 20px;
-  background: #302E2B;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  font-family: 'Roboto', sans-serif;
+  width: 35%;
+  margin: 5rem auto;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
   text-align: left;
+  font-family: 'MedievalSharp', cursive;
+  backdrop-filter: blur(5px);
 }
 
+/* Botón de volver */
 .back-button {
   background: none;
   border: none;
@@ -156,83 +158,98 @@ async function registerUser() {
 }
 
 .back-button:hover {
-    color: #d1d134;
-}
-.register-title {
-  font-size: 2rem;
-  text-align: center;
-  margin-bottom: 20px;
-  font-family: 'Poppins', sans-serif;
-  color: #ffffff;
+  color: #f5a623;
 }
 
+/* Título del formulario de registro */
+.register-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #ffffff;
+  letter-spacing: 3px;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+  text-transform: uppercase;
+}
+
+/* Formulario del registro */
 .register-form {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  color: #cfcfcf;
 }
 
+/* Etiquetas del formulario de registro */
 .register-form label {
   font-weight: bold;
   display: block;
   margin-bottom: 5px;
   color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
+/* Campos de texto del formulario de registro */
 .register-form input {
-  width: 95%;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  display: block;
+  width: 91%;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border: 0.2rem solid #444;
+  border-radius: 0.7rem;
+  background-color: #333;
+  color: #fff;
   font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s;
 }
 
+.register-form input:focus {
+  border-color: #a7a728; /* Color verde cuando el campo está enfocado */
+}
+
+/* Botón de submit del formulario de registro */
 .submit-button {
   padding: 12px;
   border: none;
   border-radius: 8px;
-  background-color: #007bff;
+  background-color: #500043;
   color: #fff;
   font-size: 1.1rem;
   cursor: pointer;
   transition: background-color 0.3s;
+  font-weight: bold;
+  font-family: 'MedievalSharp', cursive;
 }
 
 .submit-button:hover {
-  background-color: #0069d9;
+  background-color: #790063;
 }
 
-.login-link {
-  text-align: center;
-  margin-top: 10px;
-  font-size: 0.9rem;
-}
-
-.login-link a {
-  color: #ffffff;
-  text-decoration: none;
-}
-
-.login-link a:hover {
-  text-decoration: underline;
-}
+/* Contenedor de la contraseña */
 .password-container {
   position: relative;
   display: flex;
   align-items: center;
 }
 
+/* Estilo del campo de contraseña */
 .password-container input {
-  width: 100%;
-  padding-right: 40px; /* Espacio para el botón */
+  width: 86.5%;
+  padding-right: 40px; /* Espacio para el botón de visibilidad */
 }
 
+/* Botón de toggle para ver la contraseña */
 .toggle-password {
   position: absolute;
-  right: 10px;
+  right: 2.5rem;
+  top: 0.6rem;
   background: none;
   border: none;
   cursor: pointer;
   font-size: 1.2rem;
 }
+
 </style>

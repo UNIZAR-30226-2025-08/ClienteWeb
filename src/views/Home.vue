@@ -228,15 +228,25 @@ function irARegistro() {
     <!-- Sección "Roles" -->
     <div ref="scrollSeccionRoles" class="roles-info" id="roles">
       <h3>Roles y Cargos En El Juego</h3>
-      <button class="carousel-button left" @click="slideAnterior">&#9664;</button>
+
+      <!-- Botón izquierdo con imagen -->
+      <button class="carousel-button left" @click="slideAnterior">
+        <img src="../assets/flecha-izquierda.png" alt="Flecha izquierda">
+      </button>
+
       <div class="carousel-container">
         <div class="carousel-slide">
           <img :src="roles[indiceSlide].src" alt="Imagen del rol" class="role-image" />
           <p class="role-name">{{ roles[indiceSlide].nombre }}</p>
-          <p class="role-team">{{ roles[indiceSlide].equipo }}</p>
+          <p class="role-team">{{ roles[indiceSlide].equipo }}</p>  
         </div>
       </div>
-      <button class="carousel-button right" @click="slideSiguiente">&#9654;</button>
+
+      <!-- Botón derecho con imagen -->
+      <button class="carousel-button right" @click="slideSiguiente">
+        <img src="../assets/flecha-correcta.png" alt="Flecha derecha">
+      </button>
+
       <div class="carousel-indicators">
         <span
           v-for="(role, index) in roles"
@@ -245,9 +255,11 @@ function irARegistro() {
           @click="indiceSlide = index; progreso = 0;"
         ></span>
       </div>
+
       <div class="progress-bar">
         <div class="progress-fill" :style="{ width: progreso + '%' }"></div>
       </div>
+
       <div class="show-all-button">
         <button @click="mostrarTodosLosRoles">Mostrar más</button>
       </div>
@@ -274,25 +286,25 @@ function irARegistro() {
     <div class="horizontal-bar"></div>
 
     <!-- Sección "Desarrollo de la partida" -->
-    <div ref="scrollSeccionDesarrollo" class="game-intro" id="desarrollo">
+    <div ref="scrollSeccionDesarrollo" class="game-run" id="desarrollo">
       <h3>Desarrollo de la partida</h3>
       <p>
-        <strong><u>Fase Nocturna</u></strong><br/>
+        <strong><u>Fase Nocturna</u></strong><br/><br/>
         Todos los jugadores cierran los ojos.<br/>
-        Se llama a los roles en el siguiente orden: primero la vidente, luego los hombres lobo y por último la bruja.<br/>
+        Se llama a los roles en el siguiente orden: <u style="color: #f1c40f;">la vidente, los hombres lobo y por último la bruja.</u><br/>
         La vidente elige a un jugador para conocer su rol.<br/>
         Los hombres lobo eligen a su víctima en secreto.<br/>
         La bruja puede emplear sus pociones para salvar a una víctima o eliminar a otro jugador.<br/>
       </p>
       <p>
-        <br/><strong><u>Fase Diurna</u></strong><br/>
+        <br/><strong><u>Fase Diurna</u></strong><br/><br/>
         Se anuncia qué jugador ha sido eliminado en la última noche.<br/>
         Se abre un debate entre todos los jugadores.<br/>
         Se realiza una votación para linchar a un posible hombre lobo.<br/>
         El jugador con más votos es eliminado y se revela su identidad.
       </p>
       <p>
-        <br/>El ciclo se repite hasta que un bando logra su objetivo.
+        <br/><strong style="color: #f1c40f;">El ciclo se repite hasta que un bando logra su objetivo.</strong>
       </p>
     </div>
 
@@ -303,8 +315,8 @@ function irARegistro() {
     <div class="game-obj" id="objetivo">
       <h3>Objetivo del Juego</h3>
       <ul>
-        <li><strong><u>Los Aldeanos</u></strong> ganan si eliminan a todos los hombres lobo.</li>
-        <li><strong><u>Los Hombres Lobo</u></strong> ganan si eliminan a todos los aldeanos.</li>
+        <li><strong><u style="color: #f1c40f;">Los Aldeanos</u></strong> ganan si eliminan a todos los hombres lobo.</li>
+        <li><strong><u style="color: #f1c40f;">Los Hombres Lobo</u></strong> ganan si eliminan a todos los aldeanos.</li>
       </ul>
     </div>
 
@@ -356,7 +368,8 @@ function irARegistro() {
 </template>
 
 <style scoped>
-html, body {
+
+body {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -366,15 +379,16 @@ html, body {
 
 main {
   background-color: #1a1917;
+  font-family: 'MedievalSharp', cursive;
 }
-
 
 .nav {
   display: flex;
   align-items: center;
   justify-content: space-between; /* Separa logo e ítems */
-  background-color: #1a1917;
+  background-color: rgb(14, 13, 13);
   padding: 1rem;
+  font-family: 'MedievalSharp', cursive;
 }
 
 .logo {
@@ -406,21 +420,20 @@ main {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  flex-wrap: wrap; /* Permite que los elementos pasen a otra línea si es necesario */
 }
-
 /* Barra horizontal */
 .horizontal-bar {
-  width: 95%;             /* Ocupa todo el ancho de la página */
-  height: 0.2rem;             /* Altura de la barra */
+  width: 75%;             /* Ocupa todo el ancho de la página */
+  height: 0.1rem;             /* Altura de la barra */
   background-color: white; /* Color blanco */
-  margin: 20px 0;          /* Espaciado vertical para separar de las secciones */
-  margin-left: 1.7rem;
+  margin-left: 13rem;
   border-radius: 10px;     /* Redondea los extremos de la barra */
 }
 
 /* Sección izquierda (Título + Formulario) */
 .left-section {
-  flex: 0.6;
+  flex: 0.8;
 }
 
 /* Sección derecha (Mockup) */
@@ -429,11 +442,23 @@ main {
   align-items: center;
   text-align: center;
   flex-direction: column; /* Acomoda los elementos en columna */
-  gap: 2  rem;
   margin-right: 20%;
   margin-top: 2%;
 }
 
+/* Hacer que los elementos sean verticales en pantallas pequeñas */
+@media (max-width: 768px) {
+  .home-container {
+    flex-direction: column; /* Cambia la disposición a vertical */
+    align-items: center; /* Centra los elementos */
+    text-align: center;
+  }
+
+  .left-section, .right-section {
+    width: 100%; /* Ocupan todo el ancho */
+    margin-right: 0;
+  }
+}
 .title {
   font-family: 'Ghost Shadow', sans-serif;
   font-size: 300%; /* Aumenté el tamaño del texto para hacerlo más impactante */
@@ -454,7 +479,7 @@ main {
 
 /* Texto de Android */
 .android-text {
-  font-size: 1.2rem;
+  font-size: 1.6rem;
   font-weight: bold;
   white-space: nowrap; /* Evita que se divida en varias líneas */
   color: white;
@@ -463,7 +488,7 @@ main {
 /* Imagen del mockup */
 .right-section img {
   max-width: 100%;
-  height: 60vh;
+  height: 65vh;
 }
 
 /* Contenedor del login */
@@ -472,14 +497,15 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 50vh; /* Reducimos la altura */
+  height: 55vh; /* Reducimos la altura */
   max-width: 50vh; /* Limitamos el ancho para que no ocupe toda la pantalla */
   margin: 0 auto; /* Centrado automático en la página */
-  background: linear-gradient(135deg, #2b2b2b, #1f1f1f); /* Fondo oscuro con gradiente */
-  border-radius: 15px; /* Bordes redondeados */
+  background: linear-gradient(135deg, #2b2b2b, #1f1f1f); /* Fondo oscuro con gradie nte */
+  border-radius: 1rem; /* Bordes redondeados */
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); /* Sombra más prominente */
   padding: 30px; /* Espaciado interno */
-  border: 2px solid #500043; /* Borde color verde */
+  border: 2px solid #00000056;
+  margin-bottom: 1rem;
 }
 
 /* Resto del formulario y contenido */
@@ -494,24 +520,25 @@ main {
 }
 
 
-/* Título del login */
+/* Nuevo título del login estilo medieval rústico */
 .login-title {
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: bold;
-  font-family: 'Arial', sans-serif;
+  font-family: 'MedievalSharp', cursive;
   color: #fff;
-  margin-bottom: 20px;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+  text-transform: uppercase;
 }
 
 /* Formulario del login */
 .login-form {
   display: flex;
   flex-direction: column;
-  color: #fff;
+  color: #cfcfcf;
 }
 
-/* Etiquetas del formulario */
+/* Etiquetas del fo rmulario */
 .login-form label {
   font-weight: bold;
   margin-bottom: 0.5rem;
@@ -523,11 +550,11 @@ main {
 /* Campos de texto */
 .login-form input {
   display: block;
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 20px;
-  border: 2px solid #444;
-  border-radius: 8px;
+  width: 91%;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border: 0.2rem solid #444;
+  border-radius: 0.7rem;
   background-color: #333;
   color: #fff;
   font-size: 1rem;
@@ -542,7 +569,6 @@ main {
 /* Enlace de registro */
 .register-link {
   font-size: 1rem;
-  margin-top: 10px;
 }
 
 .register-link a {
@@ -553,29 +579,26 @@ main {
 }
 
 .register-link a:hover {
-  color: #500043;
+  text-decoration: underline;
 }
 
 /* Botón de login */
 .login-button {
+  margin-top: 1rem;
   background-color: #500043;
   color: white;
-  padding: 14px;
-  border: none;
-  border-radius: 8px;
+  padding: 0.9rem;
+  border: 2px solid #00000056;
+  border-radius: 0.7rem;
   font-size: 1.1rem;
   cursor: pointer;
   font-weight: bold;
   transition: background-color 0.3s, transform 0.2s;
+  font-family: 'MedievalSharp', cursive;
 }
 
 .login-button:hover {
   background-color: #790063;
-  transform: translateY(3px);
-}
-
-.login-button:active {
-  transform: translateY(1px);
 }
 
 /* Sección de login con Google */
@@ -589,44 +612,48 @@ main {
   justify-content: center;
   width: 100%;
   padding: 12px;
-  border: none;
+  border: 2px solid #00000056;
   border-radius: 8px;
-  background: #db4437; /* Rojo característico de Google */
+  background: #8b2b22; /* Rojo característico de Google */
   font-weight: bold;
+  font-size: 1.1rem;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
+  font-family: 'MedievalSharp', cursive;  
+  color: white;
 }
 
 .google-button:hover {
   background-color: #c1351d;
-  transform: translateY(-3px);
-}
-
-.google-button:active {
-  transform: translateY(1px);
 }
 
 .google-button img {
-  width: 20px;
-  margin-right: 12px;
+  width: 1.5rem;
+  margin-right: 1rem;
 }
 
 
 /* Estilos para la sección de contenido sobre el juego */
 .game-intro {
-  padding: 50px 20px;
+  padding: 3rem 1rem;
   text-align: center;
   color: white;
   margin-top: 0px;
 }
 
 .game-intro h3 {
-  font-size: 2rem;
-  margin-bottom: 20px;
+  font-size: 3rem;
+  color: #f1c40f; /* Amarillo dorado */
+  margin-bottom: 2rem;
+  text-shadow: 
+    3px 3px 5px rgba(0, 0, 0, 0.7),  /* Sombra oscura principal */
+    0px 0px 10px rgba(0, 0, 0, 0.8), /* Efecto de brillo dorado */
+    2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra adicional para más realismo */
 }
 
+
 .game-intro p {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   line-height: 1.6;
   max-width: 800px;
   margin: 0 auto;
@@ -637,25 +664,25 @@ main {
   padding: 30px 15px; /* Reducir el padding */
   text-align: center;
   color: white;
-  background-color: #262522;
-  margin-top: -1.2rem;
-  border-radius: 8px; /* Reducir los bordes */
   position: relative;
   z-index: 1;
 }
 
 /* Título de la sección */
 .roles-info h3 {
-  font-size: 2rem;  /* Reducir el tamaño */
-  margin-bottom: 15px; /* Reducir el margen */
-  font-weight: bold;
-  text-transform: uppercase;
+  font-size: 3rem;
+  color: #f1c40f; /* Amarillo dorado */
+  margin-bottom: 2rem;
+  text-shadow: 
+    3px 3px 5px rgba(0, 0, 0, 0.7),  /* Sombra oscura principal */
+    0px 0px 10px rgba(0, 0, 0, 0.8), /* Efecto de brillo dorado */
+    2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra adicional para más realismo */
 }
 
 /* Carrusel */
 .carousel-container {
   position: relative;
-  max-width: 250px;  /* Reducir el tamaño del carrusel */
+  max-width: 23rem;  /* Reducir el tamaño del carrusel */
   margin: 30px auto;
   overflow: hidden;
   display: flex;
@@ -696,51 +723,66 @@ main {
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Reducir sombra */
 }
 
-/* Flechas del carrusel */
+/* Estilos generales del botón */
 .carousel-button {
   background: transparent;
   border: none;
-  font-size: 4rem;
-  color: #fff;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1000;
-  padding: 0 15px;
-  transition: color 0.3s ease, transform 0.3s ease;
   cursor: pointer;
-  pointer-events: auto; /* Permitir la interacción por defecto */
+  transition: transform 0.2s ease-in-out;
+  padding: 0; /* Elimina cualquier relleno */
 }
+
+/* Tamaño y estilo de las imágenes dentro de los botones */
+.carousel-button img {
+  width: 8rem; /* Ajusta el tamaño según tu preferencia */
+  height: auto;
+  opacity: 0.9; /* Suaviza un poco la imagen */
+  transition: opacity 0.3s ease, transform 0.2s ease-in-out;
+}
+
+/* Efectos al pasar el mouse */
+.carousel-button:hover img {
+  opacity: 0.7;
+  transform: scale(1.1);
+}
+
+/* Botón izquierdo */
 .carousel-button.left {
-  left: 300px;
+  left: 35rem; /* Ajusta la distancia desde el centro */
 }
+
+/* Botón derecho */
 .carousel-button.right {
-  right: 300px;
-}
-.carousel-button:hover {
-  color: #f5a623;
-  transform: translateY(-50%) scale(1.1);
+  right: 35rem; /* Ajusta la distancia desde el centro */
 }
 
 /* Indicadores del carrusel */
 .carousel-indicators {
   display: flex;
   justify-content: center;
-  margin-top: 15px;  /* Reducir margen */
+  margin-top: 1rem;
+  margin-bottom : 1.5rem;
 }
 
 .carousel-indicators span {
-  height: 12px; /* Reducir el tamaño */
-  width: 12px;  /* Reducir el tamaño */
-  margin: 0 6px;  /* Reducir el espacio */
+  height: 1rem;
+  width: 1rem;
+  margin: 0 8px;
   border-radius: 50%;
-  background-color: #bbb;
+  background: rgba(255, 255, 255, 0.5);
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background 0.3s, transform 0.3s ease-in-out;
 }
 
+/* Indicador activo con efecto de brillo */
 .carousel-indicators span.active-indicator {
-  background-color: #f5a623;
+  background: #f5a623;
+  box-shadow: 0 0 10px rgba(255, 165, 0, 0.8);
+  transform: scale(1.2);
 }
 
 /* Barra de progreso */
@@ -757,29 +799,36 @@ main {
 
 .progress-fill {
   height: 100%;
-  background: #f5a623;
   width: 0%;
   transition: width 0.05s linear;
+  background: #f5a623;
 }
 
 /* Botón Mostrar Todos */
 .show-all-button {
-  margin-top: 20px;  /* Reducir margen */
+  margin-top: 25px;  /* Espaciado superior aumentado para separarlo mejor */
+  text-align: center;  /* Centrar el botón */
 }
 
 .show-all-button button {
-  padding: 10px 25px;  /* Reducir padding */
-  font-size: 0.9rem;  /* Reducir tamaño */
+  padding: 12px 30px;  /* Aumentar un poco el padding para hacerlo más atractivo */
+  font-size: 1rem;  /* Tamaño de fuente moderado */
   background-color: #f5a623;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 30px;  /* Bordes más redondeados para un look más suave */
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.3s ease-in-out;
+  font-weight: bold;
 }
 
 .show-all-button button:hover {
   background-color: #d68719;
+  transform: translateY(-2px);  /* Le da un pequeño efecto de elevación */
+}
+
+.show-all-button button:active {
+  transform: translateY(0px);  /* Restaurar la posición cuando se haga clic */
 }
 
 /* Estilos del pop-up */
@@ -872,18 +921,46 @@ main {
   margin-top: 5px;
 }
 
+/* Estilos para la sección de contenido sobre el juego en ejecución */
+.game-run {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: white;
+  margin-top: 0px;
+}
+
+.game-run h3 {
+  font-size: 3rem;
+  color: #f1c40f; /* Amarillo dorado */
+  margin-bottom: 2rem;
+  text-shadow: 
+    3px 3px 5px rgba(0, 0, 0, 0.7),  /* Sombra oscura principal */
+    0px 0px 10px rgba(0, 0, 0, 0.8), /* Efecto de brillo */
+    2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra adicional para más realismo */
+}
+
+.game-run p {
+  font-size: 1.5rem;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+}
 
 /* Estilos para la nueva sección "game-obj" */
 .game-obj {
-  padding: 40px 20px;
+  padding: 3rem 1rem;
   text-align: center;
+  color: white;
 }
 
 .game-obj h3 {
-  font-size: 2rem;
-  color: #ffffff;
-  font-weight: bold;
-  margin-bottom: 20px;
+  font-size: 3rem;
+  color: #f1c40f; /* Amarillo dorado */
+  margin-bottom: 2rem;
+  text-shadow: 
+    3px 3px 5px rgba(0, 0, 0, 0.7),  /* Sombra oscura principal */
+    0px 0px 10px rgba(0, 0, 0, 0.8), /* Efecto de brillo */
+    2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra adicional para más realismo */
 }
 
 .game-obj ul {
@@ -892,10 +969,11 @@ main {
 }
 
 .game-obj ul li {
-  font-size: 1.2rem;
-  margin-bottom: 10px;
   line-height: 1.6;
   color: #ffffff;
+  font-size: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .game-obj ul li strong {
@@ -904,7 +982,7 @@ main {
 }
 
 .game-obj ul li:first-child {
-  margin-top: 20px; /* Un pequeño margen arriba para el primer item */
+  margin-top:  1rem; /* Un pequeño margen arriba para el primer item */
 }
 
 .game-obj ul li:last-child {
@@ -915,35 +993,40 @@ main {
  * SECCIÓN "¿LISTO PARA EMPEZAR?" 
  ***********************************************/
  .ready-section {
-  background-color: #1F1E1C; /* Fondo oscuro */
-  color: #fff;           /* Texto claro */
+  padding: 3rem 1rem;
   text-align: center;
-  padding: 40px 20px;
-  margin-top: 40px;      /* Separación respecto a la sección anterior */
 }
 
 .ready-section h2 {
-  font-size: 2rem;
-  margin-bottom: 10px;
+  font-size: 3rem;
+  color: #f1c40f; /* Amarillo dorado */
+  margin-bottom: 2rem;
+  text-shadow: 
+    3px 3px 5px rgba(0, 0, 0, 0.7),  /* Sombra oscura principal */
+    0px 0px 10px rgba(0, 0, 0, 0.8), /* Efecto de brillo */
+    2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra adicional para más realismo */
 }
 
 .ready-section p {
-  font-size: 1.2rem;
-  margin-bottom: 20px;
+  font-size: 1.5rem;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 /* Contenedor de botones en línea */
 .ready-buttons {
   display: inline-flex;
-  gap: 20px;
+  gap: 2rem;
 }
 
 /* Botones de la sección */
 .btn-download,
 .btn-home {
-  margin-top: 30px;
+  margin-top: 1.5rem;
   padding: 15px 30px;
   border-radius: 5px;
+  border: 2px solid #00000056;
   text-decoration: none;
   font-weight: bold;
   color: #fff; /* Texto blanco */
@@ -970,30 +1053,30 @@ main {
  * FOOTER
  ***********************************************/
 .footer-section {
-  background-color: #1F1E1C; /* Fondo oscuro */
+  background-color: rgb(14, 13, 13); /* Fondo oscuro */
   color: #fff;           /* Texto blanco */
-  padding: 40px 20px;
+  padding: 3rem 2rem;
   text-align: left;
-  margin-top: 40px;      /* Separación respecto a la sección anterior */
+  margin-top: 3rem;      /* Separación respecto a la sección anterior */
 }
 
 .footer-content {
   display: flex;
   flex-wrap: wrap;        /* Para ajustarse en pantallas pequeñas */
   justify-content: center;
-  gap: 40px;              /* Espacio entre columnas */
-  margin-bottom: 20px;
+  gap: 20rem;              /* Espacio entre columnas */
+  margin-bottom: 1rem;
 }
 
 .footer-column {
   flex: 1;
-  min-width: 200px;       /* Mínimo ancho para columnas */
-  max-width: 300px;       /* Máximo ancho para columnas */
+  min-width: 10rem;       /* Mínimo ancho para columnas */
+  max-width: 15rem;       /* Máximo ancho para columnas */
 }
 
 .footer-column h4 {
   margin-bottom: 10px;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   text-transform: uppercase;
 }
 
@@ -1022,7 +1105,7 @@ main {
 .footer-bottom {
   border-top: 1px solid #555;
   padding-top: 20px;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .social-links a img {
