@@ -1,4 +1,11 @@
+<script setup>
+import { useRouter } from 'vue-router';
+import Cabecera from "../components/Cabecera.vue";
+const router = useRouter();
+</script>
 <template>
+   <!-- Cabecera: Se utiliza el componente Cabecera -->
+   <Cabecera :titulo="'Mi Juego'" :compacto="false" />
     <div class="ranking-container">
       <h1 class="ranking-title">Ranking de Jugadores</h1>
       <div class="ranking-list">
@@ -41,6 +48,7 @@
   
   <style scoped>
   .ranking-container {
+    color:  #302b2b;
     padding: 2rem;
     background-color: #1f1f1f;
     color: white;

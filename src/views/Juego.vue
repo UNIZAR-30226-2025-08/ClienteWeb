@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue3-toastify'; // Asegúrate de que está importado en tu archivo
 import 'vue3-toastify/dist/index.css'; // Asegúrate de que los estilos estén importados
-
+import Cabecera from "../components/Cabecera.vue";
 const router = useRouter();
 const loginSuccess = localStorage.getItem('loginSuccess'); // Verificar si ya hubo un login exitoso
 
@@ -46,73 +46,56 @@ function irABuscarSalas() {
 </script>
 
 <template>
-  <div class="juego-container">
-    <!-- Barra lateral -->
-    <div class="sidebar">
-      <button class="action-button-sidebar" @click="irARanking">Ranking</button>
-      <button class="action-button-sidebar" @click="irARoles">Roles</button>
-      <button class="action-button-sidebar" @click="irAReglas">Reglas</button>
-      <button class="action-button-sidebar" @click="irAConfiguracion">Configuración</button>
-      <button class="action-button salir-button" @click="irAHome">Salir</button>
-    </div>
+  <div class="Principalcontent">
+    <div class="juego-container">
+      <!-- Barra lateral -->
+      <div class="sidebar">
+        <button class="action-button-sidebar" @click="irARanking">Ranking</button>
+        <button class="action-button-sidebar" @click="irARoles">Roles</button>
+        <button class="action-button-sidebar" @click="irAReglas">Reglas</button>
+        <button class="action-button-sidebar" @click="irAConfiguracion">Configuración</button>
+        <button class="action-button salir-button" @click="irAHome">Salir</button>
+      </div>
 
-    <!-- Contenido principal -->
-    <div class="main-content">
-      <!-- Header: Perfil + Notificaciones -->
-      <div class="header">
-        <div class="user-profile">
-          <img src="../assets/profile_icon.jpg" alt="User Icon" class="user-icon" />
-          <div class="user-info">
-            <span class="user-name">NombreCuenta</span>
-            <div class="level-bar">
-              <span class="level">Nivel 10</span>
-              <progress class="xp-bar" value="2000" max="3000"></progress>
-            </div>
+      <!-- Contenido principal -->
+      <div class="main-content">
+        <!-- Cabecera: Se utiliza el componente Cabecera -->
+        <Cabecera :titulo="'Mi Juego'" :compacto="false" />
+
+        <!-- Contenido principal: Tabla -->
+        <div class="content">
+          <div class="history">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th colspan="3" class="main-title">Historial de Partidas</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="dark-row">
+                  <td>Fecha</td>
+                  <td>Modo</td>
+                  <td>Resultado</td>
+                </tr>
+                <tr class="light-row">
+                  <td>--</td>
+                  <td>--</td>
+                  <td>--</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <div class="notifications">
-          <button class="notification-button">
-            <img src="../assets/noti_icon.png" alt="Notificaciones" class="notification-icon" />
-            <span class="badge">1</span>
-          </button>
+        <!-- Botones de acción -->
+        <div class="actions">
+          <button class="action-button" @click="irACrearSala">Crear Sala</button>
+          <button class="action-button">Partida Rápida</button>
+          <button class="action-button" @click="irABuscarSalas">Buscar Salas</button>
         </div>
-      </div>
-
-      <!-- Contenido principal: Tabla -->
-      <div class="content">
-        <div class="history">
-          <table class="history-table">
-            <thead>
-              <tr>
-                <th colspan="3" class="main-title">Historial de Partidas</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr class="dark-row">
-                <td>Fecha</td>
-                <td>Modo</td>
-                <td>Resultado</td>
-              </tr>
-              <tr class="light-row">
-                <td>--</td>
-                <td>--</td>
-                <td>--</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Botones de acción -->
-      <div class="actions">
-        <button class="action-button" @click="irACrearSala">Crear Sala</button>
-        <button class="action-button">Partida Rápida</button>
-        <button class="action-button" @click="irABuscarSalas">Buscar Salas</button>
       </div>
     </div>
-  </div>
+  </div>  
 </template>
 
 
