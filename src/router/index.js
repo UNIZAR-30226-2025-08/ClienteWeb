@@ -9,6 +9,7 @@ import Roles from '../views/Roles.vue';
 import Sala from '../views/Sala.vue';
 import Amigos from '../views/Amigos.vue'
 import ranking from '../views/ranking.vue';
+import Partida from '../views/partida.vue';
 
 const routes = [
   { path: '/', component: Home }, // Página principal
@@ -20,7 +21,8 @@ const routes = [
   { path: '/servidores', component: Servidores },
   { path: '/sala', component: Sala },
   { path: '/amigos', component: Amigos},
-  { path: '/ranking', component: ranking}
+  { path: '/ranking', component: ranking},
+  { path: '/partida', component: Partida}
 ];
 
 const router = createRouter({

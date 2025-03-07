@@ -49,33 +49,6 @@ function desplazarArriba() {
   scrollInicio.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// Índice del slide actual
-const indiceSlide = ref(0);
-
-// Parámetros de la barra de progreso y auto-slide
-const tiempoTotal = 3000;        // Duración total de cada slide (ms)
-const tiempoIntervalo = 50;       // Intervalo de actualización de la barra (ms)
-const incremento = 100 / (tiempoTotal / tiempoIntervalo);
-const progreso = ref(0);
-
-// Funciones para cambiar de slide
-function slideAnterior() {
-  indiceSlide.value = (indiceSlide.value - 1 + roles.length) % roles.length;
-  progreso.value = 0;
-}
-function slideSiguiente() {
-  indiceSlide.value = (indiceSlide.value + 1) % roles.length;
-  progreso.value = 0;
-}
-onMounted(() => {
-  setInterval(() => {
-    progreso.value += incremento;
-    if (progreso.value >= 100) {
-      slideSiguiente();
-    }
-  }, tiempoIntervalo);
-});
-
 // Función para realizar el hash SHA-256
 async function generarHashSHA256(contrasena) {
   const encoder = new TextEncoder();
@@ -106,7 +79,16 @@ async function loginUser() {
       contrasena: hashContrasena, // Enviar la contraseña encriptada
     });
 
-    if (response.status === 200) {
+    if (response.status === 200 && response.data.usuario) {
+      //Extraemos los datos de el Backend que nos pasa el usuario
+      const usuario = {
+        id: response.data.usuario.idUsuario,
+        nombre: response.data.usuario.nombre,
+        fechaCreacion: response.data.usuario.fechaCreacion,
+        avatar: response.data.usuario.avatar
+      };
+      // Guardar el objeto usuario en Local Storage
+      localStorage.setItem('usuario', JSON.stringify(usuario));
       // Si el login es exitoso, almacenar el mensaje de éxito
       localStorage.setItem('loginSuccess', 'true');  // Almacenar en localStorage
       router.push('/juego'); // Redirigir al juego
@@ -121,6 +103,33 @@ async function loginUser() {
     toast.error(mensajeError.value, { autoClose: 3000 }); // Mostrar alerta de error
   }
 }
+
+// Índice del slide actual
+const indiceSlide = ref(0);
+
+// Parámetros de la barra de progreso y auto-slide
+const tiempoTotal = 3000;        // Duración total de cada slide (ms)
+const tiempoIntervalo = 50;       // Intervalo de actualización de la barra (ms)
+const incremento = 100 / (tiempoTotal / tiempoIntervalo);
+const progreso = ref(0);
+
+// Funciones para cambiar de slide
+function slideAnterior() {
+  indiceSlide.value = (indiceSlide.value - 1 + roles.length) % roles.length;
+  progreso.value = 0;
+}
+function slideSiguiente() {
+  indiceSlide.value = (indiceSlide.value + 1) % roles.length;
+  progreso.value = 0;
+}
+onMounted(() => {
+  setInterval(() => {
+    progreso.value += incremento;
+    if (progreso.value >= 100) {
+      slideSiguiente();
+    }
+  }, tiempoIntervalo);
+});
 
 /* ----------------------------
    Botón "Mostrar Todos"
