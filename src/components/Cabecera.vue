@@ -7,12 +7,14 @@
       <!-- Perfil + notificaciones a la derecha -->
       <div class="perfil-notificaciones">
         <div class="profile" :class="{ compacto: compacto }">
-          <img src="../assets/profile_icon.jpg" alt="User Icon" class="user-icon" />
-          
+          <!-- Se muestra el avatar obtenido o se usa un valor por defecto -->
+          <img :src="user?.avatar || '../assets/profile_icon.jpg'" alt="User Icon" class="user-icon" />
+
           <div class="profile-info">
-            <span class="user-name">NombreCuenta</span>
-            <span class="level">Nivel 10</span>
-            <progress class="xp-bar" value="2000" max="3000"></progress>
+            <!-- Se muestra el nombre del usuario -->
+            <span class="user-name">{{ user?.nombre || 'NombreCuenta' }}</span>
+            <!-- En vez del nivel de experiencia se muestra el rol favorito -->
+            <span class="Rol">{{ user?.rolFavorito || 'Rol Favorito' }}</span>
           </div>
         </div>
         <div class="notifications">
@@ -27,6 +29,8 @@
 </template>
   
 <script setup>
+import { ref, onMounted } from 'vue';
+// Recibir propiedades desde el componente padre (por ejemplo, título y si es compacto)
 const props = defineProps({
   titulo: {
     type: String,
@@ -35,6 +39,16 @@ const props = defineProps({
   compacto: {
     type: Boolean,
     default: false // Ajusta margenes si es "compacto"
+  }
+});
+// Variable para almacenar los datos del usuario
+const user = ref(null);
+
+// Al montar el componente, se carga la información del usuario desde Local Storage
+onMounted(() => {
+  const storedUser = localStorage.getItem('usuario');
+  if (storedUser) {
+    user.value = JSON.parse(storedUser);
   }
 });
 </script>
@@ -103,28 +117,11 @@ const props = defineProps({
   font-size: 1rem;
 }
 
-.level {
+.rol {
   font-size: 0.9rem;
   color: #ccc;
 }
 
-.xp-bar {
-  width: 160px;
-  height: 10px;
-  -webkit-appearance: none;
-  appearance: none;
-  border-radius: 4px;
-}
-
-.xp-bar::-webkit-progress-bar {
-  background-color: #333;
-  border-radius: 4px;
-}
-
-.xp-bar::-webkit-progress-value {
-  background-color: #999;
-  border-radius: 4px;
-}
 
 /* NOTIFICACIONES */
 .notifications {
