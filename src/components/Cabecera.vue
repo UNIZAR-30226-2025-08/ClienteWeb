@@ -8,13 +8,13 @@
       <div class="perfil-notificaciones">
         <div class="profile" :class="{ compacto: compacto }">
           <!-- Se muestra el avatar obtenido o se usa un valor por defecto -->
-          <img :src="user?.avatar || '../assets/profile_icon.jpg'" alt="User Icon" class="user-icon" />
+          <img :src="user?.avatar || 'src\assets\profile_icon.jpg'" alt="User Icon" class="user-icon" />
 
           <div class="profile-info">
             <!-- Se muestra el nombre del usuario -->
             <span class="user-name">{{ user?.nombre || 'NombreCuenta' }}</span>
             <!-- En vez del nivel de experiencia se muestra el rol favorito -->
-            <span class="Rol">{{ user?.rolFavorito || 'Rol Favorito' }}</span>
+            <span class="Rol">{{ user?.rolFavorito || 'Sin rol favorito' }}</span>
           </div>
         </div>
         <div class="notifications">

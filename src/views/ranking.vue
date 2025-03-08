@@ -1,6 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import Cabecera from "../components/Cabecera.vue";
+import Volver from '../components/Volver.vue';
 const router = useRouter();
 </script>
 <template>
@@ -16,6 +17,7 @@ const router = useRouter();
         </div>
       </div>
     </div>
+    <Volver />
   </template>
   
   <script>

@@ -20,59 +20,39 @@ const rolesCantidad = ref([
 // Computed para obtener el número total de jugadores
 const numJugadores = computed(() => rolesCantidad.value.reduce((acc, rol) => acc + rol.cantidad, 0));
 
-// Estado para mostrar el popup y el rol seleccionado
-const mostrarPopup = ref(false);
-const rolSeleccionado = ref(null);
+// Ajustar roles de forma automática
+const ajustarRoles = () => {
+  let jugadores = numJugadores.value;
 
-// Función para abrir el popup y mostrar los detalles del rol
-const mostrarDetallesRol = (rolNombre) => {
-  rolSeleccionado.value = roles.find(rol => rol.nombre === rolNombre);
-  mostrarPopup.value = true;
+  // 📌 Ajuste automático de lobos SIEMPRE, sin importar privacidad
+  let lobos = jugadores >= 12 ? 3 : jugadores >= 8 ? 2 : 1;
+  rolesCantidad.value.find(rol => rol.nombre === 'Hombre Lobo').cantidad = lobos;
+
+  if (privacidad.value === 'Pública') {
+    // 📌 Ajuste automático de otros roles solo si es pública
+    rolesCantidad.value.forEach(rol => {
+      if (rol.nombre === 'Vidente') {
+        rol.cantidad = 1;
+      } else if (rol.nombre === 'Bruja') {
+        rol.cantidad = jugadores >= 8 ? 1 : 0;
+      } else if (rol.nombre === 'Cazador') {
+        rol.cantidad = jugadores >= 12 ? 1 : 0;
+      }
+    });
+
+    // 📌 Calcular los aldeanos restantes
+    const totalRolesEspeciales = rolesCantidad.value.reduce((sum, rol) => rol.nombre !== 'Aldeano' ? sum + rol.cantidad : sum, 0);
+    rolesCantidad.value.find(rol => rol.nombre === 'Aldeano').cantidad = jugadores - totalRolesEspeciales;
+  }
 };
 
-// Función para cerrar el popup
-const cerrarPopup = () => {
-  mostrarPopup.value = false;
-};
+// Watch para actualizar automáticamente los roles cuando cambia la privacidad o el número de jugadores
+watch([privacidad, numJugadores], ajustarRoles);
 
-// Cambiar privacidad de la sala
+// Función para cambiar la privacidad
 const cambiarPrivacidad = () => {
   privacidad.value = privacidad.value === 'Pública' ? 'Privada' : 'Pública';
 };
-
-// Función para ajustar los roles automáticamente en partidas públicas
-const ajustarRolesPublicos = () => {
-  if (privacidad.value !== 'Pública') return;
-
-  let jugadores = numJugadores.value;
-
-  // Determinar cantidad de lobos
-  let lobos = jugadores >= 12 ? 3 : jugadores >= 8 ? 2 : 1;
-
-  // Actualizar cantidades en la lista de roles
-  rolesCantidad.value.forEach(rol => {
-    if (rol.nombre === 'Hombre Lobo') {
-      rol.cantidad = lobos;
-    } else if (rol.nombre === 'Vidente') {
-      rol.cantidad = 1;
-    } else if (rol.nombre === 'Bruja') {
-      rol.cantidad = jugadores >= 8 ? 1 : 0;
-    } else if (rol.nombre === 'Cazador') {
-      rol.cantidad = jugadores >= 12 ? 1 : 0;
-    }
-  });
-
-  // Calcular los aldeanos restantes
-  const totalRolesEspeciales = rolesCantidad.value.reduce((sum, rol) => rol.nombre !== 'Aldeano' ? sum + rol.cantidad : sum, 0);
-  const aldeanosRestantes = jugadores - totalRolesEspeciales;
-
-  // Ajustar la cantidad de Aldeanos
-  const aldeanoRol = rolesCantidad.value.find(rol => rol.nombre === 'Aldeano');
-  if (aldeanoRol) aldeanoRol.cantidad = aldeanosRestantes;
-};
-
-// Watch para actualizar automáticamente los roles cuando cambia la privacidad o la cantidad de jugadores
-watch([privacidad, numJugadores], ajustarRolesPublicos);
 
 // Función para incrementar el número de jugadores (máximo 18)
 const incrementarJugadores = () => {
@@ -92,25 +72,31 @@ const decrementarJugadores = () => {
 
 // Función para incrementar la cantidad de un rol (solo en partidas privadas)
 const incrementarRol = (rol) => {
-  if (privacidad.value === 'Pública') return; // En partidas públicas no se puede modificar manualmente
-  if (numJugadores.value >= 18) return; // Máximo 18 jugadores
+  if (privacidad.value === 'Pública') return;
+  if (rol.nombre === 'Hombre Lobo') return; // ❌ Lobos no modificables manualmente
 
-  // Restricciones para roles especiales
-  if (rol.nombre === 'Hombre Lobo' && rol.cantidad >= 3) return; // Máximo 3 lobos
-  if (rol.nombre === 'Cazador' && rol.cantidad >= 2) return; // Máximo 2 cazadores
-  if (rol.nombre === 'Bruja' && rol.cantidad >= 1) return; // Máximo 1 bruja
-  if (rol.nombre === 'Vidente' && rol.cantidad >= 1) return; // Máximo 1 vidente
+  // 📌 Evitar superar el límite de 18 jugadores
+  if (numJugadores.value >= 18) return;
+
+  // 📌 Aplicar límites específicos
+  if (rol.nombre === 'Bruja' && rol.cantidad >= 1) return; // Máximo 1 Bruja
+  if (rol.nombre === 'Vidente' && rol.cantidad >= 1) return; // Máximo 1 Vidente
+  if (rol.nombre === 'Cazador' && rol.cantidad >= 2) return; // Máximo 2 Cazadores
 
   rol.cantidad++;
 };
 
 // Función para decrementar la cantidad de un rol (solo en partidas privadas)
 const decrementarRol = (rol) => {
-  if (privacidad.value === 'Pública') return; // En partidas públicas no se puede modificar manualmente
+  if (privacidad.value === 'Pública') return;
+  if (rol.nombre === 'Hombre Lobo') return; // ❌ Lobos no modificables manualmente
+
   if (rol.cantidad > 0) rol.cantidad--;
 };
 
-// Validación del botón "Crear Sala"
+
+
+// Computed para deshabilitar el botón de "Crear Sala"
 const botonCrearDeshabilitado = computed(() => numJugadores.value < 5);
 </script>
 
@@ -128,7 +114,7 @@ const botonCrearDeshabilitado = computed(() => numJugadores.value < 5);
         <label>Número de jugadores:</label>
         <button @click="decrementarJugadores" class="flecha" :disabled="numJugadores <= 5">-</button>
         <span class="jugadores">{{ numJugadores }}</span>
-        <button @click="incrementarJugadores" class="flecha" :disabled="numJugadores >= 18">+</button>
+        <button @click="incrementarJugadores" class="flecha" :hidden="numJugadores >= 18">+</button>
       </div>
 
       <div class="campo flex-row">
@@ -149,15 +135,14 @@ const botonCrearDeshabilitado = computed(() => numJugadores.value < 5);
         <div 
           v-for="rol in rolesCantidad" 
           :key="rol.id" 
-          class="rol" 
-          @click="mostrarDetallesRol(rol.nombre)"
+          class="rol"
         >
           <img :src="rol.imagen" :alt="rol.nombre" />
           <span>{{ rol.nombre }}: {{ rol.cantidad }}</span>
           
           <div class="role-controls">
             <button 
-              v-if="rol.cantidad > 0 && privacidad !== 'Pública'"
+              v-if="rol.cantidad > 0 && privacidad !== 'Pública' && rol.nombre !== 'Hombre Lobo'"
               @click.stop="decrementarRol(rol)"  
               class="button decrement"
             >
@@ -167,10 +152,14 @@ const botonCrearDeshabilitado = computed(() => numJugadores.value < 5);
             <span class="role-amount">{{ rol.cantidad }}</span>
 
             <button 
-              v-if="privacidad !== 'Pública'"
+              v-if="privacidad !== 'Pública' && rol.nombre !== 'Hombre Lobo' && numJugadores < 18 && 
+                    ((rol.nombre === 'Bruja' && rol.cantidad < 1) || 
+                      (rol.nombre === 'Vidente' && rol.cantidad < 1) || 
+                      (rol.nombre === 'Cazador' && rol.cantidad < 2) || 
+                      (rol.nombre === 'Aldeano'))"
               @click.stop="incrementarRol(rol)"  
               class="button increment"
-            >
+            > 
               +
             </button>
           </div>
@@ -180,16 +169,14 @@ const botonCrearDeshabilitado = computed(() => numJugadores.value < 5);
 
     <div class="acciones">
       <Volver />
-      
       <button 
         v-if="!botonCrearDeshabilitado" 
         class="crear-sala" 
         :disabled="botonCrearDeshabilitado"
-        :class="{'disabled-button': botonCrearDeshabilitado}"
       >
         Crear Sala
       </button>
-      
+
       <p v-if="botonCrearDeshabilitado" class="warning-message">
         <span v-if="numJugadores < 5">
           Asegúrate de tener al menos 5 jugadores.
@@ -198,6 +185,7 @@ const botonCrearDeshabilitado = computed(() => numJugadores.value < 5);
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .container {
