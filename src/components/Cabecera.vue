@@ -6,9 +6,9 @@
 
       <!-- Perfil + notificaciones a la derecha -->
       <div class="perfil-notificaciones">
-        <div class="profile" :class="{ compacto: compacto }">
+        <div class="profile" :class="{ compacto: compacto }" @click="irAlPerfil">
           <!-- Se muestra el avatar obtenido o se usa un valor por defecto -->
-          <img :src="user?.avatar || 'src\assets\profile_icon.jpg'" alt="User Icon" class="user-icon" />
+          <img :src="user?.avatar || 'src/assets/profile_icon.jpg'" alt="User Icon" class="user-icon" />
 
           <div class="profile-info">
             <!-- Se muestra el nombre del usuario -->
@@ -27,10 +27,13 @@
     </div>
   </header>
 </template>
+
   
 <script setup>
 import { ref, onMounted } from 'vue';
-// Recibir propiedades desde el componente padre (por ejemplo, título y si es compacto)
+import { useRouter } from 'vue-router';
+
+// Recibir propiedades desde el componente padre
 const props = defineProps({
   titulo: {
     type: String,
@@ -38,20 +41,36 @@ const props = defineProps({
   },
   compacto: {
     type: Boolean,
-    default: false // Ajusta margenes si es "compacto"
+    default: false
   }
 });
-// Variable para almacenar los datos del usuario
+
+const router = useRouter();
 const user = ref(null);
 
-// Al montar el componente, se carga la información del usuario desde Local Storage
+// Cargar la información del usuario desde Local Storage al montar el componente
 onMounted(() => {
   const storedUser = localStorage.getItem('usuario');
   if (storedUser) {
     user.value = JSON.parse(storedUser);
   }
 });
+
+// Función para redirigir a Perfil.vue con los datos del usuario
+const irAlPerfil = () => {
+  if (user.value) {
+    router.push({
+      name: 'perfil',
+      query: { 
+        nombre: user.value.nombre, 
+        avatar: user.value.avatar || '', 
+        rolFavorito: user.value.rolFavorito || 'Sin rol favorito' 
+      }
+    });
+  }
+};
 </script>
+
   
 <style scoped>
 /* --------------------- */
