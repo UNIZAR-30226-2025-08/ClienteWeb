@@ -10,22 +10,23 @@ const router = useRouter();
   <Cabecera :titulo="'Mi Juego'" :compacto="false" />
 
   <div class="ranking-container">
-    <h1 class="ranking-title">Ranking de Jugadores</h1>
+    <h1 class="ranking-title">
+      <i class="bi bi-award-fill title-icon"></i> Ranking de Jugadores
+    </h1>
     <table class="ranking-table">
       <thead>
-  <tr>
-    <th>
-      <i class="bi bi-list-ol"></i> Posición
-    </th>
-    <th>
-      <i class="bi bi-person-fill"></i> Jugador
-    </th>
-    <th>
-      <i class="bi bi-trophy-fill"></i> Victorias
-    </th>
-  </tr>
-</thead>
-
+        <tr>
+          <th>
+            <i class="bi bi-list-ol"></i> Posición
+          </th>
+          <th>
+            <i class="bi bi-person-fill"></i> Jugador
+          </th>
+          <th>
+            <i class="bi bi-trophy-fill"></i> Victorias
+          </th>
+        </tr>
+      </thead>
       <tbody>
         <tr v-for="(player, index) in sortedPlayers" :key="index">
           <td class="rank-cell">
@@ -70,6 +71,10 @@ export default {
 </script>
 
 <style scoped>
+/* Recuerda incluir Bootstrap Icons en tu index.html:
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+*/
+
 /* Contenedor con fondo degradado */
 .ranking-container {
   padding: 2rem;
@@ -81,14 +86,23 @@ export default {
   text-align: center;
 }
 
-/* Título con tipografía Bebas Neue y efecto de sombra */
+/* Título con tipografía Bebas Neue, efecto de sombra e icono */
 .ranking-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 4rem;
   margin-bottom: 1rem;
   margin-top: 0;
-  color: #FFD700;
+  color: #fbdc2e;
   text-shadow: 8px 3px 3px rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title-icon {
+  font-size: 4.5rem;
+  margin-right: 1rem;
+  color: #FFD700;
 }
 
 /* Estilo de la tabla */
@@ -98,28 +112,33 @@ export default {
   background-color: rgba(255,255,255,0.05);
 }
 
-/* Estilos para cabecera de la tabla */
-.ranking-table th {
+.ranking-table th, 
+.ranking-table td {
   padding: 1.2rem;
+  border: 1px solid #302E2B;
+}
+
+.ranking-table th {
+
   background-color: rgba(0,0,0,0.4);
   font-family: 'Bebas Neue', sans-serif;
   font-size: 2rem;
-  color: #FFD700;
+  color: #ffffff;
   text-transform: uppercase;
   border-bottom: 2px solid rgba(255,255,255,0.2);
 }
 
-/* Estilos para las celdas de la tabla */
+
 .ranking-table td {
   padding: 1rem;
   font-family: 'MedievalSharp', cursive;
   font-size: 1.7rem;
   font-weight: bold;
-  color: #eee;
+  color: #ffffff;
   border-bottom: 1px solid rgba(255,255,255,0.1);
+  text-shadow: 5px 3px 3px rgba(0, 0, 0, 0.7);
 }
 
-/* Efecto hover en las filas */
 .ranking-table tbody tr:hover {
   background-color: rgba(255,255,255,0.1);
 }
@@ -128,25 +147,32 @@ thead {
   text-shadow: 5px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
-/* Centrado de la celda de posición */
 .rank-cell {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Iconos: tamaño y color */
-.icon {
-  margin-right: 0.5rem;
+ .bi-trophy-fill{
   color: #FFD700;
 }
 
-/* Icono para el primer puesto (copa dorada) */
+.bi-person-fill{
+  color: #af9b9b;
+}
+
+.bi-list-ol{
+  color: #f0ec00;
+}
+.icon {
+  margin-right: 0.5rem;
+  color: #f4f4f4;
+}
+
 .trophy {
   font-size: 3.2rem;
 }
 
-/* Iconos para el segundo y tercer puesto */
 .medal {
   font-size: 2.8rem;
 }
