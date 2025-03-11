@@ -5,12 +5,13 @@ import { computed } from 'vue';
 // Importar imagen por defecto para evitar problemas con la ruta
 import defaultAvatar from '../assets/profile_icon.jpg';
 
-const route = useRoute();
+const router = useRoute();
 
 // Computed properties para manejar los valores de manera segura
-const nombre = computed(() => route.query.nombre || 'NombreCuenta');
-const avatar = computed(() => route.query.avatar || defaultAvatar);
-const rolFavorito = computed(() => route.query.rolFavorito || 'Sin rol favorito');
+const nombre = computed(() => router.query.nombre || 'NombreCuenta');
+const avatar = computed(() => router.query.avatar || defaultAvatar);
+const rolFavorito = computed(() => router.query.rolFavorito || 'Sin rol favorito');
+
 </script>
 
 <template>

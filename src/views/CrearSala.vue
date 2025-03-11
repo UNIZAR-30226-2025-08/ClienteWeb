@@ -1,12 +1,27 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
+import axios from 'axios';
+import { useRouter } from 'vue-router';
 import Cabecera from '../components/Cabecera.vue';
 import Volver from '../components/Volver.vue';
-import { roles } from '../assets/data/roles.js';
 
-const nombreServidor = ref('Servidor de "nombreJugador"');
+const router = useRouter();
+const usuario = ref(null);
+const nombreServidor = ref(''); // Inicializar vacío para que se actualice correctamente
 const privacidad = ref('Privada');
 const password = ref('');
+
+// 🟢 Recuperar usuario autenticado al cargar la vista
+onMounted(() => {
+  const usuarioGuardado = localStorage.getItem('usuario');
+  if (usuarioGuardado) {
+    usuario.value = JSON.parse(usuarioGuardado);
+    nombreServidor.value = `Servidor de "${usuario.value.nombre}"`; // Usar el nombre del usuario
+  } else {
+    alert('Debes iniciar sesión para crear una sala.');
+    router.push('/'); // Redirigir al home si no está autenticado
+  }
+});
 
 // Inicialización de roles con valores predeterminados
 const rolesCantidad = ref([
@@ -17,30 +32,49 @@ const rolesCantidad = ref([
   { id: 5, nombre: 'Cazador', imagen: new URL('../assets/roles/cazador.jpeg', import.meta.url).href, cantidad: 0 }
 ]);
 
-// Computed para obtener el número total de jugadores
 const numJugadores = computed(() => rolesCantidad.value.reduce((acc, rol) => acc + rol.cantidad, 0));
+const botonCrearDeshabilitado = computed(() => numJugadores.value < 5);
+
+// 🟢 Función para CREAR la partida
+const crearSala = async () => {
+  if (!usuario.value) {
+    alert('No estás autenticado. Inicia sesión para continuar.');
+    return;
+  }
+
+  try {
+    const data = {
+      nombre: nombreServidor.value,
+      tipo: privacidad.value.toLowerCase(),
+      contrasena: privacidad.value === 'Privada' ? password.value : null,
+      idUsuario: usuario.value.id // Enviar ID del usuario autenticado al backend
+    };
+
+    const response = await axios.post('http://localhost:5000/api/partida/crear', data);
+
+    if (response.data && response.data.partida) {
+      alert(`Partida creada con éxito: ID ${response.data.partida.idPartida}`);
+      router.push('/lobby'); // Redirigir al lobby de la partida
+    }
+  } catch (error) {
+    console.error('Error al crear la partida:', error);
+    alert('No se pudo crear la partida.');
+  }
+};
 
 // Ajustar roles de forma automática
 const ajustarRoles = () => {
   let jugadores = numJugadores.value;
-
-  // 📌 Ajuste automático de lobos SIEMPRE, sin importar privacidad
   let lobos = jugadores >= 12 ? 3 : jugadores >= 8 ? 2 : 1;
   rolesCantidad.value.find(rol => rol.nombre === 'Hombre Lobo').cantidad = lobos;
 
-  if (privacidad.value === 'Pública') {
-    // 📌 Ajuste automático de otros roles solo si es pública
+  if (privacidad.value === 'publica') {
     rolesCantidad.value.forEach(rol => {
-      if (rol.nombre === 'Vidente') {
-        rol.cantidad = 1;
-      } else if (rol.nombre === 'Bruja') {
-        rol.cantidad = jugadores >= 8 ? 1 : 0;
-      } else if (rol.nombre === 'Cazador') {
-        rol.cantidad = jugadores >= 12 ? 1 : 0;
-      }
+      if (rol.nombre === 'Vidente') rol.cantidad = 1;
+      else if (rol.nombre === 'Bruja') rol.cantidad = jugadores >= 8 ? 1 : 0;
+      else if (rol.nombre === 'Cazador') rol.cantidad = jugadores >= 12 ? 1 : 0;
     });
 
-    // 📌 Calcular los aldeanos restantes
     const totalRolesEspeciales = rolesCantidad.value.reduce((sum, rol) => rol.nombre !== 'Aldeano' ? sum + rol.cantidad : sum, 0);
     rolesCantidad.value.find(rol => rol.nombre === 'Aldeano').cantidad = jugadores - totalRolesEspeciales;
   }
@@ -49,12 +83,9 @@ const ajustarRoles = () => {
 // Watch para actualizar automáticamente los roles cuando cambia la privacidad o el número de jugadores
 watch([privacidad, numJugadores], ajustarRoles);
 
-// Función para cambiar la privacidad
-const cambiarPrivacidad = () => {
-  privacidad.value = privacidad.value === 'Pública' ? 'Privada' : 'Pública';
-};
+// Funciones para modificar la privacidad y los jugadores
+const cambiarPrivacidad = () => privacidad.value = privacidad.value === 'publica' ? 'Privada' : 'publica';
 
-// Función para incrementar el número de jugadores (máximo 18)
 const incrementarJugadores = () => {
   if (numJugadores.value < 18) {
     const aldeano = rolesCantidad.value.find(rol => rol.nombre === 'Aldeano');
@@ -62,7 +93,6 @@ const incrementarJugadores = () => {
   }
 };
 
-// Función para decrementar el número de jugadores (mínimo 5)
 const decrementarJugadores = () => {
   if (numJugadores.value > 5) {
     const aldeano = rolesCantidad.value.find(rol => rol.nombre === 'Aldeano');
@@ -70,36 +100,19 @@ const decrementarJugadores = () => {
   }
 };
 
-// Función para incrementar la cantidad de un rol (solo en partidas privadas)
+// Funciones para modificar roles manualmente en partidas privadas
 const incrementarRol = (rol) => {
-  if (privacidad.value === 'Pública') return;
-  if (rol.nombre === 'Hombre Lobo') return; // ❌ Lobos no modificables manualmente
-
-  // 📌 Evitar superar el límite de 18 jugadores
-  if (numJugadores.value >= 18) return;
-
-  // 📌 Aplicar límites específicos
-  if (rol.nombre === 'Bruja' && rol.cantidad >= 1) return; // Máximo 1 Bruja
-  if (rol.nombre === 'Vidente' && rol.cantidad >= 1) return; // Máximo 1 Vidente
-  if (rol.nombre === 'Cazador' && rol.cantidad >= 2) return; // Máximo 2 Cazadores
-
+  if (privacidad.value === 'publica' || rol.nombre === 'Hombre Lobo' || numJugadores.value >= 18) return;
+  if ((rol.nombre === 'Bruja' || rol.nombre === 'Vidente') && rol.cantidad >= 1) return;
+  if (rol.nombre === 'Cazador' && rol.cantidad >= 2) return;
   rol.cantidad++;
 };
 
-// Función para decrementar la cantidad de un rol (solo en partidas privadas)
 const decrementarRol = (rol) => {
-  if (privacidad.value === 'Pública') return;
-  if (rol.nombre === 'Hombre Lobo') return; // ❌ Lobos no modificables manualmente
-
-  if (rol.cantidad > 0) rol.cantidad--;
+  if (privacidad.value === 'publica' || rol.nombre === 'Hombre Lobo' || rol.cantidad <= 0) return;
+  rol.cantidad--;
 };
-
-
-
-// Computed para deshabilitar el botón de "Crear Sala"
-const botonCrearDeshabilitado = computed(() => numJugadores.value < 5);
 </script>
-
 <template>
   <div class="container">
     <Cabecera titulo="Server Settings" />
@@ -107,7 +120,7 @@ const botonCrearDeshabilitado = computed(() => numJugadores.value < 5);
     <div class="formulario">
       <div class="campo">
         <label>Nombre del Servidor:</label>
-        <input type="text" v-model="nombreServidor" placeholder="Introduce un nombre" />
+        <input v-model="nombreServidor" placeholder="Servidor de..." />
       </div>
 
       <div class="campo">
@@ -142,7 +155,7 @@ const botonCrearDeshabilitado = computed(() => numJugadores.value < 5);
           
           <div class="role-controls">
             <button 
-              v-if="rol.cantidad > 0 && privacidad !== 'Pública' && rol.nombre !== 'Hombre Lobo'"
+              v-if="rol.cantidad > 0 && privacidad !== 'publica' && rol.nombre !== 'Hombre Lobo'"
               @click.stop="decrementarRol(rol)"  
               class="button decrement"
             >
@@ -152,7 +165,7 @@ const botonCrearDeshabilitado = computed(() => numJugadores.value < 5);
             <span class="role-amount">{{ rol.cantidad }}</span>
 
             <button 
-              v-if="privacidad !== 'Pública' && rol.nombre !== 'Hombre Lobo' && numJugadores < 18 && 
+              v-if="privacidad !== 'publica' && rol.nombre !== 'Hombre Lobo' && numJugadores < 18 && 
                     ((rol.nombre === 'Bruja' && rol.cantidad < 1) || 
                       (rol.nombre === 'Vidente' && rol.cantidad < 1) || 
                       (rol.nombre === 'Cazador' && rol.cantidad < 2) || 
@@ -173,6 +186,7 @@ const botonCrearDeshabilitado = computed(() => numJugadores.value < 5);
         v-if="!botonCrearDeshabilitado" 
         class="crear-sala" 
         :disabled="botonCrearDeshabilitado"
+        @click="crearSala"
       >
         Crear Sala
       </button>
@@ -185,6 +199,7 @@ const botonCrearDeshabilitado = computed(() => numJugadores.value < 5);
     </div>
   </div>
 </template>
+
 
 
 <style scoped>
