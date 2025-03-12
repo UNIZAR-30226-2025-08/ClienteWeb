@@ -118,7 +118,7 @@ function crearSala() {
 socket.on('salaCreada', (data) => {
   // data podría incluir, por ejemplo, el ID de la sala
   // Redireccionar a la sala creada
-  router.push(`/sala/${data.id}`);
+  router.push(`/sala/`);
 });
 
 // Escuchar un posible error al crear la sala
