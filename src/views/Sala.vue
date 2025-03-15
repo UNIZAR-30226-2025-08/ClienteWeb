@@ -15,7 +15,7 @@ import Cabecera from '../components/Cabecera.vue';
       <div class="usuario-info">
         <div class="usuario-detalle">
           <!-- Icono/avatar del usuario (colócalo según tu proyecto) -->
-          <img src="../assets/avatar.png" alt="Avatar" class="avatar-usuario" />
+          <img src="../assets/player.png" alt="Avatar" class="avatar-usuario" />
           <div class="usuario-nombre">NombreCuenta</div>
           <div class="usuario-nivel">Nivel 10</div>
           <div class="usuario-puntos">30085</div>
@@ -27,7 +27,7 @@ import Cabecera from '../components/Cabecera.vue';
         <!-- Ejemplo de slot con jugador 'Listo' -->
         <div class="slot-item">
           <div class="slot-avatar">
-            <img src="../assets/avatar.png" alt="Avatar Jugador" />
+            <img src="../assets/player.png" alt="Avatar Jugador" />
           </div>
           <div class="slot-nombre">Jugador 1</div>
           <div class="slot-estado listo">Listo!</div>
@@ -36,7 +36,7 @@ import Cabecera from '../components/Cabecera.vue';
         <!-- Ejemplo de slot con jugador 'No Listo' -->
         <div class="slot-item">
           <div class="slot-avatar">
-            <img src="../assets/avatar.png" alt="Avatar Jugador" />
+            <img src="../assets/player.png" alt="Avatar Jugador" />
           </div>
           <div class="slot-nombre">Jugador 2</div>
           <div class="slot-estado no-listo">No Listo</div>
