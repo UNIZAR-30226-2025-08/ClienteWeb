@@ -7,7 +7,6 @@ import 'vue3-toastify/dist/index.css';
 
 const router = useRouter();
 
-// Función para volver a la pantalla principal
 function volver() {
   router.push('/');
 }
@@ -18,7 +17,6 @@ const contrasena = ref('');
 const confirmacionContrasena = ref('');
 const mensajeError = ref('');
 
-// Control de visibilidad de contraseña
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 
@@ -32,22 +30,9 @@ async function generarHashSHA256(contrasena) {
   return hashHex;
 }
 
-
 // Función para registrar usuario
 async function registerUser() {
   mensajeError.value = '';
-
-  if (!nombre.value || !correo.value || !contrasena.value || !confirmacionContrasena.value) {
-    mensajeError.value = 'Todos los campos son obligatorios';
-    toast.error(mensajeError.value, { autoClose: 3000 });
-    return;
-  }
-
-  if (contrasena.value.length < 6) {
-    mensajeError.value = 'La contraseña debe tener al menos 6 caracteres';
-    toast.error(mensajeError.value, { autoClose: 3000 });
-    return;
-  }
 
   if (contrasena.value !== confirmacionContrasena.value) {
     mensajeError.value = 'Las contraseñas no coinciden';
@@ -70,20 +55,18 @@ async function registerUser() {
         id: response.data.usuario.idUsuario,
         nombre: response.data.usuario.nombre,
         fechaCreacion: response.data.usuario.fechaCreacion,
-        avatar: response.data.usuario.avatar
+        avatar: response.data.usuario.avatar,
       };
-      // Guardar el objeto usuario en Local Storage
       localStorage.setItem('usuario', JSON.stringify(usuario));
       toast.success('Registro exitoso. Redirigiendo...', { autoClose: 3000 });
+
       setTimeout(() => {
-        router.push('/juego'); // Redirigir al login tras éxito
+        router.push('/juego'); // Redirigir tras éxito
       }, 3000);
-    } else {
-      mensajeError.value = 'No se pudo completar el registro';
-      toast.error(mensajeError.value, { autoClose: 3000 });
     }
   } catch (error) {
-    mensajeError.value = error.response?.data?.message || 'Error al registrar usuario';
+    // Capturar mensaje de error del backend
+    mensajeError.value = error.response?.data?.error || 'Error al registrar usuario';
     toast.error(mensajeError.value, { autoClose: 3000 });
   }
 }
@@ -95,8 +78,8 @@ function togglePasswordVisibility(field) {
     showConfirmPassword.value = !showConfirmPassword.value;
   }
 }
-
 </script>
+
 
 <template>
   <div class="register-container">

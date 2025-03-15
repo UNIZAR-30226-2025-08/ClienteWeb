@@ -99,7 +99,7 @@ async function loginUser() {
     }
   } catch (error) {
     // Si hay un error en la petición, mostrar un mensaje de error general
-    mensajeError.value = error.response?.data?.message || 'Error al iniciar sesión';
+    mensajeError.value = error.response?.data?.error;
     toast.error(mensajeError.value, { autoClose: 3000 }); // Mostrar alerta de error
   }
 }
