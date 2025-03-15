@@ -8,7 +8,7 @@ export const roles = [
     {
       src: new URL('../roles/bruja.jpeg', import.meta.url).href,
       nombre: 'Bruja',
-      descripcion: 'Posee dos pociones que puede usar por la noche, tras el turno de los hombres lobo: la Poción de la Vida salvará a un personaje del ataque de los Hombres Lobo de esa misma noche (también puede reservársela para ella misma) y la Poción de la Muerte matará a otro personaje de su elección. Puede usar una, ninguna o las dos pociones durante el mismo turno si así lo desea, pero una vez ha utilizado una de las pociones, la pierde para el resto de la partida y no podrá volver a servirse de ella.',
+      descripcion: 'Posee dos pociones que puede usar por la noche, tras el turno de los hombres lobo: la Poción de la Vida salvará a un personaje del ataque de los Hombres Lobo de esa misma noche y la Poción de la Muerte matará a otro personaje de su elección. Puede usar una, ninguna o las dos pociones durante el mismo turno si así lo desea. Una vez las usa, no podrá volver a servirse de ella.',
       equipo: 'Bando de los aldeanos'
     },
     {
