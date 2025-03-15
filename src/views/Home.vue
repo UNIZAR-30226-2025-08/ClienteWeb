@@ -222,9 +222,9 @@ function irARegistro() {
 
     <!-- Sección "Cómo jugar" -->
     <div ref="scrollSeccionJuego" class="game-intro" id="como-jugar">
-      <h3>¿Cómo jugar a Los Hombres Lobos de Castonegro?</h3>
+      <h3>¿Cómo jugar a Los Hombres Lobos de Castronegro?</h3>
       <p>
-        Los Hombres Lobos de Castonegro es un juego de roles ocultos y deducción social en el que 
+        Los Hombres Lobos de Castronegro es un juego de roles ocultos y deducción social en el que 
         los jugadores asumen diferentes papeles dentro de una aldea.
         El objetivo varía según el bando: los aldeanos intentan descubrir y eliminar a los hombres lobo,
         mientras que los hombres lobo intentan eliminar a los aldeanos sin ser descubiertos.
@@ -347,7 +347,7 @@ function irARegistro() {
       <div class="footer-content">
         <div class="footer-column">
           <h4>Contacto</h4>
-          <p>Email: <strong>castonegro@gmail.com</strong></p>
+          <p>Email: <strong>castronegro@gmail.com</strong></p>
           <div class="social-links">
             <a href="#"><img src="../assets/facebook-icon.jpg" alt="Facebook" /></a>
             <a href="#"><img src="../assets/instagram.webp" alt="Instagram" /></a>
@@ -370,7 +370,7 @@ function irARegistro() {
         </div>
       </div>
       <div class="footer-bottom">
-        <p>© 2025 Los Hombres Lobos de Castonegro. Todos los derechos reservados</p>
+        <p>© 2025 Los Hombres Lobos de Castronegro. Todos los derechos reservados</p>
       </div>
     </footer>
   </main>

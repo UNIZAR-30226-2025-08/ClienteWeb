@@ -1,0 +1,33 @@
+name: Despliegue en Vercel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+
+      - name: Configuración de Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14.x'
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Construir el proyecto
+        run: npm run build
+
+      - name: Desplegar en Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        run: |
+          curl -sL https://github.com/vercel/vercel-action/releases/latest/download/vercel-action-linux-amd64.tar.gz | tar xz
+          ./vercel-action-linux-amd64 deploy --token $VERCEL_TOKEN --prod --org $VERCEL_ORG_ID --project $VERCEL_PROJECT_ID
