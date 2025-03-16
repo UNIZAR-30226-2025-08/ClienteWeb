@@ -9,13 +9,13 @@
       <div class="perfil-notificaciones">
         <div class="profile" :class="{ compacto: compacto }" @click="irAlPerfil">
           <!-- Se muestra el avatar obtenido o se usa un valor por defecto -->
-          <img :src="user?.avatar || 'src/assets/profile_icon.jpg'" alt="User Icon" class="user-icon" />
+          <img :src="user.avatar || 'src/assets/profile_icon.jpg'" alt="User Icon" class="user-icon" />
 
           <div class="profile-info">
             <!-- Se muestra el nombre del usuario -->
-            <span class="user-name">{{ user?.nombre || 'NombreCuenta' }}</span>
-            <!-- En vez del nivel de experiencia se muestra el rol favorito -->
-            <span class="Rol">{{ user?.rolFavorito || 'Sin rol favorito' }}</span>
+            <span class="user-name">{{ user.nombre || 'NombreCuenta' }}</span>
+            <!-- Se muestra el rol favorito -->
+            <span class="Rol">{{ user.rolFavorito || 'Sin rol favorito' }}</span>
           </div>
         </div>
         <div class="notifications">
@@ -29,7 +29,6 @@
   </header>
 </template>
 
-  
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
@@ -47,13 +46,20 @@ const props = defineProps({
 });
 
 const router = useRouter();
-const user = ref(null);
+const user = ref({});
 
 // Cargar la información del usuario desde Local Storage al montar el componente
 onMounted(() => {
   const storedUser = localStorage.getItem('usuario');
   if (storedUser) {
     user.value = JSON.parse(storedUser);
+  } else {
+    // Si no existe el usuario en el localStorage, asignar valores por defecto
+    user.value = {
+      nombre: 'NombreCuenta',
+      avatar: 'src/assets/profile_icon.jpg',
+      rolFavorito: 'Sin rol favorito' // Asignar valor por defecto para el rol
+    };
   }
 });
 
@@ -65,14 +71,12 @@ const irAlPerfil = () => {
       query: { 
         nombre: user.value.nombre, 
         avatar: user.value.avatar || '', 
-        rolFavorito: user.value.rolFavorito || 'Sin rol favorito' 
+        rolFavorito: user.value.rolFavorito || 'Sin rol favorito' // Pasar el rol correctamente
       }
     });
   }
 };
 </script>
-
-  
 <style scoped>
 /* --------------------- */
 /* CABECERA              */
