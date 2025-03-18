@@ -55,8 +55,20 @@ const ajustarRoles = () => {
 
     const totalRolesEspeciales = rolesCantidad.value.reduce((sum, rol) => rol.nombre !== 'Aldeano' ? sum + rol.cantidad : sum, 0);
     rolesCantidad.value.find(rol => rol.nombre === 'Aldeano').cantidad = jugadores - totalRolesEspeciales;
+  } else {
+    // En partida privada, no añadir un Aldeano extra si el número de jugadores es 7 o 11
+    if (jugadores !== 7 && jugadores !== 11) {
+      const totalRolesEspeciales = rolesCantidad.value.reduce((sum, rol) => rol.nombre !== 'Aldeano' ? sum + rol.cantidad : sum, 0);
+      rolesCantidad.value.find(rol => rol.nombre === 'Aldeano').cantidad = jugadores - totalRolesEspeciales;
+    }
+    // En partida privada, no eliminar un Aldeano extra si el número de jugadores es 8 o 12
+    if (jugadores !== 8 && jugadores !== 12){
+      const totalRolesEspeciales = rolesCantidad.value.reduce((sum, rol) => rol.nombre !== 'Aldeano' ? sum - rol.cantidad : sum, 0);
+      rolesCantidad.value.find(rol => rol.nombre === 'Aldeano').cantidad = jugadores + totalRolesEspeciales;
+    }
   }
 };
+
 
 // Watch para actualizar automáticamente los roles cuando cambia la privacidad o el número de jugadores
 watch([privacidad, numJugadores], ajustarRoles);
@@ -180,6 +192,7 @@ socket.on('errorSala', (msg) => {
 
             <button 
               v-if="privacidad !== 'publica' && rol.nombre !== 'Hombre Lobo' && numJugadores < 18 && 
+                    numJugadores !== 7 && numJugadores !== 11 &&
                     ((rol.nombre === 'Bruja' && rol.cantidad < 1) || 
                       (rol.nombre === 'Vidente' && rol.cantidad < 1) || 
                       (rol.nombre === 'Cazador' && rol.cantidad < 2) || 
