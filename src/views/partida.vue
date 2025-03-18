@@ -19,8 +19,16 @@
       <h1 class="empieza-text">EMPIEZA LA PARTIDA</h1>
     </div>
 
-    <!-- Cabecera / Secciones de la partida (cuando partidaActive = true) -->
-    <div v-if="partidaActive" class="top-sections">
+    <!-- Nueva Overlay: Elección del Alguacil -->
+    <!-- Mismas clases y animación de 6s que las otras pantallas -->
+    <div v-if="alguacilOverlayActive" class="intro-overlay fadeInOut">
+      <h1 class="intro-text">
+        LOS JUGADORES ELEGIRÁN DE MANERA CONSENSUADA QUIÉN SERÁ EL ALGUACIL
+      </h1>
+    </div>
+
+    <!-- Cabecera / Secciones de la partida (ahora con v-if="partidaActive && !alguacilOverlayActive") -->
+    <div v-if="partidaActive && !alguacilOverlayActive" class="top-sections">
       <div class="section">
         <img src="../assets/aldeanosVivos.png" alt="Aldeanos Vivos" class="icon" />
         <div class="text">
@@ -44,7 +52,7 @@
     </div>
 
     <!-- Recuadro inferior izquierdo con la información del rol -->
-    <div v-if="partidaActive" class="bottom-left-info">
+    <div v-if="partidaActive && !alguacilOverlayActive" class="bottom-left-info">
       <!-- Fila superior: imagen pequeña + "HABILIDAD" al lado -->
       <div class="top-row">
         <img :src="chosenRole.src" alt="Imagen del Rol" class="role-info-image" />
@@ -57,8 +65,7 @@
     </div>
 
     <!-- Ocho jugadores alrededor de la hoguera -->
-    <div v-if="partidaActive" class="players-container">
-      <!-- Cada jugador con su icono y etiqueta -->
+    <div v-if="partidaActive && !alguacilOverlayActive" class="players-container">
       <div class="player-icon player-1">
         <span class="player-label">JUGADOR 1</span>
         <img src="../assets/player.png" alt="Jugador 1" />
@@ -107,6 +114,8 @@ export default {
       roleActive: false,
       empiezaOverlayActive: false,
       partidaActive: false,
+      // Nueva propiedad para mostrar la overlay del Alguacil
+      alguacilOverlayActive: false,
 
       // Rol aleatorio elegido
       chosenRole: {}
@@ -117,7 +126,7 @@ export default {
     setTimeout(() => {
       this.introActive = false;
 
-      // Filtramos para excluir el rol "Aguacil"
+      // Filtramos para excluir el rol "Aguacil" (opcional)
       const validRoles = roles.filter(role => role.nombre.toLowerCase() !== "aguacil");
       const randomIndex = Math.floor(Math.random() * validRoles.length);
       this.chosenRole = validRoles[randomIndex];
@@ -132,6 +141,19 @@ export default {
         setTimeout(() => {
           this.empiezaOverlayActive = false;
           this.partidaActive = true;
+
+          // 4) 30s después de mostrar la sala, lanzamos la pantalla de Alguacil
+          setTimeout(() => {
+            this.alguacilOverlayActive = true;
+
+            // (Opcional) Si quieres que el overlay del alguacil
+            // se desvanezca después de 6s, haz:
+            setTimeout(() => {
+              this.alguacilOverlayActive = false;
+            }, 6000);
+
+          }, 30000);
+
         }, 6000);
       }, 6000);
     }, 6000);

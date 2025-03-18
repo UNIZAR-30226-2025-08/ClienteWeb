@@ -36,7 +36,7 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999999;
+  z-index: 999999; /* Cubrir todo */
 }
 
 /* Para el overlay de rol, alineamos en columna (texto, imagen, texto) */

@@ -5,7 +5,7 @@ import axios from 'axios';
 import Cabecera from '../components/Cabecera.vue';
 import Volver from '../components/Volver.vue';
 // Importar socket.io-client para conectarse al servidor de websockets
-import { io } from 'socket.io-client';
+//import { io } from 'socket.io-client';
 
 // Crear la conexión al servidor de websockets (ajusta la URL según tu entorno)
 const socket = io('http://localhost:5000');
