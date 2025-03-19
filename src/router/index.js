@@ -7,7 +7,7 @@ import Reglas from '../views/Reglas.vue';
 import Servidores from '../views/ServerBrowser.vue';
 import Roles from '../views/Roles.vue';
 import Sala from '../views/Sala.vue';
-import Amigos from '../views/Amigos.vue'
+import Amigos from '../views/Amigos.vue';
 import ranking from '../views/ranking.vue';
 import Partida from '../views/partida.vue';
 import Perfil from '../views/Perfil.vue';
@@ -20,7 +20,7 @@ const routes = [
   { path: '/juego', component: Juego },
   { path: '/reglas', component: Reglas },
   { path: '/servidores', component: Servidores },
-  { path: '/sala', component: Sala },
+  { path: '/sala/:idSala', component: Sala }, // Ruta dinámica para la sala
   { path: '/amigos', component: Amigos},
   { path: '/ranking', component: ranking},
   { path: '/partida', component: Partida},

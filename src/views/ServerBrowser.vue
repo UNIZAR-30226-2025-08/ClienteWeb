@@ -1,13 +1,112 @@
 <script setup>
-import Volver from '../components/Volver.vue';
-import Cabecera from '../components/Cabecera.vue';
+import { ref, onMounted, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
+import { io } from "socket.io-client";
+import Volver from "../components/Volver.vue";
+import Cabecera from "../components/Cabecera.vue";
+
+const socket = io("http://localhost:5000"); // Asegúrate de que la URL del servidor es correcta
+const router = useRouter();
+
+// Variables reactivas
+const salas = ref([]); // Lista de salas en tiempo real
+const usuario = ref(null); // Usuario autenticado
+
+// Función para obtener la lista de salas desde el servidor
+const obtenerSalas = () => {
+  socket.emit("obtenerSalas"); // Emitimos el evento para obtener las salas
+};
+
+onMounted(() => {
+  const usuarioGuardado = localStorage.getItem("usuario");
+  if (!usuarioGuardado) {
+    alert("Debes iniciar sesión para ver las salas.");
+    router.push("/");
+    return;
+  }
+
+  usuario.value = JSON.parse(usuarioGuardado);
+
+  // Obtener la lista inicial de salas cuando se monta el componente
+  obtenerSalas();
+
+  // Escuchar la lista inicial de salas
+  socket.on("listaSalas", (salasRecibidas) => {
+    salas.value = salasRecibidas;
+  });
+
+  // Escuchar las actualizaciones de salas en tiempo real
+  socket.on("actualizarSala", (salaActualizada) => {
+    const index = salas.value.findIndex((s) => s.id === salaActualizada.id);
+    if (index !== -1) {
+      salas.value[index] = salaActualizada; // Si ya existe, actualizamos la sala
+    } else {
+      salas.value.push(salaActualizada); // Si no existe, agregamos la nueva sala
+    }
+  });
+
+  // Escuchar cuando se cree una nueva sala
+  socket.on("nuevaSala", (nuevaSala) => {
+    salas.value.push(nuevaSala); // Agregamos la nueva sala a la lista
+  });
+
+  // Escuchar cuando se elimine una sala
+  socket.on("eliminarSala", (idSala) => {
+    salas.value = salas.value.filter(sala => sala.id !== idSala); // Eliminamos la sala de la lista
+  });
+
+  // Manejo de errores
+  socket.on("error", (mensaje) => {
+    alert(`Error: ${mensaje}`);
+  });
+});
+
+onUnmounted(() => {
+  // Limpiar eventos al desmontar el componente
+  socket.off("listaSalas");
+  socket.off("actualizarSala");
+  socket.off("nuevaSala");
+  socket.off("eliminarSala");
+  socket.off("error");
+});
+
+const unirseSala = (sala) => {
+  if (!sala) return;
+
+  let contrasena = null;
+  if (sala.tipo === "privada") {
+    contrasena = prompt("Introduce la contraseña de la sala:");
+    if (!contrasena) return;
+  }
+
+  // Emitir evento para unirse a la sala
+  socket.emit("unirseSala", { idSala: sala.id, usuario: usuario.value, contrasena });
+
+  // Escuchar la confirmación para evitar duplicados
+  const salaActualizadaHandler = (salaActualizada) => {
+    if (salaActualizada.id === sala.id) {
+      localStorage.setItem("salaActual", JSON.stringify(salaActualizada));
+
+      // 🔹 En lugar de router.push, recargamos la página completamente
+      window.location.href = `/sala/${sala.id}`;
+
+      // Limpiar el escuchador
+      socket.off("salaActualizada", salaActualizadaHandler);
+    }
+  };
+
+  socket.on("salaActualizada", salaActualizadaHandler);
+};
+
 </script>
+
+
+
 
 <template>
   <div class="server-browser">
     <Cabecera titulo="Server Browser" :compacto="true" />
 
-    <!-- Contenedor general que ocupa todo el ancho -->
     <div class="server-container">
       <div class="table-container">
         <table class="server-table">
@@ -17,44 +116,20 @@ import Cabecera from '../components/Cabecera.vue';
               <th>Pass</th>
               <th>Nombre Del Servidor</th>
               <th>Número Jugadores</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Sola</td>
-              <td><img src="../assets/candado.png" alt="Candado" class="lock-icon" /></td>
-              <td>Servidor 1</td>
-              <td>7/8</td>
-            </tr>
-            <tr>
-              <td>Sala</td>
-              <td></td>
-              <td>Servidor 2</td>
-              <td>4/8</td>
-            </tr>
-            <tr>
-              <td>En Partida</td>
-              <td><img src="../assets/candado.png" alt="Candado" class="lock-icon" /></td>
-              <td>Servidor 3</td>
-              <td>12/12</td>
-            </tr>
-            <tr>
-              <td>Empezando</td>
-              <td><img src="../assets/candado.png" alt="Candado" class="lock-icon" /></td>
-              <td>Servidor 4</td>
-              <td>7/12</td>
-            </tr>
-            <tr>
-              <td>En Partida</td>
-              <td><img src="../assets/candado.png" alt="Candado" class="lock-icon" /></td>
-              <td>Servidor 5</td>
-              <td>8/8</td>
-            </tr>
-            <tr>
-              <td>Sola</td>
-              <td></td>
-              <td>Servidor 6</td>
-              <td>11/15</td>
+            <tr v-for="sala in salas" :key="sala.id">
+              <td>{{ sala.tipo === "privada" ? "Privada" : "Pública" }}</td>
+              <td>
+                <img v-if="sala.tipo === 'privada'" src="../assets/candado.png" alt="Candado" class="lock-icon" />
+              </td>
+              <td>{{ sala.nombre }}</td>
+              <td>{{ sala.jugadores.length }}/{{ sala.maxJugadores }}</td>
+              <td>
+                <button @click="unirseSala(sala)">Unirse</button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -63,13 +138,11 @@ import Cabecera from '../components/Cabecera.vue';
 
     <div class="bottom-bar">
       <Volver />
-      <button class="btn-join">
-        UNIRSE
-        <img src="../assets/tick_blanco.png" alt="Unirse" class="icon" />
-      </button>
     </div>
   </div>
 </template>
+
+
 
 <style scoped>
 /* 

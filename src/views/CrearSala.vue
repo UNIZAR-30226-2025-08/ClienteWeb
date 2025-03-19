@@ -56,19 +56,16 @@ const ajustarRoles = () => {
     const totalRolesEspeciales = rolesCantidad.value.reduce((sum, rol) => rol.nombre !== 'Aldeano' ? sum + rol.cantidad : sum, 0);
     rolesCantidad.value.find(rol => rol.nombre === 'Aldeano').cantidad = jugadores - totalRolesEspeciales;
   } else {
-    // En partida privada, no añadir un Aldeano extra si el número de jugadores es 7 o 11
     if (jugadores !== 7 && jugadores !== 11) {
       const totalRolesEspeciales = rolesCantidad.value.reduce((sum, rol) => rol.nombre !== 'Aldeano' ? sum + rol.cantidad : sum, 0);
       rolesCantidad.value.find(rol => rol.nombre === 'Aldeano').cantidad = jugadores - totalRolesEspeciales;
     }
-    // En partida privada, no eliminar un Aldeano extra si el número de jugadores es 8 o 12
     if (jugadores !== 8 && jugadores !== 12){
       const totalRolesEspeciales = rolesCantidad.value.reduce((sum, rol) => rol.nombre !== 'Aldeano' ? sum - rol.cantidad : sum, 0);
       rolesCantidad.value.find(rol => rol.nombre === 'Aldeano').cantidad = jugadores + totalRolesEspeciales;
     }
   }
 };
-
 
 // Watch para actualizar automáticamente los roles cuando cambia la privacidad o el número de jugadores
 watch([privacidad, numJugadores], ajustarRoles);
@@ -103,10 +100,8 @@ const decrementarRol = (rol) => {
   rol.cantidad--;
 };
 
-
 // Función para crear la sala utilizando websockets
 function crearSala() {
-  // Calcular maxRolesEspeciales (suponiendo que todos los roles excepto "Aldeano" son especiales)
   const maxRolesEspeciales = rolesCantidad.value
     .filter(rol => rol.nombre !== 'Aldeano')
     .reduce((acum, rol) => acum + rol.cantidad, 0);
@@ -124,14 +119,18 @@ function crearSala() {
   socket.emit('crearSala', salaData);
 }
 
-
-
-// Escuchar el evento de respuesta del servidor para sala creada
 socket.on('salaCreada', (data) => {
-  // data podría incluir, por ejemplo, el ID de la sala
-  // Redireccionar a la sala creada
-  router.push(`/sala/`);
+  if (data && data.id) {
+    // Guardar la información de la sala para que el creador se vea dentro de ella
+    localStorage.setItem('salaActual', JSON.stringify(data));
+    
+    // 🔹 En lugar de router.push, forzamos una recarga completa de la página
+    window.location.href = `/sala/${data.id}`;
+  } else {
+    alert('Hubo un error al crear la sala. Por favor, inténtalo nuevamente.');
+  }
 });
+
 
 // Escuchar un posible error al crear la sala
 socket.on('errorSala', (msg) => {
@@ -185,7 +184,7 @@ socket.on('errorSala', (msg) => {
               @click.stop="decrementarRol(rol)"  
               class="button decrement"
             >
-              -
+              - 
             </button>
 
             <span class="role-amount">{{ rol.cantidad }}</span>
