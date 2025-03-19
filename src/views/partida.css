@@ -36,7 +36,7 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999999;
+  z-index: 999999; /* Cubrir todo */
 }
 
 /* Para el overlay de rol, alineamos en columna (texto, imagen, texto) */
@@ -208,21 +208,28 @@ html, body {
   text-align: justify;
 }
 
-/* Contenedor de los jugadores */
+/* -----------------------
+   Contenedor de los jugadores
+------------------------ */
 .players-container {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none; /* Para no interferir con clics */
+  /* pointer-events: none;  <-- Comenta o quita esta línea si quieres clics siempre */
+}
+
+/* Solo si quieres que sea clicable durante la votación */
+.players-container.clickable {
+  pointer-events: auto;
 }
 
 /* Cada jugador: círculo grande, nombre en negro encima */
 .player-icon {
   position: absolute;
   transform: translate(-50%, -50%);
-  width: 90px;       /* círculo más grande */
+  width: 90px;       /* círculo */
   height: 90px;
   background-color: #262522; 
   border-radius: 50%;
@@ -234,21 +241,21 @@ html, body {
 /* Nombre del jugador: arriba del círculo, en negro */
 .player-label {
   position: absolute;
-  top: -1.2rem;      /* lo sube por encima del círculo */
-  color: #000;       /* texto en negro */
+  top: -1.2rem;
+  color: #000;
   font-size: 0.85rem;
   font-weight: bold;
 }
 
 /* Avatar dentro del círculo */
 .player-icon img {
-  width: 70px;       /* más pequeño para que se vea el borde oscuro */
+  width: 70px;
   height: 70px;
   border-radius: 50%;
   object-fit: cover;
 }
 
-/* Ajustamos las posiciones para un radio mayor (~300px) */
+/* Posiciones alrededor de la hoguera */
 .player-1 {
   top: calc(50% - 300px);
   left: 50%;
@@ -281,3 +288,100 @@ html, body {
   top: calc(50% - 212px);
   left: calc(50% - 212px);
 }
+
+/* Jugador seleccionado: borde verde */
+.player-icon.selected {
+  box-shadow: 0 0 0 4px #33FF00; /* borde verde brillante */
+  transition: box-shadow 0.2s;
+}
+
+/* -----------------------
+   Contador (60s)
+------------------------ */
+.countdown-container {
+  position: absolute;
+  left: 20px;
+  top: 100px; /* Ajusta según tu diseño */
+}
+
+.countdown-circle {
+  width: 60px;
+  height: 60px;
+  background-color: #262522; 
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.countdown-text {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: bold;
+  font-family: sans-serif;
+}
+
+/* -----------------------
+   Botón de VOTAR (encima del panel de habilidad)
+------------------------ */
+.vote-button-container {
+  position: absolute;
+  left: 80px;
+  bottom: 340px; /* Ajusta para que quede encima de .bottom-left-info */
+  width: 275px;  /* mismo ancho que .bottom-left-info */
+  display: flex;
+  justify-content: center;
+}
+
+/* Botón de VOTAR (encima del panel de habilidad) */
+.vote-button-container {
+  position: absolute;
+  left: 80px;
+  bottom: 340px; /* Ajusta para que quede encima de .bottom-left-info */
+  width: 275px;  /* mismo ancho que .bottom-left-info */
+  display: flex;
+  justify-content: center;
+  z-index: 1000000; /* Asegura que esté por encima de otros elementos */
+}
+
+.vote-button {
+  background-color: #262522;
+  color: #fff;
+  font-size: 1rem;
+  padding: 12px 30px;
+  border: 2px solid #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: sans-serif;
+  width: 100%; /* más ancho */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+/* Efecto hover para que se sienta interactivo */
+.vote-button:hover {
+  background-color: #333;
+}
+
+/* Icono de candado dentro del botón */
+.candado-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* El botón se pone en verde cuando hay un jugador seleccionado */
+.vote-button.active {
+  border-color: #33FF00;
+  color: #33FF00;
+}
+
+/* Si el botón está deshabilitado (ya has votado), se atenúa y no se puede pulsar */
+.vote-button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
