@@ -4,97 +4,73 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { toast } from 'vue3-toastify';
 import Volver from "../components/Volver.vue";
-
-// Importar imagen por defecto para evitar problemas con la ruta
 import defaultAvatar from '../assets/profile_icon.jpg';
 
-// Obtener el usuario desde el localStorage
 const usuario = JSON.parse(localStorage.getItem('usuario'));
-
-// Verificar si el usuario está en localStorage
 const router = useRouter();
+
 if (!usuario) {
-  router.push('/'); // Redirigir al login si no hay usuario en localStorage
+  router.push('/');
 }
 
-// Variables reactivas para los datos del usuario
 const nombre = ref(usuario?.nombre || 'NombreCuenta');
 const avatar = ref(usuario?.avatar || defaultAvatar);
 const rolFavorito = ref(usuario?.rolFavorito || 'Sin rol favorito');
-
-// Variable de estado para mensajes de error
 const mensajeError = ref('');
+const modalAbierto = ref(false);
 
-// Función para verificar si la URL del avatar es válida
-function esUrlValida(url) {
-  try {
-    const image = new Image();
-    image.src = url;
-    return image.complete;
-  } catch (e) {
-    return false;
-  }
-}
+// Datos temporales para edición
+const nuevoNombre = ref(nombre.value);
+const nuevoAvatar = ref(avatar.value);
+const nuevoRol = ref(rolFavorito.value);
 
-// Manejo de la actualización del perfil
+const abrirModal = () => {
+  nuevoNombre.value = nombre.value;
+  nuevoAvatar.value = avatar.value;
+  nuevoRol.value = rolFavorito.value;
+  modalAbierto.value = true;
+};
+
+const cerrarModal = () => {
+  modalAbierto.value = false;
+};
+
 const actualizarPerfil = async () => {
-  mensajeError.value = ''; // Limpiar mensaje de error previo
+  mensajeError.value = '';
 
-  // Validación simple de campos
-  if (!nombre.value || !avatar.value || !rolFavorito.value) {
+  if (!nuevoNombre.value || !nuevoAvatar.value || !nuevoRol.value) {
     mensajeError.value = 'Todos los campos son obligatorios';
     toast.error(mensajeError.value);
     return;
   }
 
-  // Validar si la URL del avatar es válida
-  if (!esUrlValida(avatar.value)) {
-    mensajeError.value = 'La URL del avatar no es válida';
-    toast.error(mensajeError.value);
-    return;
-  }
+  const rol = nuevoRol.value === 'Sin rol favorito' ? null : nuevoRol.value;
 
-  // Si el rol favorito es 'Sin rol favorito', lo enviamos como null
-  const rol = rolFavorito.value === 'Sin rol favorito' ? null : rolFavorito.value;
+  const datosActualizados = {
+    idUsuario: usuario.idUsuario,
+    nombre: nuevoNombre.value,
+    avatar: nuevoAvatar.value,
+    rolFavorito: rol
+  };
 
   try {
-    // Enviar la solicitud PUT al backend
-    const response = await axios.put('/api/usuario/actualizar', {
-      idUsuario: usuario.id, // Usamos el ID del usuario almacenado
-      nombre: nombre.value,
-      avatar: avatar.value,
-      rolFavorito: rol,
-    });
+    const response = await axios.put('/api/usuario/actualizar', datosActualizados);
 
-    // Verificar la respuesta del servidor
     if (response.status === 200 && response.data?.usuario) {
-      console.log('Respuesta del servidor:', response.data);
+      localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
 
-      // Actualizar los datos del usuario en el localStorage con los nuevos valores
-      const usuarioActualizado = response.data.usuario;
-      localStorage.setItem('usuario', JSON.stringify(usuarioActualizado));
+      nombre.value = response.data.usuario.nombre;
+      avatar.value = response.data.usuario.avatar;
+      rolFavorito.value = response.data.usuario.rolFavorito;
 
-      // Mostrar mensaje de éxito
       toast.success('Perfil actualizado exitosamente', { autoClose: 3000 });
-
-      // Redirigir al usuario a la página de perfil
-      router.push('/perfil');
+      cerrarModal();
     } else {
-      console.error('Error en la respuesta del servidor:', response);
       mensajeError.value = 'Hubo un error al actualizar el perfil';
       toast.error(mensajeError.value, { autoClose: 3000 });
     }
   } catch (error) {
-    console.error('Error completo:', error);
-
-    if (error.response && error.response.data && error.response.data.error) {
-      mensajeError.value = error.response.data.error;
-    } else if (error.request) {
-      mensajeError.value = 'Error de solicitud, por favor revisa la conexión.';
-    } else {
-      mensajeError.value = 'Hubo un problema al actualizar el perfil.';
-    }
-
+    mensajeError.value = error.response?.data?.error || 'Hubo un problema al actualizar el perfil.';
     toast.error(mensajeError.value, { autoClose: 3000 });
   }
 };
@@ -103,28 +79,33 @@ const actualizarPerfil = async () => {
 <template>
   <h1 class="cabecera">Perfil</h1>
   
-  <!-- Mostrar mensaje de error si existe -->
-  <p v-if="mensajeError" class="error">{{ mensajeError }}</p>
-  
   <div class="perfil-container">
     <img :src="avatar" alt="Avatar" class="avatar" />
+    
+    <div class="info-perfil">
+      <h2>Nombre: <span>{{ nombre }}</span></h2>
+      <h3>Rol Favorito: <span>{{ rolFavorito }}</span></h3>
+      <button @click="abrirModal">Actualizar Perfil</button>
+    </div>
+  </div>
 
-    <!-- Formulario para modificar el perfil -->
-    <div class="formulario-modificacion">
-      <h2>Actualizar Perfil</h2>
+  <!-- Modal de edición -->
+  <div v-if="modalAbierto" class="modal-overlay">
+    <div class="modal">
+      <h2>Editar Perfil</h2>
+
       <form @submit.prevent="actualizarPerfil">
         <div>
-          <label for="nombre">Nuevo Nombre:</label>
-          <input v-model="nombre" type="text" id="nombre" placeholder="Nuevo nombre" />
+          <label for="nuevoNombre">Nuevo Nombre:</label>
+          <input v-model="nuevoNombre" type="text" id="nuevoNombre" required />
         </div>
         <div>
-          <label for="avatar">Nueva URL del Avatar:</label>
-          <input v-model="avatar" type="text" id="avatar" placeholder="URL del avatar" />
+          <label for="nuevoAvatar">Nueva URL del Avatar:</label>
+          <input v-model="nuevoAvatar" type="text" id="nuevoAvatar" required />
         </div>
         <div>
-          <label for="rolFavorito">Nuevo Rol Favorito:</label>
-          <select v-model="rolFavorito" id="rolFavorito">
-            <option value="Sin rol favorito">Sin rol favorito</option>
+          <label for="nuevoRol">Nuevo Rol Favorito:</label>
+          <select v-model="nuevoRol" id="nuevoRol" required>
             <option value="bruja">Bruja</option>
             <option value="cazador">Cazador</option>
             <option value="vidente">Vidente</option>
@@ -132,11 +113,16 @@ const actualizarPerfil = async () => {
             <option value="aldeano">Aldeano</option>
           </select>
         </div>
-        <button type="submit">Actualizar Perfil</button>
-        <Volver />
+
+        <div class="modal-buttons">
+          <button type="submit">Guardar</button>
+          <button type="button" @click="cerrarModal">Cancelar</button>
+        </div>
       </form>
     </div>
   </div>
+
+  <Volver />
 </template>
 
 <style scoped>
@@ -149,15 +135,14 @@ const actualizarPerfil = async () => {
 
 .perfil-container {
   display: flex;
-  flex-direction: row;
   align-items: center;
   text-align: left;
-  margin-top: 5rem;
-  margin-left: 25rem;
+  margin: 5rem auto;
   max-width: 55%;
   background-color: #1e1c1a;
   padding: 3rem;
   padding-left: 5rem;
+  border-radius: 10px;
 }
 
 .avatar {
@@ -167,23 +152,24 @@ const actualizarPerfil = async () => {
   margin-right: 3rem;
 }
 
-.formulario-modificacion {
+.info-perfil {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  max-width: 400px;
 }
 
-.formulario-modificacion input,
-.formulario-modificacion select,
-.formulario-modificacion button {
-  margin: 0.5rem 0;
-  padding: 0.8rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.info-perfil h2, .info-perfil h3 {
+  color: white;
+}
+
+.info-perfil span {
+  font-weight: bold;
 }
 
 button {
+  margin-top: 1rem;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 5px;
   background-color: #2e2e2e;
   color: white;
   cursor: pointer;
@@ -193,8 +179,75 @@ button:hover {
   background-color: #444;
 }
 
-.error {
-  color: red;
+/* Estilos del modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background: #222;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  color: white;
+  box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
+}
+
+.modal label {
   font-weight: bold;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.modal input,
+.modal select {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #444;
+  background: #333;
+  color: white;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal-buttons button {
+  margin-top: 1rem;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.modal-buttons button:first-child {
+  background-color: #1a73e8;
+  color: white;
+}
+
+.modal-buttons button:first-child:hover {
+  background-color: #1258c4;
+}
+
+.modal-buttons button:last-child {
+  background-color: red;
+  color: white;
+}
+
+.modal-buttons button:last-child:hover {
+  background-color: darkred;
 }
 </style>
