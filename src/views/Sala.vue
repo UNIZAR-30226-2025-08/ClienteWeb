@@ -166,7 +166,7 @@ const espaciosJugadores = computed(() => {
         <div v-for="(jugador, index) in espaciosJugadores" :key="index" class="slot-item" :class="{ 'slot-vacio': !jugador, 'slot-cargando': slotsCargando[jugador?.id] }">
           <div class="slot-avatar">
             <img v-if="jugador && !slotsCargando[jugador.id]" src="../assets/player.png" alt="Avatar Jugador" />
-            <img v-else-if="!jugador" src="../assets/empty_slot.png" alt="Espacio vacío" />
+            <img v-else-if="!jugador" src="../assets/candado.png" alt="Espacio vacío" />
             <div v-else class="loading-avatar"></div>
           </div>
           <div class="slot-nombre">
