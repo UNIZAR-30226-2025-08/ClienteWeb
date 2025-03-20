@@ -1,8 +1,44 @@
 <script setup>
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 import Cabecera from "../components/Cabecera.vue";
 
 const router = useRouter();
+
+// Variables reactivas para los datos, estado de carga y errores
+const rankedPlayers = ref([]);
+const loading = ref(true);
+const error = ref(null);
+
+// Función para obtener el ranking desde el endpoint del backend
+const fetchRanking = async () => {
+  try {
+    const response = await axios.get('/api/ranking/ranking');
+    // Se asume que la respuesta tiene la forma { mensaje: "Ranking global obtenido", ranking: [...] }
+    // Mapeamos los datos para que tengan las propiedades que usamos en el template
+    rankedPlayers.value = response.data.ranking.map(item => ({
+      name: item.nombre,
+      victories: item.victorias,
+      avatar: item.avatar
+    }));
+  } catch (err) {
+    console.error("Error al obtener el ranking:", err);
+    error.value = 'Error al obtener el ranking global';
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Ejecuta la función cuando el componente se monta
+onMounted(() => {
+  fetchRanking();
+});
+
+// Computed para ordenar los jugadores según sus victorias (descendente)
+const sortedPlayers = computed(() => {
+  return [...rankedPlayers.value].sort((a, b) => b.victories - a.victories);
+});
 </script>
 
 <template>
@@ -13,7 +49,13 @@ const router = useRouter();
     <h1 class="ranking-title">
       <i class="bi bi-award-fill title-icon"></i> Ranking de Jugadores
     </h1>
-    <table class="ranking-table">
+    
+    <!-- Mensajes de carga y error -->
+    <div v-if="loading">Cargando ranking...</div>
+    <div v-else-if="error" class="error">{{ error }}</div>
+    
+    <!-- Tabla del ranking -->
+    <table v-else class="ranking-table">
       <thead>
         <tr>
           <th>
@@ -36,6 +78,7 @@ const router = useRouter();
             <span v-else-if="index === 2" class="icon medal" title="Tercer lugar">🥉</span>
             <span v-else>{{ index + 1 }}</span>
           </td>
+          
           <td class="player-name">{{ player.name }}</td>
           <td class="victories">{{ player.victories }}</td>
         </tr>
@@ -44,35 +87,9 @@ const router = useRouter();
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      rankedPlayers: [
-        { name: 'Juan', victories: 125 },
-        { name: 'Maria', victories: 102 },
-        { name: 'Carlos', victories: 98 },
-        { name: 'Lucia', victories: 87 },
-        { name: 'Pedro', victories: 75 },
-        { name: 'Sofia', victories: 63 },
-        { name: 'David', victories: 52 },
-        { name: 'Ana', victories: 45 },
-        { name: 'Victor', victories: 34 },
-        { name: 'Elena', victories: 22 }
-      ]
-    };
-  },
-  computed: {
-    sortedPlayers() {
-      return [...this.rankedPlayers].sort((a, b) => b.victories - a.victories);
-    }
-  }
-};
-</script>
-
 <style scoped>
-/* Recuerda incluir Bootstrap Icons en tu index.html:
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+/*
+*FALTA INCLUIR EL AVATAR CUANDO LOS TENGAMOS YA IMPLEMENTADOS
 */
 
 /* Contenedor con fondo degradado */
@@ -119,7 +136,6 @@ export default {
 }
 
 .ranking-table th {
-
   background-color: rgba(0,0,0,0.4);
   font-family: 'Bebas Neue', sans-serif;
   font-size: 2rem;
@@ -127,7 +143,6 @@ export default {
   text-transform: uppercase;
   border-bottom: 2px solid rgba(255,255,255,0.2);
 }
-
 
 .ranking-table td {
   padding: 1rem;
@@ -153,7 +168,7 @@ thead {
   justify-content: center;
 }
 
- .bi-trophy-fill{
+.bi-trophy-fill{
   color: #FFD700;
 }
 
@@ -164,6 +179,7 @@ thead {
 .bi-list-ol{
   color: #f0ec00;
 }
+
 .icon {
   margin-right: 0.5rem;
   color: #f4f4f4;
@@ -175,5 +191,11 @@ thead {
 
 .medal {
   font-size: 2.8rem;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+  margin: 1rem 0;
 }
 </style>
