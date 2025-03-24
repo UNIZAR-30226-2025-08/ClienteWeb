@@ -68,7 +68,7 @@
       </div>
     </div>
 
-    <!-- Botón de votar (ahora más ancho y encima de la parte de habilidad) -->
+    <!-- Botón de votar (candado si ya has votado) -->
     <div 
       v-if="partidaActive && alguacilVotingActive" 
       class="vote-button-container"
@@ -79,11 +79,9 @@
         :disabled="hasVoted"
         @click="voteForPlayer"
       >
-        <!-- Si no has votado, texto "VOTAR" -->
         <template v-if="!hasVoted">
           VOTAR
         </template>
-        <!-- Si ya has votado, texto "YA HAS VOTADO" + icono candado -->
         <template v-else>
           <img src="../assets/candado.png" alt="candado" class="candado-icon" />
           YA HAS VOTADO
@@ -105,6 +103,16 @@
       >
         <span class="player-label">JUGADOR 1</span>
         <img src="../assets/player.png" alt="Jugador 1" />
+        <!-- Palitos de votos -->
+        <div v-if="revealVotes && revealIndex >= 1" class="votes-palos">
+          <span 
+            v-for="(vote, idx) in playersVotes[0]" 
+            :key="idx" 
+            class="palito"
+          >
+            |
+          </span>
+        </div>
       </div>
 
       <!-- Jugador 2 -->
@@ -115,6 +123,15 @@
       >
         <span class="player-label">JUGADOR 2</span>
         <img src="../assets/player.png" alt="Jugador 2" />
+        <div v-if="revealVotes && revealIndex >= 2" class="votes-palos">
+          <span 
+            v-for="(vote, idx) in playersVotes[1]" 
+            :key="idx" 
+            class="palito"
+          >
+            |
+          </span>
+        </div>
       </div>
 
       <!-- Jugador 3 -->
@@ -125,6 +142,15 @@
       >
         <span class="player-label">JUGADOR 3</span>
         <img src="../assets/player.png" alt="Jugador 3" />
+        <div v-if="revealVotes && revealIndex >= 3" class="votes-palos">
+          <span 
+            v-for="(vote, idx) in playersVotes[2]" 
+            :key="idx" 
+            class="palito"
+          >
+            |
+          </span>
+        </div>
       </div>
 
       <!-- Jugador 4 -->
@@ -135,6 +161,15 @@
       >
         <span class="player-label">JUGADOR 4</span>
         <img src="../assets/player.png" alt="Jugador 4" />
+        <div v-if="revealVotes && revealIndex >= 4" class="votes-palos">
+          <span 
+            v-for="(vote, idx) in playersVotes[3]" 
+            :key="idx" 
+            class="palito"
+          >
+            |
+          </span>
+        </div>
       </div>
 
       <!-- Jugador 5 -->
@@ -145,6 +180,15 @@
       >
         <span class="player-label">JUGADOR 5</span>
         <img src="../assets/player.png" alt="Jugador 5" />
+        <div v-if="revealVotes && revealIndex >= 5" class="votes-palos">
+          <span 
+            v-for="(vote, idx) in playersVotes[4]" 
+            :key="idx" 
+            class="palito"
+          >
+            |
+          </span>
+        </div>
       </div>
 
       <!-- Jugador 6 -->
@@ -155,6 +199,15 @@
       >
         <span class="player-label">JUGADOR 6</span>
         <img src="../assets/player.png" alt="Jugador 6" />
+        <div v-if="revealVotes && revealIndex >= 6" class="votes-palos">
+          <span 
+            v-for="(vote, idx) in playersVotes[5]" 
+            :key="idx" 
+            class="palito"
+          >
+            |
+          </span>
+        </div>
       </div>
 
       <!-- Jugador 7 -->
@@ -165,6 +218,15 @@
       >
         <span class="player-label">JUGADOR 7</span>
         <img src="../assets/player.png" alt="Jugador 7" />
+        <div v-if="revealVotes && revealIndex >= 7" class="votes-palos">
+          <span 
+            v-for="(vote, idx) in playersVotes[6]" 
+            :key="idx" 
+            class="palito"
+          >
+            |
+          </span>
+        </div>
       </div>
 
       <!-- Jugador 8 -->
@@ -175,7 +237,28 @@
       >
         <span class="player-label">JUGADOR 8</span>
         <img src="../assets/player.png" alt="Jugador 8" />
+        <div v-if="revealVotes && revealIndex >= 8" class="votes-palos">
+          <span 
+            v-for="(vote, idx) in playersVotes[7]" 
+            :key="idx" 
+            class="palito"
+          >
+            |
+          </span>
+        </div>
       </div>
+    </div>
+
+    <!-- Mensaje central de "Has votado al jugador X" -->
+    <div v-if="hasVoted && alguacilVotingActive" class="vote-message">
+      Has votado al <strong>Jugador {{ selectedPlayerIndex }}</strong>
+    </div>
+
+    <!-- Pantalla final: "JUGADOR X ES EL ALGUACIL" -->
+    <div v-if="alguacilResultOverlayActive" class="intro-overlay fadeInOut">
+      <h1 class="intro-text">
+        JUGADOR {{ alguacilWinnerIndex }} ES EL ALGUACIL
+      </h1>
     </div>
   </div>
 </template>
@@ -204,7 +287,16 @@ export default {
       hasVoted: false,
 
       // Rol aleatorio elegido
-      chosenRole: {}
+      chosenRole: {},
+
+      // Control de votos
+      playersVotes: [0, 0, 0, 0, 0, 0, 0, 0], // votos de cada jugador
+      revealVotes: false,  // si estamos mostrando los votos en pantalla
+      revealIndex: 0,      // hasta qué jugador se han “revelado” los votos
+
+      // Overlay final para indicar quién salió como Alguacil
+      alguacilResultOverlayActive: false,
+      alguacilWinnerIndex: null
     };
   },
   mounted() {
@@ -212,7 +304,7 @@ export default {
     setTimeout(() => {
       this.introActive = false;
 
-      // Escoge rol aleatorio
+      // Escoge rol aleatorio (excepto "aguacil")
       const validRoles = roles.filter(role => role.nombre.toLowerCase() !== "aguacil");
       const randomIndex = Math.floor(Math.random() * validRoles.length);
       this.chosenRole = validRoles[randomIndex];
@@ -251,18 +343,53 @@ export default {
         if (this.timeLeft > 0) {
           this.timeLeft--;
         } else {
+          // Se acabó el tiempo de votar
           clearInterval(this.countdownInterval);
-          // Se acabó el tiempo, podrías cerrar la votación o asignar por defecto
           this.alguacilVotingActive = false;
+
+          // EJEMPLO: asignar los votos recibidos por cada jugador
+          // (en un caso real vendrían de tu lógica o servidor)
+          this.playersVotes = [2, 0, 3, 1, 4, 0, 1, 2];
+
+          // Mostramos los votos progresivamente
+          this.showVotesProgressively();
         }
       }, 1000);
+    },
+
+    // Muestra los votos de cada jugador uno tras otro
+    showVotesProgressively() {
+      this.revealVotes = true;
+      let i = 0;
+      const revealInterval = setInterval(() => {
+        i++;
+        this.revealIndex = i;
+
+        if (i >= this.playersVotes.length) {
+          clearInterval(revealInterval);
+
+          // Calculamos el ganador (jugador con más votos)
+          const maxVotes = Math.max(...this.playersVotes);
+          const winnerIndex = this.playersVotes.indexOf(maxVotes) + 1; 
+          // +1 porque playersVotes es 0-based, jugadores 1..8
+
+          this.alguacilWinnerIndex = winnerIndex;
+
+          // Mostramos el overlay final
+          this.alguacilResultOverlayActive = true;
+
+          // Tras 6s, lo ocultamos (igual que los otros overlays fadeInOut)
+          setTimeout(() => {
+            this.alguacilResultOverlayActive = false;
+          }, 6000);
+        }
+      }, 500); // cada 0.5s se “revela” el siguiente jugador
     },
 
     // Seleccionar/deseleccionar un jugador
     selectPlayer(playerIndex) {
       if (!this.alguacilVotingActive || this.hasVoted) return;
 
-      // Si ya estaba seleccionado, lo deseleccionamos
       if (this.selectedPlayerIndex === playerIndex) {
         this.selectedPlayerIndex = null;
       } else {
@@ -272,16 +399,9 @@ export default {
 
     // Botón "VOTAR"
     voteForPlayer() {
-      // Solo permitimos votar si hay un jugador seleccionado y no se ha votado antes
       if (this.selectedPlayerIndex !== null && !this.hasVoted) {
         console.log("Has votado al jugador", this.selectedPlayerIndex);
-
-        // Marcar que ya has votado
         this.hasVoted = true;
-
-        // Opcional: podrías limpiar la cuenta atrás
-        // clearInterval(this.countdownInterval);
-        // this.alguacilVotingActive = false;
       }
     }
   }

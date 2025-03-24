@@ -300,13 +300,13 @@ html, body {
 ------------------------ */
 .countdown-container {
   position: absolute;
-  left: 20px;
-  top: 100px; /* Ajusta según tu diseño */
+  left: 60px;
+  top: 150px; /* Ajusta según tu diseño */
 }
 
 .countdown-circle {
-  width: 60px;
-  height: 60px;
+  width: 100px;
+  height: 100px;
   background-color: #262522; 
   border-radius: 50%;
   display: flex;
@@ -316,7 +316,7 @@ html, body {
 
 .countdown-text {
   color: #fff;
-  font-size: 1.2rem;
+  font-size: 2rem;
   font-weight: bold;
   font-family: sans-serif;
 }
@@ -383,5 +383,40 @@ html, body {
 .vote-button[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.vote-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #262522; /* color de fondo oscuro */
+  color: #fff;
+  padding: 20px 40px;
+  border-radius: 8px;
+  font-size: 1.5rem;
+  font-family: sans-serif;
+  text-align: center;
+  z-index: 999999; /* Que quede por encima de todo */
+}
+
+/* Posiciona los "palitos" justo debajo del círculo de cada jugador */
+.votes-palos {
+  position: absolute;
+  bottom: -1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+/* Cada palito será un rectángulo vertical grueso, 
+   color negro y con bordes redondeados */
+.palito {
+  display: inline-block;
+  width: 6px;             /* grosor */
+  height: 20px;           /* altura */
+  margin: 0 3px;          /* separación horizontal */
+  background-color: black;
+  border-radius: 6px;     /* puntas circulares */
 }
 
