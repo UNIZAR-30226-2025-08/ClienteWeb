@@ -5,6 +5,7 @@
    #262522 (intermedio)
    #1F1E1C (más oscuro)
    #A2D060 (verde)
+   #E74C3C (rojo)
 */
 
 /* Página principal */
@@ -73,7 +74,7 @@
   padding: 0;
 }
 
-/* Botones (Unirse, Invitar) */
+/* Botones (Unirse, Invitar, Eliminar) */
 .friend-buttons {
   display: flex;
   gap: 1rem;
@@ -84,13 +85,29 @@
   border: none;
   border-radius: 8px;
   padding: 16px 64px;
-  color: #ffffff; /* Texto oscuro para buen contraste */
+  color: #ffffff; /* Texto claro */
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .green-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.red-button {
+  background-color: #e74c3c; /* Botón rojo para eliminar */
+  border: none;
+  border-radius: 8px;
+  padding: 16px 64px;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.red-button:hover {
   transform: scale(1.05);
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
 }
@@ -112,4 +129,82 @@
   border: none;
   background: none;
   cursor: pointer;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: #262522;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  width: 80%;
+  max-width: 400px;
+}
+
+.modal h3 {
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+}
+
+.modal p {
+  margin-bottom: 20px;
+  font-size: 1rem;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.modal-error {
+  color: #e74c3c;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.friend-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background-color: #1f1e1c;
+  border-radius: 8px;
+  margin: 10px 20px;
+}
+
+.friend-search input[type="text"] {
+  flex: 1;
+  padding: 10px;
+  border-radius: 4px;
+  border: none;
+  font-size: 1rem;
+}
+
+.blue-button {
+  background-color: #3498db; /* Azul */
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.blue-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
 }
