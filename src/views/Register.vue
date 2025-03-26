@@ -1,21 +1,21 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
-import { toast } from 'vue3-toastify';
-import 'vue3-toastify/dist/index.css';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 const router = useRouter();
 
 function volver() {
-  router.push('/');
+  router.push("/");
 }
 
-const nombre = ref('');
-const correo = ref('');
-const contrasena = ref('');
-const confirmacionContrasena = ref('');
-const mensajeError = ref('');
+const nombre = ref("");
+const correo = ref("");
+const contrasena = ref("");
+const confirmacionContrasena = ref("");
+const mensajeError = ref("");
 
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
@@ -24,18 +24,20 @@ const showConfirmPassword = ref(false);
 async function generarHashSHA256(contrasena) {
   const encoder = new TextEncoder();
   const data = encoder.encode(contrasena);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+  const hashHex = hashArray
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
   return hashHex;
 }
 
 // Función para registrar usuario
 async function registerUser() {
-  mensajeError.value = '';
+  mensajeError.value = "";
 
   if (contrasena.value !== confirmacionContrasena.value) {
-    mensajeError.value = 'Las contraseñas no coinciden';
+    mensajeError.value = "Las contraseñas no coinciden";
     toast.error(mensajeError.value, { autoClose: 3000 });
     return;
   }
@@ -44,7 +46,7 @@ async function registerUser() {
     // Generar hash SHA-256 en el cliente
     const hashContrasena = await generarHashSHA256(contrasena.value);
 
-    const response = await axios.post('/api/usuario/crear', {
+    const response = await axios.post("/api/usuario/crear", {
       nombre: nombre.value,
       correo: correo.value,
       contrasena: hashContrasena, // Enviar la contraseña encriptada
@@ -57,67 +59,87 @@ async function registerUser() {
         fechaCreacion: response.data.usuario.fechaCreacion,
         avatar: response.data.usuario.avatar,
       };
-      localStorage.setItem('usuario', JSON.stringify(usuario));
-      toast.success('Registro exitoso. Redirigiendo...', { autoClose: 3000 });
+      localStorage.setItem("usuario", JSON.stringify(usuario));
+      toast.success("Registro exitoso. Redirigiendo...", { autoClose: 3000 });
 
       setTimeout(() => {
-        router.push('/juego'); // Redirigir tras éxito
+        router.push("/juego"); // Redirigir tras éxito
       }, 3000);
     }
   } catch (error) {
     // Capturar mensaje de error del backend
-    mensajeError.value = error.response?.data?.error || 'Error al registrar usuario';
+    mensajeError.value =
+      error.response?.data?.error || "Error al registrar usuario";
     toast.error(mensajeError.value, { autoClose: 3000 });
   }
 }
 
 function togglePasswordVisibility(field) {
-  if (field === 'password') {
+  if (field === "password") {
     showPassword.value = !showPassword.value;
-  } else if (field === 'confirm-password') {
+  } else if (field === "confirm-password") {
     showConfirmPassword.value = !showConfirmPassword.value;
   }
 }
 </script>
 
-
 <template>
   <div class="register-container">
     <button class="back-button" @click="volver">← Volver</button>
     <h2 class="register-title">Únete a los hombres lobo de Castronegro</h2>
-    
+
     <form class="register-form" @submit.prevent="registerUser">
       <label for="nombre">Nombre de usuario</label>
-      <input id="nombre" v-model="nombre" type="text" placeholder="Ingresa tu nombre de usuario" required />
+      <input
+        id="nombre"
+        v-model="nombre"
+        type="text"
+        placeholder="Ingresa tu nombre de usuario"
+        required
+      />
 
       <label for="correo">Correo electrónico</label>
-      <input id="correo" v-model="correo" type="email" placeholder="Ingresa tu correo" required />
+      <input
+        id="correo"
+        v-model="correo"
+        type="email"
+        placeholder="Ingresa tu correo"
+        required
+      />
 
       <label for="contrasena">Contraseña</label>
       <div class="password-container">
-        <input 
-          id="contrasena" 
+        <input
+          id="contrasena"
           v-model="contrasena"
-          :type="showPassword ? 'text' : 'password'" 
-          placeholder="********" 
+          :type="showPassword ? 'text' : 'password'"
+          placeholder="********"
           required
         />
-        <button type="button" class="toggle-password" @click="togglePasswordVisibility('password')">
-          {{ showPassword ? '👁️' : '🙈' }}
+        <button
+          type="button"
+          class="toggle-password"
+          @click="togglePasswordVisibility('password')"
+        >
+          {{ showPassword ? "👁️" : "🙈" }}
         </button>
       </div>
 
       <label for="confirm-password">Confirmar Contraseña</label>
       <div class="password-container">
-        <input 
+        <input
           id="confirm-password"
           v-model="confirmacionContrasena"
-          :type="showConfirmPassword ? 'text' : 'password'" 
+          :type="showConfirmPassword ? 'text' : 'password'"
           placeholder="Repite la contraseña"
           required
         />
-        <button type="button" class="toggle-password" @click="togglePasswordVisibility('confirm-password')">
-          {{ showConfirmPassword ? '👁️' : '🙈' }}
+        <button
+          type="button"
+          class="toggle-password"
+          @click="togglePasswordVisibility('confirm-password')"
+        >
+          {{ showConfirmPassword ? "👁️" : "🙈" }}
         </button>
       </div>
 
@@ -136,7 +158,7 @@ function togglePasswordVisibility(field) {
   border-radius: 15px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
   text-align: left;
-  font-family: 'MedievalSharp', cursive;
+  font-family: "MedievalSharp", cursive;
   backdrop-filter: blur(5px);
 }
 
@@ -214,7 +236,7 @@ function togglePasswordVisibility(field) {
   cursor: pointer;
   transition: background-color 0.3s;
   font-weight: bold;
-  font-family: 'MedievalSharp', cursive;
+  font-family: "MedievalSharp", cursive;
 }
 
 .submit-button:hover {
@@ -244,5 +266,4 @@ function togglePasswordVisibility(field) {
   cursor: pointer;
   font-size: 1.2rem;
 }
-
 </style>

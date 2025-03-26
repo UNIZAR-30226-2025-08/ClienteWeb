@@ -118,4 +118,3 @@ onMounted(() => {
   background-color: #2a2724;
 }
 </style>
-

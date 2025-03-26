@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap");
 
 /* Paleta de colores:
    #302E2B (más claro)
@@ -9,32 +9,30 @@
 
 /* Página principal */
 .amigos-page {
-    width: 100%;
-    min-height: 100vh; /* Para ocupar toda la ventana */
-    background-color: #302E2B;
-    display: flex;
-    flex-direction: column;
-    color: #fff;
-    font-family: 'Open Sans', sans-serif;
-    margin: 0;
-    margin-top: 1rem;
-    box-sizing: border-box;
+  width: 100%;
+  min-height: 100vh; /* Para ocupar toda la ventana */
+  background-color: #302e2b;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  font-family: "Open Sans", sans-serif;
+  margin: 0;
+  margin-top: 1rem;
+  box-sizing: border-box;
 }
-  
 
 .amigos-container {
-    background-color: #262522;
-    width: 100%;
-    margin: 20px 0;
-    padding: 20px;
-    box-sizing: border-box;
-    flex: 1; /* Hace que ocupe el espacio vertical sobrante */
+  background-color: #262522;
+  width: 100%;
+  margin: 20px 0;
+  padding: 20px;
+  box-sizing: border-box;
+  flex: 1; /* Hace que ocupe el espacio vertical sobrante */
 }
-  
-  
+
 /* Fila individual de amigo */
 .friend-row {
-  background-color: #1F1E1C; /* Fondo intermedio */
+  background-color: #1f1e1c; /* Fondo intermedio */
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -82,7 +80,7 @@
 }
 
 .green-button {
-  background-color: #A2D060; /* Botón verde */
+  background-color: #a2d060; /* Botón verde */
   border: none;
   border-radius: 8px;
   padding: 16px 64px;
@@ -94,13 +92,13 @@
 
 .green-button:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Barra inferior para el botón Volver */
 .bottom-bar {
   margin-top: auto; /* Empuja la barra al final */
-  background-color: #302E2B;
+  background-color: #302e2b;
   display: flex;
   align-items: center;
   padding: 15px 20px;

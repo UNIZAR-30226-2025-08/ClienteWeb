@@ -1,26 +1,43 @@
 <template>
   <header class="cabecera">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
     <div class="contenido">
       <!-- Título a la izquierda -->
       <h1>{{ titulo }}</h1>
 
       <!-- Perfil + notificaciones a la derecha -->
       <div class="perfil-notificaciones">
-        <div class="profile" :class="{ compacto: compacto }" @click="irAlPerfil">
+        <div
+          class="profile"
+          :class="{ compacto: compacto }"
+          @click="irAlPerfil"
+        >
           <!-- Se muestra el avatar obtenido o se usa un valor por defecto -->
-          <img :src="user.avatar || 'src/assets/profile_icon.jpg'" alt="User Icon" class="user-icon" />
+          <img
+            :src="user.avatar || 'src/assets/profile_icon.jpg'"
+            alt="User Icon"
+            class="user-icon"
+          />
 
           <div class="profile-info">
             <!-- Se muestra el nombre del usuario -->
-            <span class="user-name">{{ user.nombre || 'NombreCuenta' }}</span>
+            <span class="user-name">{{ user.nombre || "NombreCuenta" }}</span>
             <!-- Se muestra el rol favorito -->
-            <span class="Rol">{{ user.rolFavorito || 'Sin rol favorito' }}</span>
+            <span class="Rol">{{
+              user.rolFavorito || "Sin rol favorito"
+            }}</span>
           </div>
         </div>
         <div class="notifications">
           <button class="notification-button">
-            <img src="../assets/noti_icon.png" alt="Notificaciones" class="notification-icon" />
+            <img
+              src="../assets/noti_icon.png"
+              alt="Notificaciones"
+              class="notification-icon"
+            />
             <span class="badge">1</span>
           </button>
         </div>
@@ -30,19 +47,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 
 // Recibir propiedades desde el componente padre
 const props = defineProps({
   titulo: {
     type: String,
-    default: 'Mi Aplicación'
+    default: "Mi Aplicación",
   },
   compacto: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
 const router = useRouter();
@@ -50,15 +67,15 @@ const user = ref({});
 
 // Cargar la información del usuario desde Local Storage al montar el componente
 onMounted(() => {
-  const storedUser = localStorage.getItem('usuario');
+  const storedUser = localStorage.getItem("usuario");
   if (storedUser) {
     user.value = JSON.parse(storedUser);
   } else {
     // Si no existe el usuario en el localStorage, asignar valores por defecto
     user.value = {
-      nombre: 'NombreCuenta',
-      avatar: 'src/assets/profile_icon.jpg',
-      rolFavorito: 'Sin rol favorito' // Asignar valor por defecto para el rol
+      nombre: "NombreCuenta",
+      avatar: "src/assets/profile_icon.jpg",
+      rolFavorito: "Sin rol favorito", // Asignar valor por defecto para el rol
     };
   }
 });
@@ -67,12 +84,12 @@ onMounted(() => {
 const irAlPerfil = () => {
   if (user.value) {
     router.push({
-      name: 'perfil',
-      query: { 
-        nombre: user.value.nombre, 
-        avatar: user.value.avatar || '', 
-        rolFavorito: user.value.rolFavorito || 'Sin rol favorito' // Pasar el rol correctamente
-      }
+      name: "perfil",
+      query: {
+        nombre: user.value.nombre,
+        avatar: user.value.avatar || "",
+        rolFavorito: user.value.rolFavorito || "Sin rol favorito", // Pasar el rol correctamente
+      },
     });
   }
 };
@@ -85,9 +102,9 @@ const irAlPerfil = () => {
   width: 100%;
   background-color: #262522; /* Fondo oscuro */
   color: #fff;
-  padding: 0.5rem 1rem;      /* Reducimos padding para ver fondo */
+  padding: 0.5rem 1rem; /* Reducimos padding para ver fondo */
   box-sizing: border-box;
-  margin-bottom: 2rem;       /* Más espacio debajo de la cabecera */
+  margin-bottom: 2rem; /* Más espacio debajo de la cabecera */
 }
 
 .contenido {
@@ -102,7 +119,7 @@ const irAlPerfil = () => {
   margin: 0;
   padding: 0;
   white-space: nowrap; /* Evita salto de línea en el título */
-  margin-right: auto;  /* Lo empuja a la izquierda */
+  margin-right: auto; /* Lo empuja a la izquierda */
 }
 
 /* PERFIL + NOTIFICACIONES a la derecha */
@@ -145,7 +162,6 @@ const irAlPerfil = () => {
   font-size: 0.9rem;
   color: #ccc;
 }
-
 
 /* NOTIFICACIONES */
 .notifications {

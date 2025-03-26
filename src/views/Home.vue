@@ -1,17 +1,17 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { roles } from '../assets/data/roles.js';
-import axios from 'axios'; // Importar axios para poder hacer la petición de login al backend
-import Musica from '../components/musica/musica.vue';
-import { toast } from 'vue3-toastify';
-import 'vue3-toastify/dist/index.css';
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { roles } from "../assets/data/roles.js";
+import axios from "axios"; // Importar axios para poder hacer la petición de login al backend
+import Musica from "../components/musica/musica.vue";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 const router = useRouter();
 
-const correo = ref('');
-const contrasena = ref('');
-const mensajeError = ref('');
+const correo = ref("");
+const contrasena = ref("");
+const mensajeError = ref("");
 
 // Control de visibilidad de la contraseña
 const showPassword = ref(false);
@@ -31,40 +31,57 @@ const scrollSeccionContacto = ref(null);
 
 // Funciones de scroll suave
 function desplazarAbajo() {
-  scrollSeccionJuego.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  scrollSeccionJuego.value.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
 }
 function desplazarAbajoRoles() {
-  scrollSeccionRoles.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  scrollSeccionRoles.value.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
 }
 function desplazarAbajoDesarrollo() {
-  scrollSeccionDesarrollo.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  scrollSeccionDesarrollo.value.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
 }
 function desplazarAbajoDescargar() {
-  scrollSeccionDescargar.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  scrollSeccionDescargar.value.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
 }
 function desplazarAbajoContacto() {
-  scrollSeccionDescargar.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  scrollSeccionDescargar.value.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
 }
 function desplazarArriba() {
-  scrollInicio.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  scrollInicio.value.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 // Función para realizar el hash SHA-256
 async function generarHashSHA256(contrasena) {
   const encoder = new TextEncoder();
   const data = encoder.encode(contrasena);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+  const hashHex = hashArray
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
   return hashHex;
 }
 
 // Función para manejar el login
 async function loginUser() {
-  mensajeError.value = ''; // Limpiar el mensaje de error anterior
+  mensajeError.value = ""; // Limpiar el mensaje de error anterior
 
   if (!correo.value || !contrasena.value) {
-    mensajeError.value = 'Todos los campos son obligatorios';
+    mensajeError.value = "Todos los campos son obligatorios";
     toast.error(mensajeError.value); // Mostrar alerta de error
     return;
   }
@@ -74,7 +91,7 @@ async function loginUser() {
     const hashContrasena = await generarHashSHA256(contrasena.value);
 
     // Enviar los datos de login al backend con axios
-    const response = await axios.post('/api/usuario/login', {
+    const response = await axios.post("/api/usuario/login", {
       correo: correo.value,
       contrasena: hashContrasena, // Enviar la contraseña encriptada
     });
@@ -86,16 +103,16 @@ async function loginUser() {
         nombre: response.data.usuario.nombre,
         fechaCreacion: response.data.usuario.fechaCreacion,
         avatar: response.data.usuario.avatar,
-        rolFavorito: response.data.usuario.rolFavorito || 'Sin rol favorito', // Agregar el rol del usuario
+        rolFavorito: response.data.usuario.rolFavorito || "Sin rol favorito", // Agregar el rol del usuario
       };
       // Guardar el objeto usuario en Local Storage
-      localStorage.setItem('usuario', JSON.stringify(usuario));
+      localStorage.setItem("usuario", JSON.stringify(usuario));
       // Si el login es exitoso, almacenar el mensaje de éxito
-      localStorage.setItem('loginSuccess', 'true');  // Almacenar en localStorage
-      router.push('/juego'); // Redirigir al juego
+      localStorage.setItem("loginSuccess", "true"); // Almacenar en localStorage
+      router.push("/juego"); // Redirigir al juego
     } else {
       // Si la respuesta no es 200 (exitoso), mostrar error
-      mensajeError.value = 'Correo o contraseña incorrectos';
+      mensajeError.value = "Correo o contraseña incorrectos";
       toast.error(mensajeError.value, { autoClose: 3000 }); // Mostrar alerta de error
     }
   } catch (error) {
@@ -105,13 +122,12 @@ async function loginUser() {
   }
 }
 
-
 // Índice del slide actual
 const indiceSlide = ref(0);
 
 // Parámetros de la barra de progreso y auto-slide
-const tiempoTotal = 3000;        // Duración total de cada slide (ms)
-const tiempoIntervalo = 50;       // Intervalo de actualización de la barra (ms)
+const tiempoTotal = 3000; // Duración total de cada slide (ms)
+const tiempoIntervalo = 50; // Intervalo de actualización de la barra (ms)
 const incremento = 100 / (tiempoTotal / tiempoIntervalo);
 const progreso = ref(0);
 
@@ -147,9 +163,8 @@ function cerrarPopup() {
 
 // Función para redirigir a la página de registro
 function irARegistro() {
-  router.push('/register')
+  router.push("/register");
 }
-
 </script>
 
 <template>
@@ -161,11 +176,36 @@ function irARegistro() {
   <nav class="nav">
     <img src="/lobo.png" alt="Logo Lobo" class="logo" />
     <div class="nav-links">
-        <a href="#como-jugar" @click.prevent="desplazarAbajo" class="hover:underline">Cómo Jugar</a>
-        <a href="#roles" @click.prevent="desplazarAbajoRoles" class="hover:underline">Roles</a>
-        <a href="#desarrollo" @click.prevent="desplazarAbajoDesarrollo" class="hover:underline">Desarrollo de la Partida</a>
-        <a href="#descargar" @click.prevent="desplazarAbajoDescargar" class="hover:underline">Descargar</a>
-        <a href="#contacto" @click.prevent="desplazarAbajoContacto" class="hover:underline">Contacto</a>
+      <a
+        href="#como-jugar"
+        @click.prevent="desplazarAbajo"
+        class="hover:underline"
+        >Cómo Jugar</a
+      >
+      <a
+        href="#roles"
+        @click.prevent="desplazarAbajoRoles"
+        class="hover:underline"
+        >Roles</a
+      >
+      <a
+        href="#desarrollo"
+        @click.prevent="desplazarAbajoDesarrollo"
+        class="hover:underline"
+        >Desarrollo de la Partida</a
+      >
+      <a
+        href="#descargar"
+        @click.prevent="desplazarAbajoDescargar"
+        class="hover:underline"
+        >Descargar</a
+      >
+      <a
+        href="#contacto"
+        @click.prevent="desplazarAbajoContacto"
+        class="hover:underline"
+        >Contacto</a
+      >
     </div>
   </nav>
 
@@ -173,25 +213,38 @@ function irARegistro() {
     <!-- Sección principal (login + mockup) -->
     <div class="home-container">
       <div class="left-section">
-        <h2 class="title">LOS HOMBRES LOBO <br> DE CASTRONEGRO</h2>
+        <h2 class="title">
+          LOS HOMBRES LOBO <br />
+          DE CASTRONEGRO
+        </h2>
         <div class="login-container">
           <div class="login-box">
             <h2 class="login-title">Inicia Sesión</h2>
             <form class="login-form" @submit.prevent="loginUser">
               <label for="correo">Correo electrónico</label>
-              <input id="correo" v-model="correo" type="email" placeholder="Ingresa tu correo" required />
+              <input
+                id="correo"
+                v-model="correo"
+                type="email"
+                placeholder="Ingresa tu correo"
+                required
+              />
 
               <label for="contrasena">Contraseña</label>
               <div class="password-container">
-                <input 
+                <input
                   id="contrasena"
                   v-model="contrasena"
-                  :type="showPassword ? 'text' : 'password'" 
+                  :type="showPassword ? 'text' : 'password'"
                   placeholder="********"
                   required
                 />
-                <button type="button" class="toggle-password" @click="togglePasswordVisibility">
-                  {{ showPassword ? '👁️' : '🙈' }}
+                <button
+                  type="button"
+                  class="toggle-password"
+                  @click="togglePasswordVisibility"
+                >
+                  {{ showPassword ? "👁️" : "🙈" }}
                 </button>
               </div>
 
@@ -217,7 +270,11 @@ function irARegistro() {
 
       <div class="right-section">
         <p class="android-text">Ya Disponible en Android</p>
-        <img src="../assets/mockup.png" alt="Mockup del juego" class="mockup-image" />
+        <img
+          src="../assets/mockup.png"
+          alt="Mockup del juego"
+          class="mockup-image"
+        />
         <a href="/path/to/apk" class="btn-download">Descargar el APK</a>
       </div>
     </div>
@@ -226,10 +283,11 @@ function irARegistro() {
     <div ref="scrollSeccionJuego" class="game-intro" id="como-jugar">
       <h3>¿Cómo jugar a Los Hombres Lobos de Castronegro?</h3>
       <p>
-        Los Hombres Lobos de Castronegro es un juego de roles ocultos y deducción social en el que 
-        los jugadores asumen diferentes papeles dentro de una aldea.
-        El objetivo varía según el bando: los aldeanos intentan descubrir y eliminar a los hombres lobo,
-        mientras que los hombres lobo intentan eliminar a los aldeanos sin ser descubiertos.
+        Los Hombres Lobos de Castronegro es un juego de roles ocultos y
+        deducción social en el que los jugadores asumen diferentes papeles
+        dentro de una aldea. El objetivo varía según el bando: los aldeanos
+        intentan descubrir y eliminar a los hombres lobo, mientras que los
+        hombres lobo intentan eliminar a los aldeanos sin ser descubiertos.
       </p>
     </div>
 
@@ -242,20 +300,24 @@ function irARegistro() {
 
       <!-- Botón izquierdo con imagen -->
       <button class="carousel-button left" @click="slideAnterior">
-        <img src="../assets/flecha-izquierda.png" alt="Flecha izquierda">
+        <img src="../assets/flecha-izquierda.png" alt="Flecha izquierda" />
       </button>
 
       <div class="carousel-container">
         <div class="carousel-slide">
-          <img :src="roles[indiceSlide].src" alt="Imagen del rol" class="role-image" />
+          <img
+            :src="roles[indiceSlide].src"
+            alt="Imagen del rol"
+            class="role-image"
+          />
           <p class="role-name">{{ roles[indiceSlide].nombre }}</p>
-          <p class="role-team">{{ roles[indiceSlide].equipo }}</p>  
+          <p class="role-team">{{ roles[indiceSlide].equipo }}</p>
         </div>
       </div>
 
       <!-- Botón derecho con imagen -->
       <button class="carousel-button right" @click="slideSiguiente">
-        <img src="../assets/flecha-correcta.png" alt="Flecha derecha">
+        <img src="../assets/flecha-correcta.png" alt="Flecha derecha" />
       </button>
 
       <div class="carousel-indicators">
@@ -263,7 +325,10 @@ function irARegistro() {
           v-for="(role, index) in roles"
           :key="index"
           :class="{ 'active-indicator': index === indiceSlide }"
-          @click="indiceSlide = index; progreso = 0;"
+          @click="
+            indiceSlide = index;
+            progreso = 0;
+          "
         ></span>
       </div>
 
@@ -283,7 +348,11 @@ function irARegistro() {
         <h3>Lista de Roles</h3>
         <div class="roles-list">
           <div v-for="role in roles" :key="role.nombre" class="role-item">
-            <img :src="role.src" alt="Imagen del rol" class="role-popup-image" />
+            <img
+              :src="role.src"
+              alt="Imagen del rol"
+              class="role-popup-image"
+            />
             <div class="role-info">
               <p class="role-name-popup">{{ role.nombre }}</p>
               <p class="role-description">{{ role.descripcion }}</p>
@@ -292,7 +361,7 @@ function irARegistro() {
         </div>
       </div>
     </div>
-    
+
     <!-- Barra horizontal -->
     <div class="horizontal-bar"></div>
 
@@ -300,22 +369,30 @@ function irARegistro() {
     <div ref="scrollSeccionDesarrollo" class="game-run" id="desarrollo">
       <h3>Desarrollo de la partida</h3>
       <p>
-        <strong><u>Fase Nocturna</u></strong><br/><br/>
-        Todos los jugadores cierran los ojos.<br/>
-        Se llama a los roles en el siguiente orden: <u style="color: #f1c40f;">la vidente, los hombres lobo y por último la bruja.</u><br/>
-        La vidente elige a un jugador para conocer su rol.<br/>
-        Los hombres lobo eligen a su víctima en secreto.<br/>
-        La bruja puede emplear sus pociones para salvar a una víctima o eliminar a otro jugador.<br/>
+        <strong><u>Fase Nocturna</u></strong
+        ><br /><br />
+        Todos los jugadores cierran los ojos.<br />
+        Se llama a los roles en el siguiente orden:
+        <u style="color: #f1c40f"
+          >la vidente, los hombres lobo y por último la bruja.</u
+        ><br />
+        La vidente elige a un jugador para conocer su rol.<br />
+        Los hombres lobo eligen a su víctima en secreto.<br />
+        La bruja puede emplear sus pociones para salvar a una víctima o eliminar
+        a otro jugador.<br />
       </p>
       <p>
-        <br/><strong><u>Fase Diurna</u></strong><br/><br/>
-        Se anuncia qué jugador ha sido eliminado en la última noche.<br/>
-        Se abre un debate entre todos los jugadores.<br/>
-        Se realiza una votación para linchar a un posible hombre lobo.<br/>
+        <br /><strong><u>Fase Diurna</u></strong
+        ><br /><br />
+        Se anuncia qué jugador ha sido eliminado en la última noche.<br />
+        Se abre un debate entre todos los jugadores.<br />
+        Se realiza una votación para linchar a un posible hombre lobo.<br />
         El jugador con más votos es eliminado y se revela su identidad.
       </p>
       <p>
-        <br/><strong style="color: #f1c40f;">El ciclo se repite hasta que un bando logra su objetivo.</strong>
+        <br /><strong style="color: #f1c40f"
+          >El ciclo se repite hasta que un bando logra su objetivo.</strong
+        >
       </p>
     </div>
 
@@ -326,8 +403,14 @@ function irARegistro() {
     <div class="game-obj" id="objetivo">
       <h3>Objetivo del Juego</h3>
       <ul>
-        <li><strong><u style="color: #f1c40f;">Los Aldeanos</u></strong> ganan si eliminan a todos los hombres lobo.</li>
-        <li><strong><u style="color: #f1c40f;">Los Hombres Lobo</u></strong> ganan si eliminan a todos los aldeanos.</li>
+        <li>
+          <strong><u style="color: #f1c40f">Los Aldeanos</u></strong> ganan si
+          eliminan a todos los hombres lobo.
+        </li>
+        <li>
+          <strong><u style="color: #f1c40f">Los Hombres Lobo</u></strong> ganan
+          si eliminan a todos los aldeanos.
+        </li>
       </ul>
     </div>
 
@@ -340,7 +423,9 @@ function irARegistro() {
       <p>Descarga Ya La App O Quédate En La Web</p>
       <div class="ready-buttons">
         <a href="/path/to/apk" class="btn-download">DESCARGAR</a>
-        <a href="#" @click.prevent="desplazarArriba" class="btn-home">Volver al inicio</a>
+        <a href="#" @click.prevent="desplazarArriba" class="btn-home"
+          >Volver al inicio</a
+        >
       </div>
     </section>
 
@@ -351,8 +436,12 @@ function irARegistro() {
           <h4>Contacto</h4>
           <p>Email: <strong>castronegro@gmail.com</strong></p>
           <div class="social-links">
-            <a href="#"><img src="../assets/facebook-icon.jpg" alt="Facebook" /></a>
-            <a href="#"><img src="../assets/instagram.webp" alt="Instagram" /></a>
+            <a href="#"
+              ><img src="../assets/facebook-icon.jpg" alt="Facebook"
+            /></a>
+            <a href="#"
+              ><img src="../assets/instagram.webp" alt="Instagram"
+            /></a>
             <a href="#"><img src="../assets/twitter.avif" alt="Twitter" /></a>
           </div>
         </div>
@@ -372,14 +461,15 @@ function irARegistro() {
         </div>
       </div>
       <div class="footer-bottom">
-        <p>© 2025 Los Hombres Lobos de Castronegro. Todos los derechos reservados</p>
+        <p>
+          © 2025 Los Hombres Lobos de Castronegro. Todos los derechos reservados
+        </p>
       </div>
     </footer>
   </main>
 </template>
 
 <style scoped>
-
 body {
   margin: 0;
   padding: 0;
@@ -390,7 +480,7 @@ body {
 
 main {
   background-color: #1a1917;
-  font-family: 'MedievalSharp', cursive;
+  font-family: "MedievalSharp", cursive;
 }
 
 .nav {
@@ -399,7 +489,7 @@ main {
   justify-content: space-between; /* Separa logo e ítems */
   background-color: rgb(14, 13, 13);
   padding: 1rem;
-  font-family: 'MedievalSharp', cursive;
+  font-family: "MedievalSharp", cursive;
 }
 
 .logo {
@@ -427,7 +517,7 @@ main {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  background-image: url('../assets/HomeFoto.jpg');
+  background-image: url("../assets/HomeFoto.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -435,11 +525,11 @@ main {
 }
 /* Barra horizontal */
 .horizontal-bar {
-  width: 75%;             /* Ocupa todo el ancho de la página */
-  height: 0.1rem;             /* Altura de la barra */
+  width: 75%; /* Ocupa todo el ancho de la página */
+  height: 0.1rem; /* Altura de la barra */
   background-color: white; /* Color blanco */
   margin-left: 13rem;
-  border-radius: 10px;     /* Redondea los extremos de la barra */
+  border-radius: 10px; /* Redondea los extremos de la barra */
 }
 
 /* Sección izquierda (Título + Formulario) */
@@ -465,28 +555,24 @@ main {
     text-align: center;
   }
 
-  .left-section, .right-section {
+  .left-section,
+  .right-section {
     width: 100%; /* Ocupan todo el ancho */
     margin-right: 0;
   }
 }
 .title {
-  font-family: 'Ghost Shadow', sans-serif;
+  font-family: "Ghost Shadow", sans-serif;
   font-size: 300%; /* Aumenté el tamaño del texto para hacerlo más impactante */
   color: #fff; /* El texto sigue siendo blanco */
   text-align: center;
-  text-shadow: 
-    -4px -4px 5px rgba(0, 0, 0, 0.7), /* Sombras más gruesas y difusas */
-     4px -4px 5px rgba(0, 0, 0, 0.7), 
-    -4px  4px 5px rgba(0, 0, 0, 0.7), 
-     4px  4px 5px rgba(0, 0, 0, 0.7), 
-    -4px  0px 5px rgba(0, 0, 0, 0.7), 
-     4px  0px 5px rgba(0, 0, 0, 0.7), 
-     0px -4px 5px rgba(0, 0, 0, 0.7), 
-     0px  4px 5px rgba(0, 0, 0, 0.7);   
+  text-shadow: -4px -4px 5px rgba(0, 0, 0, 0.7),
+    /* Sombras más gruesas y difusas */ 4px -4px 5px rgba(0, 0, 0, 0.7),
+    -4px 4px 5px rgba(0, 0, 0, 0.7), 4px 4px 5px rgba(0, 0, 0, 0.7),
+    -4px 0px 5px rgba(0, 0, 0, 0.7), 4px 0px 5px rgba(0, 0, 0, 0.7),
+    0px -4px 5px rgba(0, 0, 0, 0.7), 0px 4px 5px rgba(0, 0, 0, 0.7);
   margin-top: 5%;
 }
-
 
 /* Texto de Android */
 .android-text {
@@ -511,7 +597,11 @@ main {
   height: 55vh; /* Reducimos la altura */
   max-width: 50vh; /* Limitamos el ancho para que no ocupe toda la pantalla */
   margin: 0 auto; /* Centrado automático en la página */
-  background: linear-gradient(135deg, #2b2b2b, #1f1f1f); /* Fondo oscuro con gradie nte */
+  background: linear-gradient(
+    135deg,
+    #2b2b2b,
+    #1f1f1f
+  ); /* Fondo oscuro con gradie nte */
   border-radius: 1rem; /* Bordes redondeados */
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); /* Sombra más prominente */
   padding: 30px; /* Espaciado interno */
@@ -530,12 +620,11 @@ main {
   backdrop-filter: blur(5px);
 }
 
-
 /* Nuevo título del login estilo medieval rústico */
 .login-title {
   font-size: 2.5rem;
   font-weight: bold;
-  font-family: 'MedievalSharp', cursive;
+  font-family: "MedievalSharp", cursive;
   color: #fff;
   letter-spacing: 3px;
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
@@ -605,7 +694,7 @@ main {
   cursor: pointer;
   font-weight: bold;
   transition: background-color 0.3s, transform 0.2s;
-  font-family: 'MedievalSharp', cursive;
+  font-family: "MedievalSharp", cursive;
 }
 
 .login-button:hover {
@@ -630,7 +719,7 @@ main {
   font-size: 1.1rem;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s;
-  font-family: 'MedievalSharp', cursive;  
+  font-family: "MedievalSharp", cursive;
   color: white;
 }
 
@@ -642,7 +731,6 @@ main {
   width: 1.5rem;
   margin-right: 1rem;
 }
-
 
 /* Estilos para la sección de contenido sobre el juego */
 .game-intro {
@@ -656,12 +744,10 @@ main {
   font-size: 3rem;
   color: #f1c40f; /* Amarillo dorado */
   margin-bottom: 2rem;
-  text-shadow: 
-    3px 3px 5px rgba(0, 0, 0, 0.7),  /* Sombra oscura principal */
-    0px 0px 10px rgba(0, 0, 0, 0.8), /* Efecto de brillo dorado */
-    2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra adicional para más realismo */
+  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.7),
+    /* Sombra oscura principal */ 0px 0px 10px rgba(0, 0, 0, 0.8),
+    /* Efecto de brillo dorado */ 2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra adicional para más realismo */
 }
-
 
 .game-intro p {
   font-size: 1.5rem;
@@ -684,22 +770,21 @@ main {
   font-size: 3rem;
   color: #f1c40f; /* Amarillo dorado */
   margin-bottom: 2rem;
-  text-shadow: 
-    3px 3px 5px rgba(0, 0, 0, 0.7),  /* Sombra oscura principal */
-    0px 0px 10px rgba(0, 0, 0, 0.8), /* Efecto de brillo dorado */
-    2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra adicional para más realismo */
+  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.7),
+    /* Sombra oscura principal */ 0px 0px 10px rgba(0, 0, 0, 0.8),
+    /* Efecto de brillo dorado */ 2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra adicional para más realismo */
 }
 
 /* Carrusel */
 .carousel-container {
   position: relative;
-  max-width: 23rem;  /* Reducir el tamaño del carrusel */
+  max-width: 23rem; /* Reducir el tamaño del carrusel */
   margin: 30px auto;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #1F1E1C;
+  background-color: #1f1e1c;
   border-radius: 8px;
   padding: 15px; /* Reducir padding */
 }
@@ -712,8 +797,8 @@ main {
 
 .carousel-slide img {
   width: 100%;
-  height: 100%;  /* Hacer la imagen cuadrada */
-  object-fit: cover;  /* Mantener la imagen dentro del cuadrado */
+  height: 100%; /* Hacer la imagen cuadrada */
+  object-fit: cover; /* Mantener la imagen dentro del cuadrado */
   border-radius: 8px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -725,9 +810,9 @@ main {
 
 /* Nombre del rol */
 .role-name {
-  font-size: 1.5rem;  /* Reducir tamaño */
+  font-size: 1.5rem; /* Reducir tamaño */
   color: #ffffff;
-  margin-top: 0px;  /* Reducir margen */
+  margin-top: 0px; /* Reducir margen */
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -776,7 +861,7 @@ main {
   display: flex;
   justify-content: center;
   margin-top: 1rem;
-  margin-bottom : 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .carousel-indicators span {
@@ -798,12 +883,12 @@ main {
 
 /* Barra de progreso */
 .progress-bar {
-  height: 8px;  /* Reducir el tamaño */
+  height: 8px; /* Reducir el tamaño */
   background: #ddd;
   border-radius: 5px;
   margin-top: 15px;
   overflow: hidden;
-  max-width: 350px;  /* Reducir el tamaño */
+  max-width: 350px; /* Reducir el tamaño */
   margin-left: auto;
   margin-right: auto;
 }
@@ -817,17 +902,17 @@ main {
 
 /* Botón Mostrar Todos */
 .show-all-button {
-  margin-top: 25px;  /* Espaciado superior aumentado para separarlo mejor */
-  text-align: center;  /* Centrar el botón */
+  margin-top: 25px; /* Espaciado superior aumentado para separarlo mejor */
+  text-align: center; /* Centrar el botón */
 }
 
 .show-all-button button {
-  padding: 12px 30px;  /* Aumentar un poco el padding para hacerlo más atractivo */
-  font-size: 1rem;  /* Tamaño de fuente moderado */
+  padding: 12px 30px; /* Aumentar un poco el padding para hacerlo más atractivo */
+  font-size: 1rem; /* Tamaño de fuente moderado */
   background-color: #f5a623;
   color: white;
   border: none;
-  border-radius: 30px;  /* Bordes más redondeados para un look más suave */
+  border-radius: 30px; /* Bordes más redondeados para un look más suave */
   cursor: pointer;
   transition: background-color 0.3s, transform 0.3s ease-in-out;
   font-weight: bold;
@@ -835,11 +920,11 @@ main {
 
 .show-all-button button:hover {
   background-color: #d68719;
-  transform: translateY(-2px);  /* Le da un pequeño efecto de elevación */
+  transform: translateY(-2px); /* Le da un pequeño efecto de elevación */
 }
 
 .show-all-button button:active {
-  transform: translateY(0px);  /* Restaurar la posición cuando se haga clic */
+  transform: translateY(0px); /* Restaurar la posición cuando se haga clic */
 }
 
 /* Estilos del pop-up */
@@ -876,7 +961,7 @@ main {
   font-size: 1.2rem;
   cursor: pointer;
   position: fixed; /* Esto hace que el botón quede fijo en la pantalla */
-  top: 20px;  /* Distancia desde la parte superior */
+  top: 20px; /* Distancia desde la parte superior */
   right: 20px; /* Distancia desde la parte derecha */
   z-index: 2100; /* Asegurarse de que esté por encima de otros elementos */
 }
@@ -944,10 +1029,9 @@ main {
   font-size: 3rem;
   color: #f1c40f; /* Amarillo dorado */
   margin-bottom: 2rem;
-  text-shadow: 
-    3px 3px 5px rgba(0, 0, 0, 0.7),  /* Sombra oscura principal */
-    0px 0px 10px rgba(0, 0, 0, 0.8), /* Efecto de brillo */
-    2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra adicional para más realismo */
+  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.7),
+    /* Sombra oscura principal */ 0px 0px 10px rgba(0, 0, 0, 0.8),
+    /* Efecto de brillo */ 2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra adicional para más realismo */
 }
 
 .game-run p {
@@ -968,10 +1052,9 @@ main {
   font-size: 3rem;
   color: #f1c40f; /* Amarillo dorado */
   margin-bottom: 2rem;
-  text-shadow: 
-    3px 3px 5px rgba(0, 0, 0, 0.7),  /* Sombra oscura principal */
-    0px 0px 10px rgba(0, 0, 0, 0.8), /* Efecto de brillo */
-    2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra adicional para más realismo */
+  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.7),
+    /* Sombra oscura principal */ 0px 0px 10px rgba(0, 0, 0, 0.8),
+    /* Efecto de brillo */ 2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra adicional para más realismo */
 }
 
 .game-obj ul {
@@ -993,7 +1076,7 @@ main {
 }
 
 .game-obj ul li:first-child {
-  margin-top:  1rem; /* Un pequeño margen arriba para el primer item */
+  margin-top: 1rem; /* Un pequeño margen arriba para el primer item */
 }
 
 .game-obj ul li:last-child {
@@ -1003,7 +1086,7 @@ main {
 /***********************************************
  * SECCIÓN "¿LISTO PARA EMPEZAR?" 
  ***********************************************/
- .ready-section {
+.ready-section {
   padding: 3rem 1rem;
   text-align: center;
 }
@@ -1012,10 +1095,9 @@ main {
   font-size: 3rem;
   color: #f1c40f; /* Amarillo dorado */
   margin-bottom: 2rem;
-  text-shadow: 
-    3px 3px 5px rgba(0, 0, 0, 0.7),  /* Sombra oscura principal */
-    0px 0px 10px rgba(0, 0, 0, 0.8), /* Efecto de brillo */
-    2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra adicional para más realismo */
+  text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.7),
+    /* Sombra oscura principal */ 0px 0px 10px rgba(0, 0, 0, 0.8),
+    /* Efecto de brillo */ 2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra adicional para más realismo */
 }
 
 .ready-section p {
@@ -1065,24 +1147,24 @@ main {
  ***********************************************/
 .footer-section {
   background-color: rgb(14, 13, 13); /* Fondo oscuro */
-  color: #fff;           /* Texto blanco */
+  color: #fff; /* Texto blanco */
   padding: 3rem 2rem;
   text-align: left;
-  margin-top: 3rem;      /* Separación respecto a la sección anterior */
+  margin-top: 3rem; /* Separación respecto a la sección anterior */
 }
 
 .footer-content {
   display: flex;
-  flex-wrap: wrap;        /* Para ajustarse en pantallas pequeñas */
+  flex-wrap: wrap; /* Para ajustarse en pantallas pequeñas */
   justify-content: center;
-  gap: 20rem;              /* Espacio entre columnas */
+  gap: 20rem; /* Espacio entre columnas */
   margin-bottom: 1rem;
 }
 
 .footer-column {
   flex: 1;
-  min-width: 10rem;       /* Mínimo ancho para columnas */
-  max-width: 15rem;       /* Máximo ancho para columnas */
+  min-width: 10rem; /* Mínimo ancho para columnas */
+  max-width: 15rem; /* Máximo ancho para columnas */
 }
 
 .footer-column h4 {
@@ -1095,7 +1177,7 @@ main {
 .footer-column a {
   font-size: 0.95rem;
   line-height: 1.5;
-  color: #fff;            /* Asegura que el texto y los enlaces sean blancos */
+  color: #fff; /* Asegura que el texto y los enlaces sean blancos */
   text-decoration: none;
 }
 
@@ -1124,7 +1206,6 @@ main {
   margin-right: 10px;
 }
 
-
 /* Estilos para la scrollbar en navegadores basados en Webkit (Chrome, Edge, Safari) */
 ::-webkit-scrollbar {
   width: 10px; /* Ancho de la barra */
@@ -1137,12 +1218,16 @@ main {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgb(37, 37, 37); /* Hacer que el fondo de la barra sea casi invisible */
+  background: rgb(
+    37,
+    37,
+    37
+  ); /* Hacer que el fondo de la barra sea casi invisible */
 }
 
 @font-face {
-  font-family: 'Ghost Shadow';
-  src: url('../assets/fonts/Ghost Shadow.ttf') format('truetype');
+  font-family: "Ghost Shadow";
+  src: url("../assets/fonts/Ghost Shadow.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }

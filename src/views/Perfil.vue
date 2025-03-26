@@ -1,22 +1,22 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
-import { toast } from 'vue3-toastify';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
+import { toast } from "vue3-toastify";
 import Volver from "../components/Volver.vue";
-import defaultAvatar from '../assets/profile_icon.jpg';
+import defaultAvatar from "../assets/profile_icon.jpg";
 
-const usuario = JSON.parse(localStorage.getItem('usuario'));
+const usuario = JSON.parse(localStorage.getItem("usuario"));
 const router = useRouter();
 
 if (!usuario) {
-  router.push('/');
+  router.push("/");
 }
 
-const nombre = ref(usuario?.nombre || 'NombreCuenta');
+const nombre = ref(usuario?.nombre || "NombreCuenta");
 const avatar = ref(usuario?.avatar || defaultAvatar);
-const rolFavorito = ref(usuario?.rolFavorito || 'Sin rol favorito');
-const mensajeError = ref('');
+const rolFavorito = ref(usuario?.rolFavorito || "Sin rol favorito");
+const mensajeError = ref("");
 const modalAbierto = ref(false);
 
 // Datos temporales para edición
@@ -36,41 +36,46 @@ const cerrarModal = () => {
 };
 
 const actualizarPerfil = async () => {
-  mensajeError.value = '';
+  mensajeError.value = "";
 
   if (!nuevoNombre.value || !nuevoAvatar.value || !nuevoRol.value) {
-    mensajeError.value = 'Todos los campos son obligatorios';
+    mensajeError.value = "Todos los campos son obligatorios";
     toast.error(mensajeError.value);
     return;
   }
 
-  const rol = nuevoRol.value === 'Sin rol favorito' ? null : nuevoRol.value;
+  const rol = nuevoRol.value === "Sin rol favorito" ? null : nuevoRol.value;
 
   const datosActualizados = {
     idUsuario: usuario.idUsuario,
     nombre: nuevoNombre.value,
     avatar: nuevoAvatar.value,
-    rolFavorito: rol
+    rolFavorito: rol,
   };
 
   try {
-    const response = await axios.put('/api/usuario/actualizar', datosActualizados);
+    const response = await axios.put(
+      "/api/usuario/actualizar",
+      datosActualizados
+    );
 
     if (response.status === 200 && response.data?.usuario) {
-      localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
+      localStorage.setItem("usuario", JSON.stringify(response.data.usuario));
 
       nombre.value = response.data.usuario.nombre;
       avatar.value = response.data.usuario.avatar;
       rolFavorito.value = response.data.usuario.rolFavorito;
 
-      toast.success('Perfil actualizado exitosamente', { autoClose: 3000 });
+      toast.success("Perfil actualizado exitosamente", { autoClose: 3000 });
       cerrarModal();
     } else {
-      mensajeError.value = 'Hubo un error al actualizar el perfil';
+      mensajeError.value = "Hubo un error al actualizar el perfil";
       toast.error(mensajeError.value, { autoClose: 3000 });
     }
   } catch (error) {
-    mensajeError.value = error.response?.data?.error || 'Hubo un problema al actualizar el perfil.';
+    mensajeError.value =
+      error.response?.data?.error ||
+      "Hubo un problema al actualizar el perfil.";
     toast.error(mensajeError.value, { autoClose: 3000 });
   }
 };
@@ -78,13 +83,17 @@ const actualizarPerfil = async () => {
 
 <template>
   <h1 class="cabecera">Perfil</h1>
-  
+
   <div class="perfil-container">
     <img :src="avatar" alt="Avatar" class="avatar" />
-    
+
     <div class="info-perfil">
-      <h2>Nombre: <span>{{ nombre }}</span></h2>
-      <h3>Rol Favorito: <span>{{ rolFavorito }}</span></h3>
+      <h2>
+        Nombre: <span>{{ nombre }}</span>
+      </h2>
+      <h3>
+        Rol Favorito: <span>{{ rolFavorito }}</span>
+      </h3>
       <button @click="abrirModal">Actualizar Perfil</button>
     </div>
   </div>
@@ -157,7 +166,8 @@ const actualizarPerfil = async () => {
   flex-direction: column;
 }
 
-.info-perfil h2, .info-perfil h3 {
+.info-perfil h2,
+.info-perfil h3 {
   color: white;
 }
 

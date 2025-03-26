@@ -1,5 +1,6 @@
 /* Ajustes básicos */
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -28,7 +29,7 @@ html, body {
 .role-overlay,
 .empieza-overlay {
   position: absolute;
-  top: 0; 
+  top: 0;
   left: 0;
   width: 100%;
   height: 100%;
@@ -167,7 +168,7 @@ html, body {
   height: 300px; /* Tamaño fijo */
   box-sizing: border-box;
   overflow: auto;
-  
+
   /* Flex layout en columna para el contenido general */
   display: flex;
   flex-direction: column;
@@ -229,9 +230,9 @@ html, body {
 .player-icon {
   position: absolute;
   transform: translate(-50%, -50%);
-  width: 90px;       /* círculo */
+  width: 90px; /* círculo */
   height: 90px;
-  background-color: #262522; 
+  background-color: #262522;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -291,7 +292,7 @@ html, body {
 
 /* Jugador seleccionado: borde verde */
 .player-icon.selected {
-  box-shadow: 0 0 0 4px #33FF00; /* borde verde brillante */
+  box-shadow: 0 0 0 4px #33ff00; /* borde verde brillante */
   transition: box-shadow 0.2s;
 }
 
@@ -307,7 +308,7 @@ html, body {
 .countdown-circle {
   width: 100px;
   height: 100px;
-  background-color: #262522; 
+  background-color: #262522;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -328,7 +329,7 @@ html, body {
   position: absolute;
   left: 80px;
   bottom: 340px; /* Ajusta para que quede encima de .bottom-left-info */
-  width: 275px;  /* mismo ancho que .bottom-left-info */
+  width: 275px; /* mismo ancho que .bottom-left-info */
   display: flex;
   justify-content: center;
 }
@@ -338,7 +339,7 @@ html, body {
   position: absolute;
   left: 80px;
   bottom: 340px; /* Ajusta para que quede encima de .bottom-left-info */
-  width: 275px;  /* mismo ancho que .bottom-left-info */
+  width: 275px; /* mismo ancho que .bottom-left-info */
   display: flex;
   justify-content: center;
   z-index: 1000000; /* Asegura que esté por encima de otros elementos */
@@ -375,8 +376,8 @@ html, body {
 
 /* El botón se pone en verde cuando hay un jugador seleccionado */
 .vote-button.active {
-  border-color: #33FF00;
-  color: #33FF00;
+  border-color: #33ff00;
+  color: #33ff00;
 }
 
 /* Si el botón está deshabilitado (ya has votado), se atenúa y no se puede pulsar */
@@ -413,10 +414,9 @@ html, body {
    color negro y con bordes redondeados */
 .palito {
   display: inline-block;
-  width: 6px;             /* grosor */
-  height: 20px;           /* altura */
-  margin: 0 3px;          /* separación horizontal */
+  width: 6px; /* grosor */
+  height: 20px; /* altura */
+  margin: 0 3px; /* separación horizontal */
   background-color: black;
-  border-radius: 6px;     /* puntas circulares */
+  border-radius: 6px; /* puntas circulares */
 }
-

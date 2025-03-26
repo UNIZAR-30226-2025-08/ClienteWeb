@@ -29,7 +29,11 @@
     <!-- Cabecera / Secciones de la partida -->
     <div v-if="partidaActive && !alguacilOverlayActive" class="top-sections">
       <div class="section">
-        <img src="../assets/aldeanosVivos.png" alt="Aldeanos Vivos" class="icon" />
+        <img
+          src="../assets/aldeanosVivos.png"
+          alt="Aldeanos Vivos"
+          class="icon"
+        />
         <div class="text">
           <strong>PUEBLO</strong>
           <span>5/6 Vivos</span>
@@ -51,9 +55,16 @@
     </div>
 
     <!-- Panel inferior izquierdo (Habilidad) -->
-    <div v-if="partidaActive && !alguacilOverlayActive" class="bottom-left-info">
+    <div
+      v-if="partidaActive && !alguacilOverlayActive"
+      class="bottom-left-info"
+    >
       <div class="top-row">
-        <img :src="chosenRole.src" alt="Imagen del Rol" class="role-info-image" />
+        <img
+          :src="chosenRole.src"
+          alt="Imagen del Rol"
+          class="role-info-image"
+        />
         <h3 class="role-info-title">HABILIDAD</h3>
       </div>
       <p class="role-description">
@@ -62,26 +73,27 @@
     </div>
 
     <!-- Contador (círculo) -->
-    <div v-if="partidaActive && alguacilVotingActive" class="countdown-container">
+    <div
+      v-if="partidaActive && alguacilVotingActive"
+      class="countdown-container"
+    >
       <div class="countdown-circle">
         <span class="countdown-text">{{ timeLeft }}</span>
       </div>
     </div>
 
     <!-- Botón de votar (candado si ya has votado) -->
-    <div 
-      v-if="partidaActive && alguacilVotingActive" 
+    <div
+      v-if="partidaActive && alguacilVotingActive"
       class="vote-button-container"
     >
-      <button 
-        class="vote-button" 
+      <button
+        class="vote-button"
         :class="{ active: selectedPlayerIndex !== null }"
         :disabled="hasVoted"
         @click="voteForPlayer"
       >
-        <template v-if="!hasVoted">
-          VOTAR
-        </template>
+        <template v-if="!hasVoted"> VOTAR </template>
         <template v-else>
           <img src="../assets/candado.png" alt="candado" class="candado-icon" />
           YA HAS VOTADO
@@ -90,14 +102,14 @@
     </div>
 
     <!-- Ocho jugadores alrededor de la hoguera -->
-    <div 
-      v-if="partidaActive && !alguacilOverlayActive" 
-      class="players-container" 
+    <div
+      v-if="partidaActive && !alguacilOverlayActive"
+      class="players-container"
       :class="{ clickable: alguacilVotingActive }"
     >
       <!-- Jugador 1 -->
-      <div 
-        class="player-icon player-1" 
+      <div
+        class="player-icon player-1"
         :class="{ selected: selectedPlayerIndex === 1 }"
         @click="selectPlayer(1)"
       >
@@ -105,9 +117,9 @@
         <img src="../assets/player.png" alt="Jugador 1" />
         <!-- Palitos de votos -->
         <div v-if="revealVotes && revealIndex >= 1" class="votes-palos">
-          <span 
-            v-for="(vote, idx) in playersVotes[0]" 
-            :key="idx" 
+          <span
+            v-for="(vote, idx) in playersVotes[0]"
+            :key="idx"
             class="palito"
           >
             |
@@ -116,7 +128,7 @@
       </div>
 
       <!-- Jugador 2 -->
-      <div 
+      <div
         class="player-icon player-2"
         :class="{ selected: selectedPlayerIndex === 2 }"
         @click="selectPlayer(2)"
@@ -124,9 +136,9 @@
         <span class="player-label">JUGADOR 2</span>
         <img src="../assets/player.png" alt="Jugador 2" />
         <div v-if="revealVotes && revealIndex >= 2" class="votes-palos">
-          <span 
-            v-for="(vote, idx) in playersVotes[1]" 
-            :key="idx" 
+          <span
+            v-for="(vote, idx) in playersVotes[1]"
+            :key="idx"
             class="palito"
           >
             |
@@ -135,7 +147,7 @@
       </div>
 
       <!-- Jugador 3 -->
-      <div 
+      <div
         class="player-icon player-3"
         :class="{ selected: selectedPlayerIndex === 3 }"
         @click="selectPlayer(3)"
@@ -143,9 +155,9 @@
         <span class="player-label">JUGADOR 3</span>
         <img src="../assets/player.png" alt="Jugador 3" />
         <div v-if="revealVotes && revealIndex >= 3" class="votes-palos">
-          <span 
-            v-for="(vote, idx) in playersVotes[2]" 
-            :key="idx" 
+          <span
+            v-for="(vote, idx) in playersVotes[2]"
+            :key="idx"
             class="palito"
           >
             |
@@ -154,7 +166,7 @@
       </div>
 
       <!-- Jugador 4 -->
-      <div 
+      <div
         class="player-icon player-4"
         :class="{ selected: selectedPlayerIndex === 4 }"
         @click="selectPlayer(4)"
@@ -162,9 +174,9 @@
         <span class="player-label">JUGADOR 4</span>
         <img src="../assets/player.png" alt="Jugador 4" />
         <div v-if="revealVotes && revealIndex >= 4" class="votes-palos">
-          <span 
-            v-for="(vote, idx) in playersVotes[3]" 
-            :key="idx" 
+          <span
+            v-for="(vote, idx) in playersVotes[3]"
+            :key="idx"
             class="palito"
           >
             |
@@ -173,7 +185,7 @@
       </div>
 
       <!-- Jugador 5 -->
-      <div 
+      <div
         class="player-icon player-5"
         :class="{ selected: selectedPlayerIndex === 5 }"
         @click="selectPlayer(5)"
@@ -181,9 +193,9 @@
         <span class="player-label">JUGADOR 5</span>
         <img src="../assets/player.png" alt="Jugador 5" />
         <div v-if="revealVotes && revealIndex >= 5" class="votes-palos">
-          <span 
-            v-for="(vote, idx) in playersVotes[4]" 
-            :key="idx" 
+          <span
+            v-for="(vote, idx) in playersVotes[4]"
+            :key="idx"
             class="palito"
           >
             |
@@ -192,7 +204,7 @@
       </div>
 
       <!-- Jugador 6 -->
-      <div 
+      <div
         class="player-icon player-6"
         :class="{ selected: selectedPlayerIndex === 6 }"
         @click="selectPlayer(6)"
@@ -200,9 +212,9 @@
         <span class="player-label">JUGADOR 6</span>
         <img src="../assets/player.png" alt="Jugador 6" />
         <div v-if="revealVotes && revealIndex >= 6" class="votes-palos">
-          <span 
-            v-for="(vote, idx) in playersVotes[5]" 
-            :key="idx" 
+          <span
+            v-for="(vote, idx) in playersVotes[5]"
+            :key="idx"
             class="palito"
           >
             |
@@ -211,7 +223,7 @@
       </div>
 
       <!-- Jugador 7 -->
-      <div 
+      <div
         class="player-icon player-7"
         :class="{ selected: selectedPlayerIndex === 7 }"
         @click="selectPlayer(7)"
@@ -219,9 +231,9 @@
         <span class="player-label">JUGADOR 7</span>
         <img src="../assets/player.png" alt="Jugador 7" />
         <div v-if="revealVotes && revealIndex >= 7" class="votes-palos">
-          <span 
-            v-for="(vote, idx) in playersVotes[6]" 
-            :key="idx" 
+          <span
+            v-for="(vote, idx) in playersVotes[6]"
+            :key="idx"
             class="palito"
           >
             |
@@ -230,7 +242,7 @@
       </div>
 
       <!-- Jugador 8 -->
-      <div 
+      <div
         class="player-icon player-8"
         :class="{ selected: selectedPlayerIndex === 8 }"
         @click="selectPlayer(8)"
@@ -238,9 +250,9 @@
         <span class="player-label">JUGADOR 8</span>
         <img src="../assets/player.png" alt="Jugador 8" />
         <div v-if="revealVotes && revealIndex >= 8" class="votes-palos">
-          <span 
-            v-for="(vote, idx) in playersVotes[7]" 
-            :key="idx" 
+          <span
+            v-for="(vote, idx) in playersVotes[7]"
+            :key="idx"
             class="palito"
           >
             |
@@ -291,12 +303,12 @@ export default {
 
       // Control de votos
       playersVotes: [0, 0, 0, 0, 0, 0, 0, 0], // votos de cada jugador
-      revealVotes: false,  // si estamos mostrando los votos en pantalla
-      revealIndex: 0,      // hasta qué jugador se han “revelado” los votos
+      revealVotes: false, // si estamos mostrando los votos en pantalla
+      revealIndex: 0, // hasta qué jugador se han “revelado” los votos
 
       // Overlay final para indicar quién salió como Alguacil
       alguacilResultOverlayActive: false,
-      alguacilWinnerIndex: null
+      alguacilWinnerIndex: null,
     };
   },
   mounted() {
@@ -305,7 +317,9 @@ export default {
       this.introActive = false;
 
       // Escoge rol aleatorio (excepto "aguacil")
-      const validRoles = roles.filter(role => role.nombre.toLowerCase() !== "aguacil");
+      const validRoles = roles.filter(
+        (role) => role.nombre.toLowerCase() !== "aguacil"
+      );
       const randomIndex = Math.floor(Math.random() * validRoles.length);
       this.chosenRole = validRoles[randomIndex];
       this.roleActive = true;
@@ -328,7 +342,6 @@ export default {
               this.startAlguacilVoting();
             }, 6000);
           }, 30000);
-
         }, 6000);
       }, 6000);
     }, 6000);
@@ -370,7 +383,7 @@ export default {
 
           // Calculamos el ganador (jugador con más votos)
           const maxVotes = Math.max(...this.playersVotes);
-          const winnerIndex = this.playersVotes.indexOf(maxVotes) + 1; 
+          const winnerIndex = this.playersVotes.indexOf(maxVotes) + 1;
           // +1 porque playersVotes es 0-based, jugadores 1..8
 
           this.alguacilWinnerIndex = winnerIndex;
@@ -403,8 +416,8 @@ export default {
         console.log("Has votado al jugador", this.selectedPlayerIndex);
         this.hasVoted = true;
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

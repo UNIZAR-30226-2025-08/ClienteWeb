@@ -27,9 +27,12 @@ const unirseSala = () => {
   // Solicitar información de la sala
   socket.emit("obtenerSala", idSala.value, (sala) => {
     if (sala) {
-      const estaEnSala = sala.jugadores.some(j => j.id === usuario.value.id);
+      const estaEnSala = sala.jugadores.some((j) => j.id === usuario.value.id);
       if (!estaEnSala) {
-        socket.emit("unirseSala", { idSala: idSala.value, usuario: usuario.value });
+        socket.emit("unirseSala", {
+          idSala: idSala.value,
+          usuario: usuario.value,
+        });
       }
       actualizarSala(sala);
     } else {
@@ -87,7 +90,7 @@ onMounted(() => {
 
   // Cambios de estado (Listo/No Listo)
   socket.on("estadoCambiado", ({ idUsuario, estado }) => {
-    const jugador = jugadores.value.find(j => j.id === idUsuario);
+    const jugador = jugadores.value.find((j) => j.id === idUsuario);
     if (jugador) jugador.listo = estado;
   });
 
@@ -118,22 +121,33 @@ const actualizarSala = (sala) => {
 
 // Cambiar estado (Listo/No Listo)
 const cambiarEstado = () => {
-  const jugador = jugadores.value.find(j => j.id === usuario.value.id);
+  const jugador = jugadores.value.find((j) => j.id === usuario.value.id);
   if (jugador) {
-    socket.emit("marcarEstado", { idSala: idSala.value, idUsuario: usuario.value.id, estado: !jugador.listo });
+    socket.emit("marcarEstado", {
+      idSala: idSala.value,
+      idUsuario: usuario.value.id,
+      estado: !jugador.listo,
+    });
   }
 };
 
 // Expulsar jugador
 const expulsarJugador = (idExpulsado) => {
   if (usuario.value.id === lider.value) {
-    socket.emit("expulsarJugador", { idSala: idSala.value, idLider: usuario.value.id, idExpulsado });
+    socket.emit("expulsarJugador", {
+      idSala: idSala.value,
+      idLider: usuario.value.id,
+      idExpulsado,
+    });
   }
 };
 
 // Salir de la sala
 const salirSala = () => {
-  socket.emit("salirSala", { idSala: idSala.value, idUsuario: usuario.value.id });
+  socket.emit("salirSala", {
+    idSala: idSala.value,
+    idUsuario: usuario.value.id,
+  });
   localStorage.removeItem("salaActual");
 
   // Mostrar toast de que el usuario se ha desconectado
@@ -163,30 +177,74 @@ const espaciosJugadores = computed(() => {
 
     <div v-else class="sala-content">
       <transition-group name="jugadores" tag="div" class="slots-container">
-        <div v-for="(jugador, index) in espaciosJugadores" :key="index" class="slot-item" :class="{ 'slot-vacio': !jugador, 'slot-cargando': slotsCargando[jugador?.id] }">
+        <div
+          v-for="(jugador, index) in espaciosJugadores"
+          :key="index"
+          class="slot-item"
+          :class="{
+            'slot-vacio': !jugador,
+            'slot-cargando': slotsCargando[jugador?.id],
+          }"
+        >
           <div class="slot-avatar">
-            <img v-if="jugador && !slotsCargando[jugador.id]" src="../assets/player.png" alt="Avatar Jugador" />
-            <img v-else-if="!jugador" src="../assets/candado.png" alt="Espacio vacío" />
+            <img
+              v-if="jugador && !slotsCargando[jugador.id]"
+              src="../assets/player.png"
+              alt="Avatar Jugador"
+            />
+            <img
+              v-else-if="!jugador"
+              src="../assets/candado.png"
+              alt="Espacio vacío"
+            />
             <div v-else class="loading-avatar"></div>
           </div>
           <div class="slot-nombre">
-            {{ jugador && !slotsCargando[jugador.id] ? jugador.nombre : "Cargando..." }}
+            {{
+              jugador && !slotsCargando[jugador.id]
+                ? jugador.nombre
+                : "Cargando..."
+            }}
             <span v-if="jugador && jugador.id === lider">👑</span>
           </div>
-          <div v-if="jugador && !slotsCargando[jugador.id]" class="estado-jugador">
+          <div
+            v-if="jugador && !slotsCargando[jugador.id]"
+            class="estado-jugador"
+          >
             {{ jugador.listo ? "✅ Listo" : "⏳ No Listo" }}
           </div>
-          <button v-if="jugador && jugador.id === usuario?.id && !slotsCargando[jugador.id]" @click="cambiarEstado" class="btn-estado" :class="{ listo: jugador.listo, 'no-listo': !jugador.listo }">
+          <button
+            v-if="
+              jugador &&
+              jugador.id === usuario?.id &&
+              !slotsCargando[jugador.id]
+            "
+            @click="cambiarEstado"
+            class="btn-estado"
+            :class="{ listo: jugador.listo, 'no-listo': !jugador.listo }"
+          >
             {{ jugador.listo ? "Cancelar Listo" : "Estoy Listo" }}
           </button>
-          <button v-if="jugador && usuario?.id === lider && jugador.id !== lider && !slotsCargando[jugador.id]" @click="expulsarJugador(jugador.id)">Expulsar</button>
+          <button
+            v-if="
+              jugador &&
+              usuario?.id === lider &&
+              jugador.id !== lider &&
+              !slotsCargando[jugador.id]
+            "
+            @click="expulsarJugador(jugador.id)"
+          >
+            Expulsar
+          </button>
         </div>
       </transition-group>
     </div>
 
     <div class="bottom-bar">
       <button class="btn-invite">Invitar Amigos</button>
-      <button class="btn-start" :disabled="jugadores.length < 2">Iniciar Partida</button>
+      <button class="btn-start" :disabled="jugadores.length < 2">
+        Iniciar Partida
+      </button>
       <button @click="salirSala">Salir</button>
     </div>
   </div>
@@ -221,7 +279,7 @@ const espaciosJugadores = computed(() => {
 
 /* ---- SLOT DE JUGADOR ---- */
 .slot-item {
-  background-color: #302E2B;
+  background-color: #302e2b;
   border: 2px solid #000;
   border-radius: 8px;
   height: 140px;
@@ -310,7 +368,7 @@ const espaciosJugadores = computed(() => {
   display: flex;
   justify-content: space-around;
   padding: 1rem;
-  background-color: #302E2B;
+  background-color: #302e2b;
 }
 
 .btn-invite,
@@ -368,8 +426,12 @@ button.expulsar:hover {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Animación de carga para el avatar */

@@ -52,7 +52,7 @@ onMounted(() => {
 
   // Escuchar cuando se elimine una sala
   socket.on("eliminarSala", (idSala) => {
-    salas.value = salas.value.filter(sala => sala.id !== idSala); // Eliminamos la sala de la lista
+    salas.value = salas.value.filter((sala) => sala.id !== idSala); // Eliminamos la sala de la lista
   });
 
   // Manejo de errores
@@ -80,7 +80,11 @@ const unirseSala = (sala) => {
   }
 
   // Emitir evento para unirse a la sala
-  socket.emit("unirseSala", { idSala: sala.id, usuario: usuario.value, contrasena });
+  socket.emit("unirseSala", {
+    idSala: sala.id,
+    usuario: usuario.value,
+    contrasena,
+  });
 
   // Escuchar la confirmación para evitar duplicados
   const salaActualizadaHandler = (salaActualizada) => {
@@ -97,11 +101,7 @@ const unirseSala = (sala) => {
 
   socket.on("salaActualizada", salaActualizadaHandler);
 };
-
 </script>
-
-
-
 
 <template>
   <div class="server-browser">
@@ -123,7 +123,12 @@ const unirseSala = (sala) => {
             <tr v-for="sala in salas" :key="sala.id">
               <td>{{ sala.tipo === "privada" ? "Privada" : "Pública" }}</td>
               <td>
-                <img v-if="sala.tipo === 'privada'" src="../assets/candado.png" alt="Candado" class="lock-icon" />
+                <img
+                  v-if="sala.tipo === 'privada'"
+                  src="../assets/candado.png"
+                  alt="Candado"
+                  class="lock-icon"
+                />
               </td>
               <td>{{ sala.nombre }}</td>
               <td>{{ sala.jugadores.length }}/{{ sala.maxJugadores }}</td>
@@ -142,8 +147,6 @@ const unirseSala = (sala) => {
   </div>
 </template>
 
-
-
 <style scoped>
 /* 
    Paleta de colores (de claro a oscuro):
@@ -152,16 +155,16 @@ const unirseSala = (sala) => {
    #1F1E1C (más oscuro)
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap");
 
 .server-browser {
   width: 100%;
   min-height: 100vh;
-  background-color: #302E2B;
+  background-color: #302e2b;
   display: flex;
   flex-direction: column;
   color: #fff;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   margin: 0;
   margin-top: 1rem;
   box-sizing: border-box;
@@ -174,9 +177,9 @@ const unirseSala = (sala) => {
 .server-container {
   background-color: #262522;
   border-radius: 0px;
-  margin: 20px 0;       /* Espacio vertical arriba y abajo */
-  width: 100%;          /* Ocupa todo el ancho */
-  padding: 60px;        /* Separación interna */
+  margin: 20px 0; /* Espacio vertical arriba y abajo */
+  width: 100%; /* Ocupa todo el ancho */
+  padding: 60px; /* Separación interna */
   box-sizing: border-box;
 }
 
@@ -194,14 +197,14 @@ const unirseSala = (sala) => {
 .server-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: #1F1E1C; /* Más oscuro */
+  background-color: #1f1e1c; /* Más oscuro */
   border-radius: 12px;
   overflow: hidden;
 }
 
 /* Encabezado con bordes redondeados arriba */
 .server-table thead {
-  background-color: #302E2B; /* Más claro */
+  background-color: #302e2b; /* Más claro */
 }
 
 .server-table thead th {
@@ -241,7 +244,7 @@ const unirseSala = (sala) => {
 
 /* Icono del candado más grande */
 .lock-icon {
-  width: 24px; 
+  width: 24px;
   height: 36px;
 }
 
@@ -249,7 +252,7 @@ const unirseSala = (sala) => {
 /* BARRA INFERIOR        */
 /* --------------------- */
 .bottom-bar {
-  background-color: #302E2B;
+  background-color: #302e2b;
   display: flex;
   justify-content: space-between;
   align-items: center;

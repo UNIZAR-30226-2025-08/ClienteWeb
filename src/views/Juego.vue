@@ -1,47 +1,47 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { toast } from 'vue3-toastify'; // Asegúrate de que está importado en tu archivo
-import 'vue3-toastify/dist/index.css'; // Asegúrate de que los estilos estén importados
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { toast } from "vue3-toastify"; // Asegúrate de que está importado en tu archivo
+import "vue3-toastify/dist/index.css"; // Asegúrate de que los estilos estén importados
 import Cabecera from "../components/Cabecera.vue";
 const router = useRouter();
-const loginSuccess = localStorage.getItem('loginSuccess'); // Verificar si ya hubo un login exitoso
+const loginSuccess = localStorage.getItem("loginSuccess"); // Verificar si ya hubo un login exitoso
 
 onMounted(() => {
   // Mostrar la alerta solo si la variable de loginSuccess está almacenada en el localStorage
-  if (loginSuccess === 'true') {
-    toast.success('Conexión exitosa, bienvenido!', { autoClose: 3000 }); // Mostrar alerta de éxito durante 5 segundos
-    localStorage.removeItem('loginSuccess'); // Eliminar la variable del localStorage después de mostrarla
+  if (loginSuccess === "true") {
+    toast.success("Conexión exitosa, bienvenido!", { autoClose: 3000 }); // Mostrar alerta de éxito durante 5 segundos
+    localStorage.removeItem("loginSuccess"); // Eliminar la variable del localStorage después de mostrarla
   }
 });
 
 // Lógica de navegación (por ejemplo, para navegar a otras páginas)
 function irAHome() {
-  router.push('/'); // Redirigir al home
+  router.push("/"); // Redirigir al home
 }
 
 function irACrearSala() {
-  router.push('/crear-sala');
+  router.push("/crear-sala");
 }
 
 function irARoles() {
-  router.push('/roles');
+  router.push("/roles");
 }
 
 function irAReglas() {
-  router.push('/reglas');
+  router.push("/reglas");
 }
 
 function irARanking() {
-  router.push('/ranking');
+  router.push("/ranking");
 }
 
 function irAConfiguracion() {
-  router.push('/configuracion');
+  router.push("/configuracion");
 }
 
 function irABuscarSalas() {
-  router.push('/servidores');
+  router.push("/servidores");
 }
 </script>
 
@@ -50,11 +50,17 @@ function irABuscarSalas() {
     <div class="juego-container">
       <!-- Barra lateral -->
       <div class="sidebar">
-        <button class="action-button-sidebar" @click="irARanking">Ranking</button>
+        <button class="action-button-sidebar" @click="irARanking">
+          Ranking
+        </button>
         <button class="action-button-sidebar" @click="irARoles">Roles</button>
         <button class="action-button-sidebar" @click="irAReglas">Reglas</button>
-        <button class="action-button-sidebar" @click="irAConfiguracion">Configuración</button>
-        <button class="action-button salir-button" @click="irAHome">Salir</button>
+        <button class="action-button-sidebar" @click="irAConfiguracion">
+          Configuración
+        </button>
+        <button class="action-button salir-button" @click="irAHome">
+          Salir
+        </button>
       </div>
 
       <!-- Contenido principal -->
@@ -89,16 +95,18 @@ function irABuscarSalas() {
 
         <!-- Botones de acción -->
         <div class="actions">
-          <button class="action-button" @click="irACrearSala">Crear Sala</button>
+          <button class="action-button" @click="irACrearSala">
+            Crear Sala
+          </button>
           <button class="action-button">Partida Rápida</button>
-          <button class="action-button" @click="irABuscarSalas">Buscar Salas</button>
+          <button class="action-button" @click="irABuscarSalas">
+            Buscar Salas
+          </button>
         </div>
       </div>
     </div>
-  </div>  
+  </div>
 </template>
-
-
 
 <style scoped>
 /* 
@@ -114,7 +122,7 @@ function irABuscarSalas() {
   display: flex;
   width: 100%;
   height: 100vh;
-  background-color: #302E2B;
+  background-color: #302e2b;
   color: #fff;
   font-family: sans-serif;
   margin: 0;
@@ -131,7 +139,7 @@ function irABuscarSalas() {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: #302E2B;
+  background-color: #302e2b;
   padding: 20px;
   position: relative;
 }
@@ -256,16 +264,16 @@ function irABuscarSalas() {
 
 /* Fila principal del thead */
 .main-title {
-  background-color: #262522; 
+  background-color: #262522;
   text-align: left;
   font-size: 1rem;
   padding: 12px;
-  border-bottom: 1px solid #302E2B; /* línea negra */
+  border-bottom: 1px solid #302e2b; /* línea negra */
 }
 
 /* Fila oscura (Fecha/Modo/Resultado) */
 .dark-row {
-  background-color: #1F1E1C; /* Más oscura */
+  background-color: #1f1e1c; /* Más oscura */
 }
 
 /* Fila clara (ejemplo --) */
@@ -275,7 +283,7 @@ function irABuscarSalas() {
 
 .history-table tbody td {
   padding: 12px;
-  border-bottom: 1px solid #302E2B; /* línea negra */
+  border-bottom: 1px solid #302e2b; /* línea negra */
   font-size: 0.95rem;
 }
 
@@ -293,7 +301,7 @@ function irABuscarSalas() {
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 60px;     /* Separación entre botones */
+  gap: 60px; /* Separación entre botones */
 }
 
 .action-button {
