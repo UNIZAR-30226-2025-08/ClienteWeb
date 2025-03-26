@@ -164,6 +164,9 @@ const espaciosJugadores = computed(() => {
   }
   return espacios;
 });
+function IraPantallaDeAmigos() {
+  router.push("/amigos");
+}
 </script>
 
 <template>
@@ -241,7 +244,9 @@ const espaciosJugadores = computed(() => {
     </div>
 
     <div class="bottom-bar">
-      <button class="btn-invite">Invitar Amigos</button>
+      <button class="btn-invite" @click="IraPantallaDeAmigos">
+        Invitar Amigos
+      </button>
       <button class="btn-start" :disabled="jugadores.length < 2">
         Iniciar Partida
       </button>
