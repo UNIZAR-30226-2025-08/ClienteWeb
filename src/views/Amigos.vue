@@ -21,16 +21,16 @@ const deleteError = ref(null);
 // Variables para la búsqueda de amigos
 const searchName = ref("");
 const searchError = ref(null);
+const searchSuccess = ref("");
 const loadingSearch = ref(false);
 
 const fetchFriends = async () => {
   try {
     const userId = getUserId();
-    // Llamada al endpoint: GET /api/amistad/listarConEstadisticas/:idUsuario
+    // Llamamos al endpoint: GET /api/amistad/listarConEstadisticas/:idUsuario (No sé porqué ponemos el usuario en la URL, preguntar ÓSCAR si o ha hecho el)
     const response = await axios.get(
       `/api/amistad/listarConEstadisticas/${userId}`
     );
-    // Se espera que la respuesta tenga la forma: { amigos: [ { idUsuario, nombre, avatar, estadisticas, ... }, ... ] }
     friends.value = response.data.amigos;
   } catch (err) {
     console.error("Error al obtener la lista de amigos:", err);
@@ -80,9 +80,9 @@ const addFriend = async () => {
   }
   loadingSearch.value = true;
   searchError.value = null;
+  searchSuccess.value = "";
   try {
-    // Buscamos el usuario por nombre.
-    // Envía directamente { nombre: searchName.value } en lugar de { data: { nombre: searchName.value } }
+    // Buscamos el usuario por nombr
     const response = await axios.post("/api/usuario/obtener_por_nombre", {
       nombre: searchName.value,
     });
@@ -91,19 +91,22 @@ const addFriend = async () => {
       return;
     }
     const foundUser = response.data.usuario;
-    // Agregamos la amistad: se envían los IDs del usuario logueado y el usuario encontrado.
+    // Enviams la solicitud de amista
     const userId = getUserId();
-    await axios.post("/api/amistad/agregar", {
-      idUsuario1: userId,
-      idUsuario2: foundUser.idUsuario,
+    await axios.post("/api/solicitud/enviar", {
+      idEmisor: userId,
+      idReceptor: foundUser.idUsuario,
     });
     // Actualizamos la lista de amigos
     await fetchFriends();
     // Limpiamos el campo de búsqueda
     searchName.value = "";
+    // Mostramos el mensaje de confirmación
+    searchSuccess.value =
+      "Solicitud de amistad enviada correctamente a el usuario " +
+      foundUser.nombre;
   } catch (err) {
     console.error("Error al agregar amigo:", err);
-    // Si el error viene del servidor, usamos ese mensaje; de lo contrario, un mensaje genérico.
     searchError.value =
       err.response?.data?.error ||
       "Error al agregar amigo. Inténtalo nuevamente.";
@@ -133,6 +136,7 @@ onMounted(() => {
         Agregar
       </button>
       <div v-if="searchError" class="error">{{ searchError }}</div>
+      <div v-if="searchSuccess" class="success">{{ searchSuccess }}</div>
     </div>
 
     <!-- Contenedor principal para la lista de amigos -->
