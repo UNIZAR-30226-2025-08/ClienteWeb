@@ -276,7 +276,7 @@
 </template>
 
 <script>
-import { roles } from "../assets/data/roles.js";
+import { roles } from "../../assets/data/roles.js";
 
 export default {
   name: "Partida",
