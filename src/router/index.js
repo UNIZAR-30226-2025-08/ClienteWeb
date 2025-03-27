@@ -9,7 +9,7 @@ import Roles from "../views/Roles.vue";
 import Sala from "../views/Sala.vue";
 import Amigos from "../views/Amigos.vue";
 import ranking from "../views/ranking.vue";
-import Partida from "../views/partida.vue";
+import Partida from "../views/partida/partida.vue";
 import Perfil from "../views/Perfil.vue";
 
 const routes = [
