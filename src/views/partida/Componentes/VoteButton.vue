@@ -7,7 +7,7 @@
     >
       <template v-if="!hasVoted"> VOTAR </template>
       <template v-else>
-        <img src="../assets/candado.png" alt="candado" class="candado-icon" />
+        <img src="../../../assets/candado.png" alt="candado" class="candado-icon" />
         YA HAS VOTADO
       </template>
     </button>

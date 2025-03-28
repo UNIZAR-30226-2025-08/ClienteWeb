@@ -8,7 +8,7 @@
     @click="$emit('select')"
   >
     <span class="player-label">JUGADOR {{ playerNumber }}</span>
-    <img src="../assets/player.png" :alt="'Jugador ' + playerNumber" />
+    <img src="../../../assets/player.png" :alt="'Jugador ' + playerNumber" />
     <div v-if="showVotes" class="votes-palos">
       <span v-for="(vote, idx) in votes" :key="idx" class="palito"> | </span>
     </div>

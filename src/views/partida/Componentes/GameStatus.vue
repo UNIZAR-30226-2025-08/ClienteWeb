@@ -1,7 +1,7 @@
 <template>
     <div class="game-status">
       <div class="section">
-        <img src="../assets/aldeanosVivos.png" alt="Aldeanos" class="icon" />
+        <img src="../../../assets/aldeanosVivos.png" alt="Aldeanos" class="icon" />
         <div class="status-text">
           <strong>PUEBLO</strong>
           <span>{{ aliveVillagers }}/{{ totalVillagers }} Vivos</span>
@@ -14,7 +14,7 @@
       </div>
       
       <div class="section">
-        <img src="../assets/lobosVivos.png" alt="Lobos" class="icon" />
+        <img src="../../../assets/lobosVivos.png" alt="Lobos" class="icon" />
         <div class="status-text">
           <strong>LOBOS</strong>
           <span>{{ aliveWolves }}/{{ totalWolves }} Vivos</span>
