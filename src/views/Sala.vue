@@ -108,10 +108,11 @@ onMounted(() => {
 
   // Listener de enPartida en onMounted
   socket.on("enPartida", ({ mensaje, sala }) => {
+    // Actualiza y guarda la sala actual en localStorage
+    actualizarSala(sala); // Esta función ya hace: localStorage.setItem("salaActual", JSON.stringify(sala))
     enPartida.value = true;
-    actualizarSala(sala);
     toast.success(mensaje);
-    // Redirigir a la vista de partida
+    // Redirigir a la vista de partida, asegurando que la información necesaria esté almacenada
     router.push(`/partida/${idSala.value}`);
   });
 });
