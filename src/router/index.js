@@ -23,7 +23,7 @@ const routes = [
   { path: "/sala/:idSala", component: Sala }, // Ruta dinámica para la sala
   { path: "/amigos", component: Amigos },
   { path: "/ranking", component: ranking },
-  { path: "/partida", component: Partida },
+  { path: "/partida/:idSala", component: Partida },
   { path: "/perfil", name: "perfil", component: Perfil },
 ];
 
