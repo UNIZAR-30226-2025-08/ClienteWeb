@@ -1,20 +1,22 @@
 <template>
   <div class="partida-container">
-    <!-- Overlays -->
-    <IntroOverlay v-if="currentPhase === 'intro'" />
-    <RoleOverlay 
-      v-if="currentPhase === 'role'" 
-      :role="chosenRole"
-    />
-    <EmpiezaOverlay v-if="currentPhase === 'start'" />
-    <AlguacilOverlay v-if="currentPhase === 'alguacil_announce'" />
-    <AlguacilResultOverlay 
-      v-if="currentPhase === 'alguacil_result'"
-      :winner-index="alguacilWinnerIndex"
-    />
+    <!-- Mostrar exclusivamente los overlays si la fase actual es una overlay -->
+    <template v-if="isOverlayActive">
+      <IntroOverlay v-if="currentPhase === 'intro'" />
+      <RoleOverlay 
+        v-else-if="currentPhase === 'role'" 
+        :role="chosenRole"
+      />
+      <EmpiezaOverlay v-else-if="currentPhase === 'start'" />
+      <AlguacilOverlay v-else-if="currentPhase === 'alguacil_announce'" />
+      <AlguacilResultOverlay 
+        v-else-if="currentPhase === 'alguacil_result'"
+        :winner-index="alguacilWinnerIndex"
+      />
+    </template>
 
-    <!-- Componentes de partida activa -->
-    <template v-if="isGameActive">
+    <!-- Mostrar el contenido principal del juego cuando NO es fase overlay -->
+    <template v-else>
       <GameStatus 
         :pueblo-vivos="aliveVillagers"
         :total-pueblo="totalVillagers"
@@ -67,6 +69,7 @@ import AlguacilOverlay from '../../views/partida/Overlay/VotacionAlguacilOverlay
 import AlguacilResultOverlay from '../../views/partida/Overlay/ResultadoAlguacilOverlay.vue'
 
 export default {
+  name: "Partida",
   components: {
     GameStatus,
     RoleInfoPanel,
@@ -82,7 +85,7 @@ export default {
   data() {
     return {
       // Flujo del juego
-      currentPhase: 'intro',
+      currentPhase: 'intro', // Fases posibles: 'intro', 'role', 'start', 'alguacil_announce', 'alguacil_result', 'game', 'game_voting'
       isGameActive: false,
       isVotingPhase: false,
       
@@ -106,6 +109,12 @@ export default {
       totalWolves: 2,
       currentDay: 1,
       currentPeriod: 'DÍA'
+    }
+  },
+  computed: {
+    // Define las fases que deben mostrar únicamente el overlay
+    isOverlayActive() {
+      return ['intro', 'role', 'start', 'alguacil_announce', 'alguacil_result'].includes(this.currentPhase)
     }
   },
   mounted() {
@@ -224,7 +233,7 @@ export default {
 
 <style scoped>
 .partida-container {
-  background-image: url("../../../assets/fondoPartida.jpeg");
+  background-image: url("../../assets/fondoPartida.jpeg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
