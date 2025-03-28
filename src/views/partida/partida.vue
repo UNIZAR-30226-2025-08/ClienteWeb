@@ -132,18 +132,14 @@ export default {
     this.players = sala.jugadores || [];
 
     // Asignar el rol del jugador actual según lo asignado en la sala
-    const myId = this.getMyId(); // Implementa este método para obtener el id del usuario actual
+    const myId = this.getMyId();
     const miJugador = this.players.find((j) => j.id == myId);
     if (miJugador && miJugador.rol) {
       this.chosenRole = miJugador.rol;
     } else {
       console.error("No se encontró un rol asignado para el jugador");
+      this;
     }
-
-    // Sincronizar el estado dinámico de la partida
-    this.currentPhase = sala.currentPhase || "game";
-    this.currentDay = sala.currentDay || 1;
-    this.currentPeriod = sala.currentPeriod || "DÍA";
 
     // Sincronizar los totales a partir de maxRoles (si existe)
     if (sala.maxRoles) {
@@ -159,7 +155,8 @@ export default {
       this.aliveVillagers = 0;
       this.totalVillagers = 0;
     }
-
+    this.startGameFlow();
+    /*
     // Construir el id de la partida (asegúrate de que coincida con la lógica del servidor)
     const idPartida = "partida_" + sala.id;
     // Emitir un evento para unirse a la partida
@@ -182,7 +179,7 @@ export default {
       if (data.idSala === sala.id && data.rol) {
         this.chosenRole = data.rol;
       }
-    });
+    });*/
   },
 
   beforeUnmount() {
