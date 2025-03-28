@@ -1,426 +1,250 @@
 <template>
   <div class="partida-container">
-    <!-- Overlay 1: Intro "AMANECE..." -->
-    <div v-if="introActive" class="intro-overlay fadeInOut">
-      <h1 class="intro-text">
-        AMANECE EN LA ALDEA, TODO EL MUNDO DESPIERTA Y ABRE LOS OJOS
-      </h1>
-    </div>
+    <!-- Overlays -->
+    <IntroOverlay v-if="currentPhase === 'intro'" />
+    <RoleOverlay 
+      v-if="currentPhase === 'role'" 
+      :role="chosenRole"
+    />
+    <EmpiezaOverlay v-if="currentPhase === 'start'" />
+    <AlguacilOverlay v-if="currentPhase === 'alguacil_announce'" />
+    <AlguacilResultOverlay 
+      v-if="currentPhase === 'alguacil_result'"
+      :winner-index="alguacilWinnerIndex"
+    />
 
-    <!-- Overlay 2: Mostrar el rol aleatorio -->
-    <div v-if="roleActive" class="role-overlay fadeInOut">
-      <h1 class="role-title">TU ROL ES</h1>
-      <img :src="chosenRole.src" class="role-image" :alt="chosenRole.nombre" />
-      <h2 class="role-name">{{ chosenRole.nombre?.toUpperCase() }}</h2>
-    </div>
+    <!-- Componentes de partida activa -->
+    <template v-if="isGameActive">
+      <GameStatus 
+        :pueblo-vivos="aliveVillagers"
+        :total-pueblo="totalVillagers"
+        :lobos-vivos="aliveWolves"
+        :total-lobos="totalWolves"
+        :jornada="currentDay"
+        :periodo="currentPeriod"
+      />
 
-    <!-- Overlay 3: Mensaje "Empieza la partida" -->
-    <div v-if="empiezaOverlayActive" class="empieza-overlay fadeInOut">
-      <h1 class="empieza-text">EMPIEZA LA PARTIDA</h1>
-    </div>
+      <RoleInfoPanel :role="chosenRole" />
 
-    <!-- Overlay 4: Elección del Alguacil -->
-    <div v-if="alguacilOverlayActive" class="intro-overlay fadeInOut">
-      <h1 class="intro-text">
-        LOS JUGADORES ELEGIRÁN DE MANERA CONSENSUADA QUIÉN SERÁ EL ALGUACIL
-      </h1>
-    </div>
+      <PlayersCircle
+        :players="players"
+        :alguacil-voting-active="isVotingPhase"
+        :reveal-votes="revealVotes"
+        :reveal-index="revealIndex"
+        @select-player="selectPlayer"
+      />
 
-    <!-- Cabecera / Secciones de la partida -->
-    <div v-if="partidaActive && !alguacilOverlayActive" class="top-sections">
-      <div class="section">
-        <img
-          src="../assets/aldeanosVivos.png"
-          alt="Aldeanos Vivos"
-          class="icon"
-        />
-        <div class="text">
-          <strong>PUEBLO</strong>
-          <span>5/6 Vivos</span>
-        </div>
+      <CountdownTimer
+        v-if="isVotingPhase"
+        :time-left="timeLeft"
+      />
+
+      <VoteButton
+        v-if="isVotingPhase"
+        :selected-player-index="selectedPlayerIndex"
+        :has-voted="hasVoted"
+        @vote="voteForPlayer"
+      />
+
+      <div v-if="hasVoted && isVotingPhase" class="vote-message">
+        Has votado al <strong>Jugador {{ selectedPlayerIndex }}</strong>
       </div>
-
-      <div class="section center">
-        <strong>JORNADA 2</strong>
-        <span>DÍA</span>
-      </div>
-
-      <div class="section">
-        <img src="../assets/lobosVivos.png" alt="Lobos Vivos" class="icon" />
-        <div class="text">
-          <strong>LOBOS</strong>
-          <span>2/2 Vivos</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Panel inferior izquierdo (Habilidad) -->
-    <div
-      v-if="partidaActive && !alguacilOverlayActive"
-      class="bottom-left-info"
-    >
-      <div class="top-row">
-        <img
-          :src="chosenRole.src"
-          alt="Imagen del Rol"
-          class="role-info-image"
-        />
-        <h3 class="role-info-title">HABILIDAD</h3>
-      </div>
-      <p class="role-description">
-        {{ chosenRole.descripcion }}
-      </p>
-    </div>
-
-    <!-- Contador (círculo) -->
-    <div
-      v-if="partidaActive && alguacilVotingActive"
-      class="countdown-container"
-    >
-      <div class="countdown-circle">
-        <span class="countdown-text">{{ timeLeft }}</span>
-      </div>
-    </div>
-
-    <!-- Botón de votar (candado si ya has votado) -->
-    <div
-      v-if="partidaActive && alguacilVotingActive"
-      class="vote-button-container"
-    >
-      <button
-        class="vote-button"
-        :class="{ active: selectedPlayerIndex !== null }"
-        :disabled="hasVoted"
-        @click="voteForPlayer"
-      >
-        <template v-if="!hasVoted"> VOTAR </template>
-        <template v-else>
-          <img src="../assets/candado.png" alt="candado" class="candado-icon" />
-          YA HAS VOTADO
-        </template>
-      </button>
-    </div>
-
-    <!-- Ocho jugadores alrededor de la hoguera -->
-    <div
-      v-if="partidaActive && !alguacilOverlayActive"
-      class="players-container"
-      :class="{ clickable: alguacilVotingActive }"
-    >
-      <!-- Jugador 1 -->
-      <div
-        class="player-icon player-1"
-        :class="{ selected: selectedPlayerIndex === 1 }"
-        @click="selectPlayer(1)"
-      >
-        <span class="player-label">JUGADOR 1</span>
-        <img src="../assets/player.png" alt="Jugador 1" />
-        <!-- Palitos de votos -->
-        <div v-if="revealVotes && revealIndex >= 1" class="votes-palos">
-          <span
-            v-for="(vote, idx) in playersVotes[0]"
-            :key="idx"
-            class="palito"
-          >
-            |
-          </span>
-        </div>
-      </div>
-
-      <!-- Jugador 2 -->
-      <div
-        class="player-icon player-2"
-        :class="{ selected: selectedPlayerIndex === 2 }"
-        @click="selectPlayer(2)"
-      >
-        <span class="player-label">JUGADOR 2</span>
-        <img src="../assets/player.png" alt="Jugador 2" />
-        <div v-if="revealVotes && revealIndex >= 2" class="votes-palos">
-          <span
-            v-for="(vote, idx) in playersVotes[1]"
-            :key="idx"
-            class="palito"
-          >
-            |
-          </span>
-        </div>
-      </div>
-
-      <!-- Jugador 3 -->
-      <div
-        class="player-icon player-3"
-        :class="{ selected: selectedPlayerIndex === 3 }"
-        @click="selectPlayer(3)"
-      >
-        <span class="player-label">JUGADOR 3</span>
-        <img src="../assets/player.png" alt="Jugador 3" />
-        <div v-if="revealVotes && revealIndex >= 3" class="votes-palos">
-          <span
-            v-for="(vote, idx) in playersVotes[2]"
-            :key="idx"
-            class="palito"
-          >
-            |
-          </span>
-        </div>
-      </div>
-
-      <!-- Jugador 4 -->
-      <div
-        class="player-icon player-4"
-        :class="{ selected: selectedPlayerIndex === 4 }"
-        @click="selectPlayer(4)"
-      >
-        <span class="player-label">JUGADOR 4</span>
-        <img src="../assets/player.png" alt="Jugador 4" />
-        <div v-if="revealVotes && revealIndex >= 4" class="votes-palos">
-          <span
-            v-for="(vote, idx) in playersVotes[3]"
-            :key="idx"
-            class="palito"
-          >
-            |
-          </span>
-        </div>
-      </div>
-
-      <!-- Jugador 5 -->
-      <div
-        class="player-icon player-5"
-        :class="{ selected: selectedPlayerIndex === 5 }"
-        @click="selectPlayer(5)"
-      >
-        <span class="player-label">JUGADOR 5</span>
-        <img src="../assets/player.png" alt="Jugador 5" />
-        <div v-if="revealVotes && revealIndex >= 5" class="votes-palos">
-          <span
-            v-for="(vote, idx) in playersVotes[4]"
-            :key="idx"
-            class="palito"
-          >
-            |
-          </span>
-        </div>
-      </div>
-
-      <!-- Jugador 6 -->
-      <div
-        class="player-icon player-6"
-        :class="{ selected: selectedPlayerIndex === 6 }"
-        @click="selectPlayer(6)"
-      >
-        <span class="player-label">JUGADOR 6</span>
-        <img src="../assets/player.png" alt="Jugador 6" />
-        <div v-if="revealVotes && revealIndex >= 6" class="votes-palos">
-          <span
-            v-for="(vote, idx) in playersVotes[5]"
-            :key="idx"
-            class="palito"
-          >
-            |
-          </span>
-        </div>
-      </div>
-
-      <!-- Jugador 7 -->
-      <div
-        class="player-icon player-7"
-        :class="{ selected: selectedPlayerIndex === 7 }"
-        @click="selectPlayer(7)"
-      >
-        <span class="player-label">JUGADOR 7</span>
-        <img src="../assets/player.png" alt="Jugador 7" />
-        <div v-if="revealVotes && revealIndex >= 7" class="votes-palos">
-          <span
-            v-for="(vote, idx) in playersVotes[6]"
-            :key="idx"
-            class="palito"
-          >
-            |
-          </span>
-        </div>
-      </div>
-
-      <!-- Jugador 8 -->
-      <div
-        class="player-icon player-8"
-        :class="{ selected: selectedPlayerIndex === 8 }"
-        @click="selectPlayer(8)"
-      >
-        <span class="player-label">JUGADOR 8</span>
-        <img src="../assets/player.png" alt="Jugador 8" />
-        <div v-if="revealVotes && revealIndex >= 8" class="votes-palos">
-          <span
-            v-for="(vote, idx) in playersVotes[7]"
-            :key="idx"
-            class="palito"
-          >
-            |
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Mensaje central de "Has votado al jugador X" -->
-    <div v-if="hasVoted && alguacilVotingActive" class="vote-message">
-      Has votado al <strong>Jugador {{ selectedPlayerIndex }}</strong>
-    </div>
-
-    <!-- Pantalla final: "JUGADOR X ES EL ALGUACIL" -->
-    <div v-if="alguacilResultOverlayActive" class="intro-overlay fadeInOut">
-      <h1 class="intro-text">
-        JUGADOR {{ alguacilWinnerIndex }} ES EL ALGUACIL
-      </h1>
-    </div>
+    </template>
   </div>
 </template>
 
 <script>
-import { roles } from "../../assets/data/roles.js";
+import { roles } from '../../assets/data/roles.js'
+import GameStatus from '../../views/partida/Componentes/GameStatus.vue'
+import RoleInfoPanel from '../../views/partida/Componentes/DescripcionRol.vue'
+import CountdownTimer from '../../views/partida/Componentes/CountdownTimer.vue'
+import VoteButton from '../../views/partida/Componentes/VoteButton.vue'
+import PlayersCircle from '../../views/partida/Componentes/PlayerCard.vue'
+import IntroOverlay from '../../views/partida/Overlay/IntroPartidaOverlay.vue'
+import RoleOverlay from '../../views/partida/Overlay/RolOverlay.vue'
+import EmpiezaOverlay from '../../views/partida/Overlay/InicioPartidaOverlay.vue'
+import AlguacilOverlay from '../../views/partida/Overlay/VotacionAlguacilOverlay.vue'
+import AlguacilResultOverlay from '../../views/partida/Overlay/ResultadoAlguacilOverlay.vue'
 
 export default {
-  name: "Partida",
+  components: {
+    GameStatus,
+    RoleInfoPanel,
+    CountdownTimer,
+    VoteButton,
+    PlayersCircle,
+    IntroOverlay,
+    RoleOverlay,
+    EmpiezaOverlay,
+    AlguacilOverlay,
+    AlguacilResultOverlay
+  },
   data() {
     return {
-      // Overlays
-      introActive: true,
-      roleActive: false,
-      empiezaOverlayActive: false,
-      partidaActive: false,
-      alguacilOverlayActive: false,
-
-      // Fase de votación Alguacil
-      alguacilVotingActive: false,
+      // Flujo del juego
+      currentPhase: 'intro',
+      isGameActive: false,
+      isVotingPhase: false,
+      
+      // Temporizadores
       timeLeft: 60,
       countdownInterval: null,
-
-      // Selección de jugador y voto
+      
+      // Jugadores y votación
+      players: Array(8).fill().map((_, i) => ({ id: i + 1, votes: 0 })),
       selectedPlayerIndex: null,
       hasVoted: false,
-
-      // Rol aleatorio elegido
+      revealVotes: false,
+      revealIndex: 0,
+      
+      // Roles y estado del juego
       chosenRole: {},
-
-      // Control de votos
-      playersVotes: [0, 0, 0, 0, 0, 0, 0, 0], // votos de cada jugador
-      revealVotes: false, // si estamos mostrando los votos en pantalla
-      revealIndex: 0, // hasta qué jugador se han “revelado” los votos
-
-      // Overlay final para indicar quién salió como Alguacil
-      alguacilResultOverlayActive: false,
       alguacilWinnerIndex: null,
-    };
+      aliveVillagers: 5,
+      totalVillagers: 6,
+      aliveWolves: 2,
+      totalWolves: 2,
+      currentDay: 1,
+      currentPeriod: 'DÍA'
+    }
   },
   mounted() {
-    // Simulación del flujo de pantallas
-    setTimeout(() => {
-      this.introActive = false;
-
-      // Escoge rol aleatorio (excepto "aguacil")
-      const validRoles = roles.filter(
-        (role) => role.nombre.toLowerCase() !== "aguacil"
-      );
-      const randomIndex = Math.floor(Math.random() * validRoles.length);
-      this.chosenRole = validRoles[randomIndex];
-      this.roleActive = true;
-
-      setTimeout(() => {
-        this.roleActive = false;
-        this.empiezaOverlayActive = true;
-
-        setTimeout(() => {
-          this.empiezaOverlayActive = false;
-          this.partidaActive = true;
-
-          // A los 30s, sale la pantalla de Alguacil
-          setTimeout(() => {
-            this.alguacilOverlayActive = true;
-
-            // Tras 6s de animación, la ocultamos y empezamos la votación
-            setTimeout(() => {
-              this.alguacilOverlayActive = false;
-              this.startAlguacilVoting();
-            }, 6000);
-          }, 30000);
-        }, 6000);
-      }, 6000);
-    }, 6000);
+    this.startGameFlow()
+  },
+  beforeUnmount() {
+    clearInterval(this.countdownInterval)
   },
   methods: {
-    // Inicia la votación del Alguacil
-    startAlguacilVoting() {
-      this.alguacilVotingActive = true;
-      this.timeLeft = 60;
+    startGameFlow() {
+      // Secuencia inicial de overlays
+      setTimeout(() => {
+        this.currentPhase = 'role'
+        this.chosenRole = this.getRandomRole()
+        
+        setTimeout(() => {
+          this.currentPhase = 'start'
+          
+          setTimeout(() => {
+            this.startMainGame()
+          }, 6000)
+        }, 6000)
+      }, 6000)
+    },
 
+    startMainGame() {
+      this.currentPhase = 'game'
+      this.isGameActive = true
+      
+      // Programar votación del Alguacil después de 30 segundos
+      setTimeout(() => {
+        this.currentPhase = 'alguacil_announce'
+        
+        setTimeout(() => {
+          this.startAlguacilVoting()
+        }, 6000)
+      }, 30000)
+    },
+
+    startAlguacilVoting() {
+      this.currentPhase = 'game_voting'
+      this.isVotingPhase = true
+      this.timeLeft = 60
+      
       this.countdownInterval = setInterval(() => {
         if (this.timeLeft > 0) {
-          this.timeLeft--;
+          this.timeLeft--
         } else {
-          // Se acabó el tiempo de votar
-          clearInterval(this.countdownInterval);
-          this.alguacilVotingActive = false;
-
-          // EJEMPLO: asignar los votos recibidos por cada jugador
-          // (en un caso real vendrían de tu lógica o servidor)
-          this.playersVotes = [2, 0, 3, 1, 4, 0, 1, 2];
-
-          // Mostramos los votos progresivamente
-          this.showVotesProgressively();
+          clearInterval(this.countdownInterval)
+          this.endVotingPhase()
         }
-      }, 1000);
+      }, 1000)
     },
 
-    // Muestra los votos de cada jugador uno tras otro
+    endVotingPhase() {
+      this.isVotingPhase = false
+      this.revealVotes = true
+      this.showVotesProgressively()
+      
+      // Calcular ganador
+      const maxVotes = Math.max(...this.players.map(p => p.votes))
+      const winners = this.players.filter(p => p.votes === maxVotes)
+      this.alguacilWinnerIndex = winners[0].id
+      
+      // Mostrar resultado
+      this.currentPhase = 'alguacil_result'
+      
+      setTimeout(() => {
+        this.currentPhase = 'game'
+        this.resetVotingState()
+      }, 6000)
+    },
+
     showVotesProgressively() {
-      this.revealVotes = true;
-      let i = 0;
+      let i = 0
       const revealInterval = setInterval(() => {
-        i++;
-        this.revealIndex = i;
-
-        if (i >= this.playersVotes.length) {
-          clearInterval(revealInterval);
-
-          // Calculamos el ganador (jugador con más votos)
-          const maxVotes = Math.max(...this.playersVotes);
-          const winnerIndex = this.playersVotes.indexOf(maxVotes) + 1;
-          // +1 porque playersVotes es 0-based, jugadores 1..8
-
-          this.alguacilWinnerIndex = winnerIndex;
-
-          // Mostramos el overlay final
-          this.alguacilResultOverlayActive = true;
-
-          // Tras 6s, lo ocultamos (igual que los otros overlays fadeInOut)
-          setTimeout(() => {
-            this.alguacilResultOverlayActive = false;
-          }, 6000);
+        if (i >= this.players.length) {
+          clearInterval(revealInterval)
+          return
         }
-      }, 500); // cada 0.5s se “revela” el siguiente jugador
+        this.revealIndex = i + 1
+        i++
+      }, 500)
     },
 
-    // Seleccionar/deseleccionar un jugador
     selectPlayer(playerIndex) {
-      if (!this.alguacilVotingActive || this.hasVoted) return;
-
-      if (this.selectedPlayerIndex === playerIndex) {
-        this.selectedPlayerIndex = null;
-      } else {
-        this.selectedPlayerIndex = playerIndex;
-      }
+      if (!this.isVotingPhase || this.hasVoted) return
+      this.selectedPlayerIndex = this.selectedPlayerIndex === playerIndex ? null : playerIndex
     },
 
-    // Botón "VOTAR"
     voteForPlayer() {
-      if (this.selectedPlayerIndex !== null && !this.hasVoted) {
-        console.log("Has votado al jugador", this.selectedPlayerIndex);
-        this.hasVoted = true;
+      if (this.selectedPlayerIndex && !this.hasVoted) {
+        this.players[this.selectedPlayerIndex - 1].votes++
+        this.hasVoted = true
       }
     },
-  },
-};
+
+    resetVotingState() {
+      this.selectedPlayerIndex = null
+      this.hasVoted = false
+      this.revealVotes = false
+      this.revealIndex = 0
+      this.players.forEach(p => p.votes = 0)
+    },
+
+    getRandomRole() {
+      const validRoles = roles.filter(role => role.nombre.toLowerCase() !== 'alguacil')
+      return validRoles[Math.floor(Math.random() * validRoles.length)]
+    }
+  }
+}
 </script>
 
 <style scoped>
-@import "./partida.css";
+.partida-container {
+  /* Fondo de la partida */
+  background-image: url("../../../assets/fondoPartida.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  /* Resto de propiedades */
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.vote-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #262522;
+  color: white;
+  padding: 20px 40px;
+  border-radius: 10px;
+  font-size: 1.5rem;
+  z-index: 1000;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
 </style>
