@@ -30,23 +30,26 @@ const unirseSala = () => {
     if (sala) {
       const estaEnSala = sala.jugadores.some((j) => j.id === usuario.value.id);
       if (!estaEnSala) {
+        // Emitir evento unirseSala con contraseña y código de invitación
         socket.emit("unirseSala", {
           idSala: idSala.value,
           usuario: usuario.value,
+          contrasena: sala.contrasena,
+          codigoInvitacion: sala.codigoInvitacion,
         });
+        // Desactivar pantalla de carga después de 1 segundo
+        setTimeout(() => {
+          cargando.value = false;
+          toast.success(`Te has conectado 🎉`);
+        }, 500);
       }
       actualizarSala(sala);
     } else {
       alert("La sala no existe o fue eliminada.");
-      router.push("/");
+      router.push("/juego");
     }
 
     // Desactivar pantalla de carga después de 1 segundo
-    setTimeout(() => {
-      cargando.value = false;
-      // Mostrar toast de que el usuario se ha conectado
-      toast.success(`Te has conectado 🎉`);
-    }, 1000); // 1 segundo de carga
   });
 };
 
@@ -63,7 +66,7 @@ onMounted(() => {
 
   if (!idSala.value) {
     alert("No se encontró el ID de la sala.");
-    router.push("/");
+    router.push("/juego");
     return;
   }
 
@@ -292,7 +295,7 @@ function IraPantallaDeAmigos() {
       >
         {{ !todosListos ? "Esperando jugadores listos" : "Iniciar Partida" }}
       </button>
-      <button @click="salirSala">Salir</button>
+      <button class="btn-salir" @click="salirSala">Salir</button>
     </div>
   </div>
 </template>
@@ -307,6 +310,7 @@ function IraPantallaDeAmigos() {
   color: #ffffff;
 }
 
+/* ---- CONTENEDOR DE CONTENIDO ---- */
 .sala-content {
   flex: 1;
   padding: 1rem 2rem;
@@ -343,27 +347,22 @@ function IraPantallaDeAmigos() {
   transform: scale(1.05);
 }
 
-/* Si el slot está vacío */
 .slot-vacio {
   opacity: 0.4;
 }
 
-/* Avatar dentro del slot */
 .slot-avatar img {
   width: 50px;
   height: 50px;
   border-radius: 50%;
 }
 
-/* Nombre dentro del slot */
 .slot-nombre {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin: 0.5rem 0;
   font-size: 1rem;
   font-weight: bold;
 }
 
-/* Estado del jugador (Listo/No Listo) */
 .estado-jugador {
   font-size: 0.9rem;
   font-weight: bold;
@@ -371,7 +370,7 @@ function IraPantallaDeAmigos() {
   border-radius: 6px;
 }
 
-/* ---- BOTÓN CAMBIAR ESTADO (Listo / No Listo) ---- */
+/* ---- BOTÓN CAMBIAR ESTADO ---- */
 .btn-estado {
   background-color: #1e1e1e;
   color: #ffffff;
@@ -381,6 +380,7 @@ function IraPantallaDeAmigos() {
   font-weight: bold;
   cursor: pointer;
   transition: background 0.3s, transform 0.2s;
+  margin-top: 0.5rem;
 }
 
 .btn-estado:hover {
@@ -389,35 +389,25 @@ function IraPantallaDeAmigos() {
 }
 
 .listo {
-  background-color: #008000 !important;
-  border-color: #006400;
-}
-
-.no-listo {
   background-color: #800000 !important;
   border-color: #640000;
 }
 
-/* ---- ANIMACIÓN DE ENTRADA Y SALIDA DE JUGADORES ---- */
-.jugadores-enter-active,
-.jugadores-leave-active {
-  transition: all 0.5s ease;
+.no-listo {
+  background-color: #008000 !important;
+  border-color: #006400;
 }
 
-.jugadores-enter-from,
-.jugadores-leave-to {
-  opacity: 0;
-  transform: scale(0.8);
-}
-
-/* ---- BARRA INFERIOR ---- */
+/* ---- BARRA INFERIOR (Footer) ---- */
 .bottom-bar {
   display: flex;
   justify-content: space-around;
-  padding: 1rem;
+  align-items: center;
+  padding: 1.5rem; /* Mayor altura */
   background-color: #302e2b;
 }
 
+/* Botones de invitar y de iniciar partida */
 .btn-invite,
 .btn-start {
   background-color: transparent;
@@ -426,7 +416,7 @@ function IraPantallaDeAmigos() {
   padding: 0.5rem 1rem;
   cursor: pointer;
   font-weight: bold;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .btn-invite:hover,
@@ -435,7 +425,23 @@ function IraPantallaDeAmigos() {
   color: #262522;
 }
 
-/* ---- BOTÓN EXPULSAR ---- */
+/* ---- BOTÓN SALIR (en rojo) ---- */
+.btn-salir {
+  background-color: #d32f2f;
+  border: 2px solid #d32f2f;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+  border-radius: 4px;
+}
+
+.btn-salir:hover {
+  background-color: #b71c1c;
+}
+
+/* ---- BOTÓN EXPULSAR (ya definido) ---- */
 button.expulsar {
   background-color: #ff4444;
   color: white;
@@ -502,9 +508,17 @@ button.expulsar:hover {
   }
 }
 
-/* Estilo para el slot en estado de carga */
 .slot-cargando {
   opacity: 0.7;
   pointer-events: none;
+}
+
+/* Hover general para botones (opcional) */
+button {
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+button:hover {
+  transform: scale(0.98);
 }
 </style>
