@@ -28,8 +28,10 @@
 
       <RoleInfoPanel :role="chosenRole" />
 
+      <!-- Aquí usamos el nuevo PlayersCircle que coloca a los jugadores en círculo -->
       <PlayersCircle
         :players="players"
+        :selected-player-index="selectedPlayerIndex"
         :alguacil-voting-active="isVotingPhase"
         :reveal-votes="revealVotes"
         :reveal-index="revealIndex"

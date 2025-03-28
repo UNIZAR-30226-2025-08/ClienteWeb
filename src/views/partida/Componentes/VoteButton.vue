@@ -31,6 +31,10 @@
   
   <style scoped>
   .vote-button {
+    position: absolute; 
+    top: 560px;          
+    right: 1550px;        
+    z-index: 9999;      /* valor alto para que quede por encima */
     background-color: #262522;
     color: #fff;
     font-size: 1rem;
@@ -40,13 +44,14 @@
     cursor: pointer;
     transition: all 0.2s;
     font-family: sans-serif;
-    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    width: 15%;
     text-align: center;
   }
+
   
   .vote-button:hover {
     background-color: #333;
