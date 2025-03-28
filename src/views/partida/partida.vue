@@ -272,14 +272,22 @@
         JUGADOR {{ alguacilWinnerIndex }} ES EL ALGUACIL
       </h1>
     </div>
+
+    <RolOverlay v-if="mostrarRolOverlay" :role="rolData" />
   </div>
 </template>
 
 <script>
 import { roles } from "../../assets/data/roles.js";
+import RolOverlay from "./Overlay/RolOverlay.vue";
+import { io } from "socket.io-client";
+import { useRoute, useRouter } from "vue-router";
 
 export default {
   name: "Partida",
+  components: {
+    RolOverlay,
+  },
   data() {
     return {
       // Overlays
@@ -309,42 +317,45 @@ export default {
       // Overlay final para indicar quién salió como Alguacil
       alguacilResultOverlayActive: false,
       alguacilWinnerIndex: null,
+
+      socket: io("http://localhost:5000"),
+      mostrarRolOverlay: false,
+      rolData: { src: "", nombre: "" },
+      route: useRoute(),
+      router: useRouter(),
     };
   },
   mounted() {
-    // Simulación del flujo de pantallas
-    setTimeout(() => {
-      this.introActive = false;
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    const idSala = this.route.params.idSala;
 
-      // Escoge rol aleatorio (excepto "aguacil")
-      const validRoles = roles.filter(
-        (role) => role.nombre.toLowerCase() !== "aguacil"
-      );
-      const randomIndex = Math.floor(Math.random() * validRoles.length);
-      this.chosenRole = validRoles[randomIndex];
-      this.roleActive = true;
+    if (!usuario || !idSala) {
+      this.router.push("/juego");
+      return;
+    }
 
+    // Escuchar la asignación de rol
+    this.socket.on("rolAsignado", ({ rol, idSala }) => {
+      // Actualizar el rol en el componente
+      this.chosenRole = {
+        nombre: rol,
+        src: this.obtenerImagenRol(rol),
+        descripcion: this.obtenerDescripcionRol(rol),
+      };
+
+      // Mostrar el RolOverlay
+      this.rolData = {
+        nombre: rol,
+        src: this.obtenerImagenRol(rol),
+      };
+      this.mostrarRolOverlay = true;
+
+      // Después de 6 segundos, continuar con el flujo normal
       setTimeout(() => {
-        this.roleActive = false;
-        this.empiezaOverlayActive = true;
-
-        setTimeout(() => {
-          this.empiezaOverlayActive = false;
-          this.partidaActive = true;
-
-          // A los 30s, sale la pantalla de Alguacil
-          setTimeout(() => {
-            this.alguacilOverlayActive = true;
-
-            // Tras 6s de animación, la ocultamos y empezamos la votación
-            setTimeout(() => {
-              this.alguacilOverlayActive = false;
-              this.startAlguacilVoting();
-            }, 6000);
-          }, 30000);
-        }, 6000);
+        this.mostrarRolOverlay = false;
+        this.iniciarFlujoPartida();
       }, 6000);
-    }, 6000);
+    });
   },
   methods: {
     // Inicia la votación del Alguacil
@@ -417,6 +428,64 @@ export default {
         this.hasVoted = true;
       }
     },
+
+    obtenerImagenRol(rol) {
+      const imagenes = {
+        Lobo: new URL("../../assets/roles/hombre_lobo.jpeg", import.meta.url)
+          .href,
+        Bruja: new URL("../../assets/roles/bruja.jpeg", import.meta.url).href,
+        Vidente: new URL("../../assets/roles/vidente.jpeg", import.meta.url)
+          .href,
+        Aldeano: new URL("../../assets/roles/aldeano.jpeg", import.meta.url)
+          .href,
+        Cazador: new URL("../../assets/roles/cazador.jpeg", import.meta.url)
+          .href,
+      };
+      return imagenes[rol] || "";
+    },
+
+    obtenerDescripcionRol(rol) {
+      const descripciones = {
+        Lobo: "Cada noche, los lobos se despiertan y eligen a una víctima para devorar.",
+        Bruja: "Tiene dos pociones: una para salvar y otra para matar.",
+        Vidente: "Cada noche puede conocer el rol de un jugador.",
+        Aldeano: "Debe descubrir quiénes son los lobos y eliminarlos.",
+        Cazador: "Al morir, puede llevarse a otro jugador con él.",
+      };
+      return descripciones[rol] || "";
+    },
+
+    iniciarFlujoPartida() {
+      this.introActive = true;
+
+      setTimeout(() => {
+        this.introActive = false;
+        this.roleActive = true;
+
+        setTimeout(() => {
+          this.roleActive = false;
+          this.empiezaOverlayActive = true;
+
+          setTimeout(() => {
+            this.empiezaOverlayActive = false;
+            this.partidaActive = true;
+
+            setTimeout(() => {
+              this.alguacilOverlayActive = true;
+
+              setTimeout(() => {
+                this.alguacilOverlayActive = false;
+                this.startAlguacilVoting();
+              }, 6000);
+            }, 30000);
+          }, 6000);
+        }, 6000);
+      }, 6000);
+    },
+  },
+  beforeUnmount() {
+    // Limpiar listeners de socket al desmontar
+    this.socket.off("rolAsignado");
   },
 };
 </script>

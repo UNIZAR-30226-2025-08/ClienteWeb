@@ -19,6 +19,7 @@ const maxJugadores = ref(null);
 const nombresala = ref(null);
 const cargando = ref(true); // Estado de carga
 const slotsCargando = ref({});
+const enPartida = ref(false);
 
 // Función para unirse a la sala
 const unirseSala = () => {
@@ -101,6 +102,15 @@ onMounted(() => {
       salirSala();
     }
   });
+
+  // Listener de enPartida en onMounted
+  socket.on("enPartida", ({ mensaje, sala }) => {
+    enPartida.value = true;
+    actualizarSala(sala);
+    toast.success(mensaje);
+    // Redirigir a la vista de partida
+    router.push(`/partida/${idSala.value}`);
+  });
 });
 
 onUnmounted(() => {
@@ -164,6 +174,33 @@ const espaciosJugadores = computed(() => {
   }
   return espacios;
 });
+
+// Modificar la computed property todosListos
+const todosListos = computed(() => {
+  return (
+    jugadores.value.length == maxJugadores.value &&
+    jugadores.value.every((j) => j.listo === true)
+  );
+});
+
+// Modificar la función iniciarPartida
+const iniciarPartida = () => {
+  if (usuario.value.id !== lider.value) {
+    toast.error("Solo el líder puede iniciar la partida");
+    return;
+  }
+
+  if (!todosListos.value) {
+    toast.error("Todos los jugadores deben estar listos");
+    return;
+  }
+
+  socket.emit("iniciarPartida", {
+    idSala: idSala.value,
+    idLider: usuario.value.id,
+  });
+};
+
 function IraPantallaDeAmigos() {
   router.push("/amigos");
 }
@@ -247,8 +284,13 @@ function IraPantallaDeAmigos() {
       <button class="btn-invite" @click="IraPantallaDeAmigos">
         Invitar Amigos
       </button>
-      <button class="btn-start" :disabled="jugadores.length < 2">
-        Iniciar Partida
+      <button
+        class="btn-start"
+        :disabled="!todosListos"
+        @click="iniciarPartida"
+        v-if="usuario?.id === lider && !enPartida"
+      >
+        {{ !todosListos ? "Esperando jugadores listos" : "Iniciar Partida" }}
       </button>
       <button @click="salirSala">Salir</button>
     </div>
