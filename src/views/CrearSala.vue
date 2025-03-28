@@ -16,7 +16,7 @@ const nombreServidor = ref(""); // Inicializar vacío para que se actualice corr
 const privacidad = ref("publica");
 const password = ref("");
 
-// 🟢 Recuperar usuario autenticado al cargar la vista
+// Recuperar usuario autenticado al cargar la vista
 onMounted(() => {
   const usuarioGuardado = localStorage.getItem("usuario");
   if (usuarioGuardado) {
@@ -32,7 +32,7 @@ onMounted(() => {
 const rolesCantidad = ref([
   {
     id: 1,
-    nombre: "Hombre Lobo",
+    nombre: "Hombre lobo",
     imagen: new URL("../assets/roles/hombre_lobo.jpeg", import.meta.url).href,
     cantidad: 1,
   },
@@ -71,7 +71,7 @@ const botonCrearDeshabilitado = computed(() => numJugadores.value < 5);
 const ajustarRoles = () => {
   let jugadores = numJugadores.value;
   let lobos = jugadores >= 12 ? 3 : jugadores >= 8 ? 2 : 1;
-  rolesCantidad.value.find((rol) => rol.nombre === "Hombre Lobo").cantidad =
+  rolesCantidad.value.find((rol) => rol.nombre === "Hombre lobo").cantidad =
     lobos;
 
   if (privacidad.value === "publica") {
@@ -132,7 +132,7 @@ const decrementarJugadores = () => {
 const incrementarRol = (rol) => {
   if (
     privacidad.value === "publica" ||
-    rol.nombre === "Hombre Lobo" ||
+    rol.nombre === "Hombre lobo" ||
     numJugadores.value >= 18
   )
     return;
@@ -145,7 +145,7 @@ const incrementarRol = (rol) => {
 const decrementarRol = (rol) => {
   if (
     privacidad.value === "publica" ||
-    rol.nombre === "Hombre Lobo" ||
+    rol.nombre === "Hombre lobo" ||
     rol.cantidad <= 0
   )
     return;
@@ -154,16 +154,17 @@ const decrementarRol = (rol) => {
 
 // Función para crear la sala utilizando websockets
 function crearSala() {
-  const maxRolesEspeciales = rolesCantidad.value
-    .filter((rol) => rol.nombre !== "Aldeano")
-    .reduce((acum, rol) => acum + rol.cantidad, 0);
+  const maxRoles = rolesCantidad.value.reduce((acc, rol) => {
+    acc[rol.nombre] = rol.cantidad;
+    return acc;
+  }, {});
 
   const salaData = {
     nombreSala: nombreServidor.value,
     tipo: privacidad.value.toLowerCase(),
     contrasena: privacidad.value === "Privada" ? password.value : null,
     maxJugadores: numJugadores.value,
-    maxRolesEspeciales,
+    maxRoles,
     usuario: usuario.value,
   };
 
@@ -246,7 +247,7 @@ socket.on("errorSala", (msg) => {
               v-if="
                 rol.cantidad > 0 &&
                 privacidad !== 'publica' &&
-                rol.nombre !== 'Hombre Lobo'
+                rol.nombre !== 'Hombre lobo'
               "
               @click.stop="decrementarRol(rol)"
               class="button decrement"
@@ -259,7 +260,7 @@ socket.on("errorSala", (msg) => {
             <button
               v-if="
                 privacidad !== 'publica' &&
-                rol.nombre !== 'Hombre Lobo' &&
+                rol.nombre !== 'Hombre lobo' &&
                 numJugadores < 18 &&
                 numJugadores !== 7 &&
                 numJugadores !== 11 &&

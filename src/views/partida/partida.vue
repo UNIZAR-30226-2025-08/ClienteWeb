@@ -193,7 +193,8 @@ export default {
 
     selectPlayer(playerIndex) {
       if (!this.isVotingPhase || this.hasVoted) return
-      this.selectedPlayerIndex = this.selectedPlayerIndex === playerIndex ? null : playerIndex
+      this.selectedPlayerIndex = 
+        this.selectedPlayerIndex === playerIndex ? null : playerIndex
     },
 
     voteForPlayer() {
@@ -212,7 +213,9 @@ export default {
     },
 
     getRandomRole() {
-      const validRoles = roles.filter(role => role.nombre.toLowerCase() !== 'alguacil')
+      const validRoles = roles.filter(
+        role => role.nombre.toLowerCase() !== 'alguacil'
+      )
       return validRoles[Math.floor(Math.random() * validRoles.length)]
     }
   }
@@ -221,13 +224,10 @@ export default {
 
 <style scoped>
 .partida-container {
-  /* Fondo de la partida */
   background-image: url("../../../assets/fondoPartida.jpeg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  
-  /* Resto de propiedades */
   position: relative;
   width: 100vw;
   height: 100vh;
