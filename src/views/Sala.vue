@@ -105,11 +105,14 @@ onMounted(() => {
       salirSala();
     }
   });
+  socket.on("rolAsignado", ({ rol, idSala }) => {
+    GuardarMiRolInicial(rol);
+  });
 
   // Listener de enPartida en onMounted
   socket.on("enPartida", ({ mensaje, sala }) => {
     // Actualiza y guarda la sala actual en localStorage
-    actualizarSala(sala); // Esta función ya hace: localStorage.setItem("salaActual", JSON.stringify(sala))
+    actualizarSala(sala);
     enPartida.value = true;
     toast.success(mensaje);
     // Redirigir a la vista de partida, asegurando que la información necesaria esté almacenada
@@ -131,6 +134,11 @@ const actualizarSala = (sala) => {
   lider.value = sala.lider;
   maxJugadores.value = sala.maxJugadores;
   nombresala.value = sala.nombre;
+};
+
+const GuardarMiRolInicial = (rol) => {
+  localStorage.removeItem("miRol");
+  localStorage.setItem("miRol", JSON.stringify(rol));
 };
 
 // Cambiar estado (Listo/No Listo)

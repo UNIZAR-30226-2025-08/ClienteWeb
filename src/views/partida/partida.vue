@@ -1,13 +1,16 @@
 <template>
   <!-- Contenedor principal, aplicamos modo-noche si currentPeriod === 'NOCHE' -->
-  <div class="partida-container" :class="{ 'modo-noche': currentPeriod === 'NOCHE' }">
+  <div
+    class="partida-container"
+    :class="{ 'modo-noche': currentPeriod === 'NOCHE' }"
+  >
     <!-- Mostrar exclusivamente los overlays si la fase actual es una overlay -->
     <template v-if="isOverlayActive">
       <!-- Overlays iniciales -->
       <IntroOverlay v-if="currentPhase === 'intro'" />
       <RoleOverlay v-else-if="currentPhase === 'role'" :role="chosenRole" />
       <EmpiezaOverlay v-else-if="currentPhase === 'start'" />
-      
+
       <!-- Overlays del alguacil -->
       <AlguacilOverlay v-else-if="currentPhase === 'alguacil_announce'" />
       <AlguacilResultOverlay
@@ -19,21 +22,26 @@
       <NocheOverlay v-else-if="currentPhase === 'night'" :visible="true" />
 
       <!-- Overlays de la vidente -->
-      <VidenteOverlay v-else-if="currentPhase === 'vidente_awaken'" :visible="true" />
-      <OjoCerradoOverlay v-else-if="currentPhase === 'ojo_cerrado'" :visible="true" />
+      <VidenteOverlay
+        v-else-if="currentPhase === 'vidente_awaken'"
+        :visible="true"
+      />
+      <OjoCerradoOverlay
+        v-else-if="currentPhase === 'ojo_cerrado'"
+        :visible="true"
+      />
     </template>
 
     <!-- Mostrar el contenido principal del juego cuando NO es fase overlay -->
     <template v-else>
       <GameStatus
-        :pueblo-vivos="aliveVillagers"
-        :total-pueblo="totalVillagers"
-        :lobos-vivos="aliveWolves"
-        :total-lobos="totalWolves"
-        :jornada="currentDay"
-        :periodo="currentPeriod"
+        :aliveVillagers="aliveVillagers"
+        :totalVillagers="totalVillagers"
+        :aliveWolves="aliveWolves"
+        :totalWolves="totalWolves"
+        :currentDay="currentDay"
+        :timePeriod="currentPeriod"
       />
-
       <RoleInfoPanel :role="chosenRole" />
 
       <!-- Círculo de jugadores, donde se puede hacer clic para votar -->
@@ -102,7 +110,7 @@ export default {
   },
   data() {
     return {
-      // Fases posibles: 
+      // Fases posibles:
       // 'intro', 'role', 'start', 'alguacil_announce', 'game_voting', 'alguacil_result',
       // 'night', 'vidente_awaken', 'ojo_cerrado', 'game'
       currentPhase: "intro",
@@ -163,27 +171,22 @@ export default {
     this.players = sala.jugadores || [];
 
     // Asignar el rol del jugador actual
-    const myId = this.getMyId();
-    const miJugador = this.players.find(j => j.id === myId);
-    if (miJugador && miJugador.rol) {
-      this.chosenRole = miJugador.rol;
+    const rol = localStorage.getItem("miRol");
+    const rolMayus = JSON.parse(rol);
+    if (rolMayus) {
+      this.chosenRole = roles.find(
+        (role) => role.nombre.toLowerCase() === rolMayus.toLowerCase()
+      );
     } else {
-      console.error("No se encontró un rol asignado para el jugador");
+      console.error("No se encontró el rol del jugador actual");
     }
 
+    this.aliveVillagers = sala.maxJugadores;
+    this.totalVillagers = sala.maxJugadores;
     // Sincronizar los totales a partir de maxRoles (si existe)
-    if (sala.maxRoles) {
-      this.aliveWolves = sala.maxRoles["Hombre lobo"] || 0;
-      this.totalWolves = sala.maxRoles["Hombre lobo"] || 0;
-      this.aliveVillagers = sala.maxRoles["Aldeano"] || 0;
-      this.totalVillagers = sala.maxRoles["Aldeano"] || 0;
-    } else {
-      this.aliveWolves = 0;
-      this.totalWolves = 0;
-      this.aliveVillagers = 0;
-      this.totalVillagers = 0;
-    }
-    
+    this.aliveWolves = sala.maxRoles["Hombre lobo"] || 0;
+    this.totalWolves = sala.maxRoles["Hombre lobo"] || 0;
+
     // Iniciar flujo de juego
     this.startGameFlow();
     /* Ejemplo de conexión con socket:
@@ -219,7 +222,6 @@ export default {
       // Secuencia inicial
       setTimeout(() => {
         this.currentPhase = "role";
-        this.chosenRole = this.getRandomRole();
 
         setTimeout(() => {
           this.currentPhase = "start";
@@ -267,8 +269,8 @@ export default {
       this.showVotesProgressively();
 
       // Calcular ganador
-      const maxVotes = Math.max(...this.players.map(p => p.votes));
-      const winners = this.players.filter(p => p.votes === maxVotes);
+      const maxVotes = Math.max(...this.players.map((p) => p.votes));
+      const winners = this.players.filter((p) => p.votes === maxVotes);
       this.alguacilWinnerIndex = winners[0]?.id || null;
 
       // Pasamos a mostrar el overlay de resultado
@@ -343,12 +345,14 @@ export default {
       this.hasVoted = false;
       this.revealVotes = false;
       this.revealIndex = 0;
-      this.players.forEach(p => (p.votes = 0));
+      this.players.forEach((p) => (p.votes = 0));
     },
 
     getRandomRole() {
       // Lógica para elegir rol (por ejemplo, excluir 'alguacil' si es un rol aparte)
-      const validRoles = roles.filter(role => role.nombre.toLowerCase() !== "alguacil");
+      const validRoles = roles.filter(
+        (role) => role.nombre.toLowerCase() !== "alguacil"
+      );
       return validRoles[Math.floor(Math.random() * validRoles.length)];
     },
   },

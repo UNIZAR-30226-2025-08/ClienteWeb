@@ -9,9 +9,13 @@
       @click="onPlayerClick(player.id)"
     >
       <!-- Imagen de cada jugador -->
-      <img src="../../../assets/player.png" alt="Jugador" class="player-image" />
+      <img
+        src="../../../assets/player.png"
+        alt="Jugador"
+        class="player-image"
+      />
       <!-- Etiqueta con el número o nombre del jugador -->
-      <span class="player-label">Jugador {{ player.id }}</span>
+      <span class="player-label"> {{ player.nombre }}</span>
     </div>
   </div>
 </template>
@@ -22,16 +26,16 @@ export default {
   props: {
     players: {
       type: Array,
-      required: true
+      required: true,
     },
     selectedPlayerIndex: {
       type: Number,
-      default: null
-    }
+      default: null,
+    },
   },
   methods: {
     onPlayerClick(playerId) {
-      this.$emit('select-player', playerId);
+      this.$emit("select-player", playerId);
     },
     getPlayerPositionStyle(index, totalPlayers) {
       // Calcula el ángulo para este jugador
@@ -46,21 +50,20 @@ export default {
       const y = radiusY * Math.sin(rad);
 
       return {
-        transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`
+        transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
       };
-    }
-
-  }
+    },
+  },
 };
 </script>
 
 <style scoped>
 /* Contenedor que define la "zona" del círculo */
 .players-circle {
-  position: absolute;        /* o relative, según tu necesidad */
-  top: 54%;                  /* centrado vertical */
-  left: 50%;                 /* centrado horizontal */
-  width: 0px;                /* No necesita ancho/alto específico, ya que se usa para posicionar */
+  position: absolute; /* o relative, según tu necesidad */
+  top: 54%; /* centrado vertical */
+  left: 50%; /* centrado horizontal */
+  width: 0px; /* No necesita ancho/alto específico, ya que se usa para posicionar */
   height: 0px;
   transform: translate(-50%, -50%);
   /* Para debug, puedes agregar un borde:
@@ -71,11 +74,11 @@ export default {
 /* Cada "jugador" se ubica en posición absoluta dentro del contenedor */
 .player-icon {
   position: absolute;
-  width: 90px;              /* Tamaño del circulito */
+  width: 90px; /* Tamaño del circulito */
   height: 90px;
   background-color: #262522; /* Fondo oscuro */
-  border-radius: 50%;       /* Circulo */
-  display: flex;            /* Centrado del contenido */
+  border-radius: 50%; /* Circulo */
+  display: flex; /* Centrado del contenido */
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -92,7 +95,7 @@ export default {
 /* Etiqueta del jugador (ej: "Jugador 1") */
 .player-label {
   position: absolute;
-  top: 100%;              /* Justo debajo de la imagen */
+  top: 100%; /* Justo debajo de la imagen */
   left: 50%;
   transform: translateX(-50%);
   color: #000000;
