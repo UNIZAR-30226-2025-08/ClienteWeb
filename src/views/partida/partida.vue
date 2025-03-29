@@ -134,7 +134,7 @@ export default {
   computed: {
     /**
      * Define qué fases deben mostrar únicamente un overlay
-     * OJO: No ponemos "game_voting" en la lista, para que en esa fase
+     * No incluimos "game_voting" aquí, para que en esa fase
      * se muestre el contenido principal (contador, jugadores, etc.).
      */
     isOverlayActive() {
@@ -186,6 +186,16 @@ export default {
     
     // Iniciar flujo de juego
     this.startGameFlow();
+    /* Ejemplo de conexión con socket:
+    const idPartida = "partida_" + sala.id;
+    socket.emit("unirsePartida", { idPartida, idUsuario: myId });
+    socket.on("turnoCambiado", ({ estado, mensaje }) => {
+      this.currentPhase = estado.turno || "game";
+      this.players = estado.jugadores || this.players;
+      this.currentDay = estado.currentDay || this.currentDay;
+      this.currentPeriod = estado.currentPeriod || this.currentPeriod;
+    });
+    */
   },
   beforeUnmount() {
     clearInterval(this.countdownInterval);
@@ -265,27 +275,40 @@ export default {
       this.currentPhase = "alguacil_result";
 
       setTimeout(() => {
-        // Tras 6s, pasamos a la fase de noche
-        this.currentPhase = "night";
-        this.currentPeriod = "NOCHE";
+        // Llamamos a la función que gestiona TODO el proceso de noche
+        this.startNightSequence();
+      }, 6000);
+    },
 
+    /**
+     * Encapsula TODO el proceso de la noche:
+     *  1) Overlay de noche
+     *  2) Vidente se despierta
+     *  3) Ojo cerrado para los demás
+     *  4) Volver al juego
+     */
+    startNightSequence() {
+      // 1) Comenzamos la noche
+      this.currentPhase = "night";
+      this.currentPeriod = "NOCHE";
+
+      setTimeout(() => {
+        // 2) Overlay: la Vidente se despierta (para TODOS)
+        this.currentPhase = "vidente_awaken";
         setTimeout(() => {
-          // Overlay: la Vidente se despierta (para TODOS)
-          this.currentPhase = "vidente_awaken";
-          setTimeout(() => {
-            // Si eres la Vidente, vuelves directo al juego
-            if (this.isVidente()) {
+          // 3) Si eres la Vidente, vas directo al juego
+          if (this.isVidente()) {
+            this.currentPhase = "game";
+            this.resetVotingState();
+          } else {
+            // Si NO eres la Vidente, ves el ojo cerrado
+            this.currentPhase = "ojo_cerrado";
+            setTimeout(() => {
+              // 4) Todos vuelven al juego
               this.currentPhase = "game";
               this.resetVotingState();
-            } else {
-              // Si NO eres la Vidente, ves el ojo cerrado
-              this.currentPhase = "ojo_cerrado";
-              setTimeout(() => {
-                this.currentPhase = "game";
-                this.resetVotingState();
-              }, 6000);
-            }
-          }, 6000);
+            }, 6000);
+          }
         }, 6000);
       }, 6000);
     },
