@@ -1,15 +1,26 @@
 <template>
-  <div class="partida-container">
+  <!-- Contenedor principal, aplicamos modo-noche si currentPeriod === 'NOCHE' -->
+  <div class="partida-container" :class="{ 'modo-noche': currentPeriod === 'NOCHE' }">
     <!-- Mostrar exclusivamente los overlays si la fase actual es una overlay -->
     <template v-if="isOverlayActive">
+      <!-- Overlays iniciales -->
       <IntroOverlay v-if="currentPhase === 'intro'" />
       <RoleOverlay v-else-if="currentPhase === 'role'" :role="chosenRole" />
       <EmpiezaOverlay v-else-if="currentPhase === 'start'" />
+      
+      <!-- Overlays del alguacil -->
       <AlguacilOverlay v-else-if="currentPhase === 'alguacil_announce'" />
       <AlguacilResultOverlay
         v-else-if="currentPhase === 'alguacil_result'"
         :winner-index="alguacilWinnerIndex"
       />
+
+      <!-- Overlay de noche -->
+      <NocheOverlay v-else-if="currentPhase === 'night'" :visible="true" />
+
+      <!-- Overlays de la vidente -->
+      <VidenteOverlay v-else-if="currentPhase === 'vidente_awaken'" :visible="true" />
+      <OjoCerradoOverlay v-else-if="currentPhase === 'ojo_cerrado'" :visible="true" />
     </template>
 
     <!-- Mostrar el contenido principal del juego cuando NO es fase overlay -->
@@ -25,6 +36,7 @@
 
       <RoleInfoPanel :role="chosenRole" />
 
+      <!-- Círculo de jugadores, donde se puede hacer clic para votar -->
       <PlayersCircle
         :players="players"
         :alguacil-voting-active="isVotingPhase"
@@ -33,8 +45,10 @@
         @select-player="selectPlayer"
       />
 
+      <!-- Contador de tiempo para la votación -->
       <CountdownTimer v-if="isVotingPhase" :time-left="timeLeft" />
 
+      <!-- Botón de voto -->
       <VoteButton
         v-if="isVotingPhase"
         :selected-player-index="selectedPlayerIndex"
@@ -42,6 +56,7 @@
         @vote="voteForPlayer"
       />
 
+      <!-- Mensaje cuando ya has votado -->
       <div v-if="hasVoted && isVotingPhase" class="vote-message">
         Has votado al <strong>Jugador {{ selectedPlayerIndex }}</strong>
       </div>
@@ -56,11 +71,17 @@ import RoleInfoPanel from "../../views/partida/Componentes/DescripcionRol.vue";
 import CountdownTimer from "../../views/partida/Componentes/CountdownTimer.vue";
 import VoteButton from "../../views/partida/Componentes/VoteButton.vue";
 import PlayersCircle from "../../views/partida/Componentes/PlayerCard.vue";
+
 import IntroOverlay from "../../views/partida/Overlay/IntroPartidaOverlay.vue";
 import RoleOverlay from "../../views/partida/Overlay/RolOverlay.vue";
 import EmpiezaOverlay from "../../views/partida/Overlay/InicioPartidaOverlay.vue";
+
 import AlguacilOverlay from "../../views/partida/Overlay/VotacionAlguacilOverlay.vue";
 import AlguacilResultOverlay from "../../views/partida/Overlay/ResultadoAlguacilOverlay.vue";
+
+import NocheOverlay from "../../views/partida/Overlay/InicioNocheOverlay.vue";
+import VidenteOverlay from "../../views/partida/Overlay/VidenteOverlay.vue";
+import OjoCerradoOverlay from "../../views/partida/Overlay/OjoCerradoOverlay.vue";
 
 export default {
   name: "Partida",
@@ -75,22 +96,25 @@ export default {
     EmpiezaOverlay,
     AlguacilOverlay,
     AlguacilResultOverlay,
+    NocheOverlay,
+    VidenteOverlay,
+    OjoCerradoOverlay,
   },
   data() {
     return {
-      // Flujo del juego
-      currentPhase: "intro", // Fases posibles: 'intro', 'role', 'start', 'alguacil_announce', 'alguacil_result', 'game', 'game_voting'
+      // Fases posibles: 
+      // 'intro', 'role', 'start', 'alguacil_announce', 'game_voting', 'alguacil_result',
+      // 'night', 'vidente_awaken', 'ojo_cerrado', 'game'
+      currentPhase: "intro",
       isGameActive: false,
       isVotingPhase: false,
 
-      // Temporizadores
+      // Temporizador
       timeLeft: 60,
       countdownInterval: null,
 
       // Jugadores y votación
-      players: Array()
-        .fill()
-        .map((_, i) => ({ id: i + 1, votes: 0 })),
+      players: [],
       selectedPlayerIndex: null,
       hasVoted: false,
       revealVotes: false,
@@ -108,7 +132,11 @@ export default {
     };
   },
   computed: {
-    // Define las fases que deben mostrar únicamente el overlay
+    /**
+     * Define qué fases deben mostrar únicamente un overlay
+     * OJO: No ponemos "game_voting" en la lista, para que en esa fase
+     * se muestre el contenido principal (contador, jugadores, etc.).
+     */
     isOverlayActive() {
       return [
         "intro",
@@ -116,6 +144,9 @@ export default {
         "start",
         "alguacil_announce",
         "alguacil_result",
+        "night",
+        "vidente_awaken",
+        "ojo_cerrado",
       ].includes(this.currentPhase);
     },
   },
@@ -131,70 +162,51 @@ export default {
     // Sincronizar lista de jugadores
     this.players = sala.jugadores || [];
 
-    // Asignar el rol del jugador actual según lo asignado en la sala
+    // Asignar el rol del jugador actual
     const myId = this.getMyId();
-    const miJugador = this.players.find((j) => j.id == myId);
+    const miJugador = this.players.find(j => j.id === myId);
     if (miJugador && miJugador.rol) {
       this.chosenRole = miJugador.rol;
     } else {
       console.error("No se encontró un rol asignado para el jugador");
-      this;
     }
 
     // Sincronizar los totales a partir de maxRoles (si existe)
     if (sala.maxRoles) {
-      //Asignamos los roles al inicio con lo que recuperamos de la sala
       this.aliveWolves = sala.maxRoles["Hombre lobo"] || 0;
       this.totalWolves = sala.maxRoles["Hombre lobo"] || 0;
       this.aliveVillagers = sala.maxRoles["Aldeano"] || 0;
       this.totalVillagers = sala.maxRoles["Aldeano"] || 0;
     } else {
-      // Si no se definió maxRoles, puedes asignar valores por defecto
       this.aliveWolves = 0;
       this.totalWolves = 0;
       this.aliveVillagers = 0;
       this.totalVillagers = 0;
     }
+    
+    // Iniciar flujo de juego
     this.startGameFlow();
-    /*
-    // Construir el id de la partida (asegúrate de que coincida con la lógica del servidor)
-    const idPartida = "partida_" + sala.id;
-    // Emitir un evento para unirse a la partida
-    socket.emit("unirsePartida", { idPartida, idUsuario: myId });
-
-    // Configurar los listeners para recibir actualizaciones desde el servidor
-    socket.on("turnoCambiado", ({ estado, mensaje }) => {
-      this.currentPhase = estado.turno || "game";
-      this.players = estado.jugadores || this.players;
-      this.currentDay = estado.currentDay || this.currentDay;
-      this.currentPeriod = estado.currentPeriod || this.currentPeriod;
-    });
-
-    socket.on("votoRegistrado", ({ estado }) => {
-      this.players = estado.jugadores || this.players;
-    });
-
-    socket.on("rolAsignado", (data) => {
-      // Aunque ya se asignó el rol, este listener sirve para actualizarlo en caso de reconexión o cambios
-      if (data.idSala === sala.id && data.rol) {
-        this.chosenRole = data.rol;
-      }
-    });*/
   },
-
   beforeUnmount() {
     clearInterval(this.countdownInterval);
-    socket.off("turnoCambiado");
-    socket.off("votoRegistrado");
-    socket.off("rolAsignado");
+    // Si usas sockets, desuscríbete aquí
+    // socket.off("turnoCambiado");
+    // socket.off("votoRegistrado");
+    // socket.off("rolAsignado");
   },
   methods: {
     getMyId() {
       const user = localStorage.getItem("usuario");
       return user ? JSON.parse(user).id : null;
     },
+
+    // Saber si el jugador actual es la Vidente
+    isVidente() {
+      return this.chosenRole && this.chosenRole.nombre === "Vidente";
+    },
+
     startGameFlow() {
-      // Secuencia inicial de overlays
+      // Secuencia inicial
       setTimeout(() => {
         this.currentPhase = "role";
         this.chosenRole = this.getRandomRole();
@@ -213,16 +225,16 @@ export default {
       this.currentPhase = "game";
       this.isGameActive = true;
 
-      // Programar votación del Alguacil después de 30 segundos
+      // Pasados 30s en game, se anuncia la votación del alguacil
       setTimeout(() => {
         this.currentPhase = "alguacil_announce";
-
         setTimeout(() => {
           this.startAlguacilVoting();
         }, 6000);
       }, 30000);
     },
 
+    // Fase de votación de Alguacil (NO es overlay, se ve en el contenido principal)
     startAlguacilVoting() {
       this.currentPhase = "game_voting";
       this.isVotingPhase = true;
@@ -238,22 +250,43 @@ export default {
       }, 1000);
     },
 
+    // Cuando termina la votación, calculamos el ganador y mostramos el resultado
     endVotingPhase() {
       this.isVotingPhase = false;
       this.revealVotes = true;
       this.showVotesProgressively();
 
       // Calcular ganador
-      const maxVotes = Math.max(...this.players.map((p) => p.votes));
-      const winners = this.players.filter((p) => p.votes === maxVotes);
-      this.alguacilWinnerIndex = winners[0].id;
+      const maxVotes = Math.max(...this.players.map(p => p.votes));
+      const winners = this.players.filter(p => p.votes === maxVotes);
+      this.alguacilWinnerIndex = winners[0]?.id || null;
 
-      // Mostrar resultado
+      // Pasamos a mostrar el overlay de resultado
       this.currentPhase = "alguacil_result";
 
       setTimeout(() => {
-        this.currentPhase = "game";
-        this.resetVotingState();
+        // Tras 6s, pasamos a la fase de noche
+        this.currentPhase = "night";
+        this.currentPeriod = "NOCHE";
+
+        setTimeout(() => {
+          // Overlay: la Vidente se despierta (para TODOS)
+          this.currentPhase = "vidente_awaken";
+          setTimeout(() => {
+            // Si eres la Vidente, vuelves directo al juego
+            if (this.isVidente()) {
+              this.currentPhase = "game";
+              this.resetVotingState();
+            } else {
+              // Si NO eres la Vidente, ves el ojo cerrado
+              this.currentPhase = "ojo_cerrado";
+              setTimeout(() => {
+                this.currentPhase = "game";
+                this.resetVotingState();
+              }, 6000);
+            }
+          }, 6000);
+        }, 6000);
       }, 6000);
     },
 
@@ -287,13 +320,12 @@ export default {
       this.hasVoted = false;
       this.revealVotes = false;
       this.revealIndex = 0;
-      this.players.forEach((p) => (p.votes = 0));
+      this.players.forEach(p => (p.votes = 0));
     },
 
     getRandomRole() {
-      const validRoles = roles.filter(
-        (role) => role.nombre.toLowerCase() !== "alguacil"
-      );
+      // Lógica para elegir rol (por ejemplo, excluir 'alguacil' si es un rol aparte)
+      const validRoles = roles.filter(role => role.nombre.toLowerCase() !== "alguacil");
       return validRoles[Math.floor(Math.random() * validRoles.length)];
     },
   },
@@ -310,6 +342,11 @@ export default {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+}
+
+/* Aplica un filtro de oscuridad cuando sea de noche */
+.modo-noche {
+  filter: brightness(0.4);
 }
 
 .vote-message {
