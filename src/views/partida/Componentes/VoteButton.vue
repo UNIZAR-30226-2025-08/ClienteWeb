@@ -32,22 +32,22 @@
   <style scoped>
   .vote-button {
     position: absolute; 
-    top: 560px;          
-    right: 1550px;        
+    top: 35rem;          
+    right: 96.875rem;        
     z-index: 9999;      /* valor alto para que quede por encima */
     background-color: #262522;
     color: #fff;
     font-size: 1rem;
-    padding: 12px 30px;
-    border: 2px solid #fff;
-    border-radius: 8px;
+    padding: 0.75rem 1.875rem;
+    border: 0.125rem solid #fff;
+    border-radius: 0.5rem;
     cursor: pointer;
     transition: all 0.2s;
     font-family: sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 0.5rem;
     width: 15%;
     text-align: center;
   }
@@ -58,8 +58,8 @@
   }
   
   .candado-icon {
-    width: 20px;
-    height: 20px;
+    width: 1.25rem;
+    height: 1.25rem;
   }
   
   .vote-button.active {

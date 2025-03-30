@@ -74,8 +74,8 @@ export default {
 /* Cada "jugador" se ubica en posición absoluta dentro del contenedor */
 .player-icon {
   position: absolute;
-  width: 90px; /* Tamaño del circulito */
-  height: 90px;
+  width: 5.625rem; /* Tamaño del circulito */
+  height: 5.625rem;
   background-color: #262522; /* Fondo oscuro */
   border-radius: 50%; /* Circulo */
   display: flex; /* Centrado del contenido */
@@ -86,8 +86,8 @@ export default {
 
 /* Imagen del jugador */
 .player-image {
-  width: 70px;
-  height: 70px;
+  width: 4.375rem;
+  height: 4.375rem;
   border-radius: 50%;
   object-fit: cover;
 }
@@ -105,7 +105,7 @@ export default {
 
 /* Destacar jugador seleccionado */
 .selected {
-  outline: 2px solid yellow;
+  outline: 0.125rem solid yellow;
   border-radius: 50%;
 }
 </style>

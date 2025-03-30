@@ -21,13 +21,13 @@
   <style scoped>
   .countdown-container {
     position: absolute;
-    left: 60px;
-    top: 150px;
+    left: 3.75rem;           /*60px;*/
+    top: 9.375rem;           /*150px;*/
   }
   
   .countdown-circle {
-    width: 100px;
-    height: 100px;
+    width: 6.25rem;         /*100px;*/
+    height: 6.25rem;         /*100px;*/
     background-color: #262522;
     border-radius: 50%;
     display: flex;

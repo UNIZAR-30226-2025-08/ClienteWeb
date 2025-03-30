@@ -383,10 +383,10 @@ export default {
   transform: translate(-50%, -50%);
   background-color: #262522;
   color: white;
-  padding: 20px 40px;
-  border-radius: 10px;
+  padding: 1.25rem 2.5rem;
+  border-radius: 0.625;
   font-size: 1.5rem;
   z-index: 1000;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 1.25rem rgba(0, 0, 0, 0.5);
 }
 </style>

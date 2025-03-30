@@ -64,7 +64,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 10px 20px;
+  padding: 0.625rem 1.25rem;
   position: absolute;
   top: 0;
   left: 0;
@@ -74,12 +74,12 @@ export default {
 .section {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.625rem;
   background-color: #262522;
   color: white;
-  padding: 15px 30px;
-  border-radius: 10px;
-  min-width: 180px;
+  padding: 0.9375rem 1.875rem;
+  border-radius: 0.625rem;
+  min-width: 11.25rem;
   max-width: 30%;
   flex-shrink: 0;
 }
@@ -91,8 +91,8 @@ export default {
 }
 
 .icon {
-  width: 40px;
-  height: 40px;
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
 .status-text {

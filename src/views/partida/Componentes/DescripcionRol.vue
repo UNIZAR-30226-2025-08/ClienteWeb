@@ -27,32 +27,32 @@
   <style scoped>
   .role-info-panel {
     position: absolute;
-    bottom: 20px;
-    left: 20px;
+    bottom: 1.25rem;         /*20px;*/
+    left: 1.25rem;         /*20px;*/
     background-color: #262522;
     color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    width: 420px;
-    height: 300px;
+    padding: 1.25rem;         /*20px;*/;
+    border-radius: 0.625rem;         /*10px;*/
+    width: 26.25rem;         /*420px;*/
+    height: 18.75rem;         /*300px;*/
     box-sizing: border-box;
     overflow: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0.625rem;         /*10px;*/
   }
   
   .top-row {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 0.9375rem;
   }
   
   .role-info-image {
-    width: 60px;
-    height: 60px;
+    width: 3.75rem;
+    height: 3.75rem;
     object-fit: cover;
-    border-radius: 5px;
+    border-radius: 0.3125rem;
   }
   
   .role-info-title {
