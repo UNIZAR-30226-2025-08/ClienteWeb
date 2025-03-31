@@ -147,8 +147,6 @@ onMounted(() => {
       <button class="blue-button" @click="addFriend" :disabled="loadingSearch">
         Agregar
       </button>
-      <div v-if="searchError" class="error">{{ searchError }}</div>
-      <div v-if="searchSuccess" class="success">{{ searchSuccess }}</div>
     </div>
 
     <!-- Contenedor principal para la lista de amigos -->
