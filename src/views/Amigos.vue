@@ -1,12 +1,13 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { toast } from "vue3-toastify";
 import Cabecera from "../components/Cabecera.vue";
 import Volver from "../components/Volver.vue";
 import axios from "axios";
 
 // Función para obtener el ID del usuario logueado desde localStorage
 const getUserId = () => {
-  return JSON.parse(localStorage.getItem("usuario")).id;
+  return JSON.parse(localStorage.getItem("usuario")).idUsuario;
 };
 
 const friends = ref([]);
@@ -82,7 +83,7 @@ const addFriend = async () => {
   searchError.value = null;
   searchSuccess.value = "";
   try {
-    // Buscamos el usuario por nombr
+    // Buscamos el usuario por nombre
     const response = await axios.post("/api/usuario/obtener_por_nombre", {
       nombre: searchName.value,
     });
@@ -91,9 +92,9 @@ const addFriend = async () => {
       return;
     }
     const foundUser = response.data.usuario;
-    // Enviams la solicitud de amista
     const userId = getUserId();
-    await axios.post("/api/solicitud/enviar", {
+    // Enviamos la solicitud de amistad y almacenamos la respuesta del backend
+    const sendResponse = await axios.post("/api/solicitud/enviar", {
       idEmisor: userId,
       idReceptor: foundUser.idUsuario,
     });
@@ -101,15 +102,26 @@ const addFriend = async () => {
     await fetchFriends();
     // Limpiamos el campo de búsqueda
     searchName.value = "";
-    // Mostramos el mensaje de confirmación
-    searchSuccess.value =
-      "Solicitud de amistad enviada correctamente a el usuario " +
-      foundUser.nombre;
+    // Si el backend responde con un mensaje, lo mostramos
+    if (sendResponse.data && sendResponse.data.mensaje) {
+      toast.info(sendResponse.data.mensaje, { autoClose: 3000 });
+      searchSuccess.value = sendResponse.data.mensaje;
+    } else {
+      toast.success(
+        `Solicitud de amistad enviada correctamente a ${foundUser.nombre}`,
+        { autoClose: 3000 }
+      );
+      searchSuccess.value = `Solicitud de amistad enviada correctamente a ${foundUser.nombre}`;
+    }
   } catch (err) {
-    console.error("Error al agregar amigo:", err);
-    searchError.value =
+    console.error("Error al agregar amigo:", err.response);
+    const errorMessage =
       err.response?.data?.error ||
+      err.response?.data?.mensaje ||
+      err.message ||
       "Error al agregar amigo. Inténtalo nuevamente.";
+    searchError.value = errorMessage;
+    toast.error(errorMessage, { autoClose: 3000 });
   } finally {
     loadingSearch.value = false;
   }

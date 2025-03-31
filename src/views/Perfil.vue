@@ -1,33 +1,29 @@
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 import { toast } from "vue3-toastify";
 import Volver from "../components/Volver.vue";
-import defaultAvatar from "../assets/profile_icon.jpg";
+import { useRouter } from "vue-router";
 
-const usuario = JSON.parse(localStorage.getItem("usuario"));
 const router = useRouter();
 
-if (!usuario) {
-  router.push("/");
-}
+const usuario = JSON.parse(localStorage.getItem("usuario"));
+const nombre = ref(usuario.nombre);
+const avatar = ref(usuario.avatar);
+const rolFavorito = ref(usuario.rolFavorito);
 
-const nombre = ref(usuario?.nombre || "NombreCuenta");
-const avatar = ref(usuario?.avatar || defaultAvatar);
-const rolFavorito = ref(usuario?.rolFavorito || "Sin rol favorito");
+const nuevoNombre = ref("");
+const nuevoAvatar = ref("");
+const nuevoRol = ref("Sin rol favorito");
 const mensajeError = ref("");
+
 const modalAbierto = ref(false);
 
-// Datos temporales para edición
-const nuevoNombre = ref(nombre.value);
-const nuevoAvatar = ref(avatar.value);
-const nuevoRol = ref(rolFavorito.value);
+const irAAmigos = () => {
+  router.push("/amigos");
+};
 
 const abrirModal = () => {
-  nuevoNombre.value = nombre.value;
-  nuevoAvatar.value = avatar.value;
-  nuevoRol.value = rolFavorito.value;
   modalAbierto.value = true;
 };
 
@@ -35,11 +31,22 @@ const cerrarModal = () => {
   modalAbierto.value = false;
 };
 
+onMounted(() => {
+  nuevoNombre.value = nombre.value;
+  nuevoAvatar.value = avatar.value;
+  nuevoRol.value = rolFavorito.value || "Sin rol favorito";
+});
+
 const actualizarPerfil = async () => {
   mensajeError.value = "";
 
-  if (!nuevoNombre.value || !nuevoAvatar.value || !nuevoRol.value) {
-    mensajeError.value = "Todos los campos son obligatorios";
+  if (
+    nuevoNombre.value === nombre.value &&
+    nuevoAvatar.value === avatar.value &&
+    (nuevoRol.value === rolFavorito.value ||
+      (rolFavorito.value == null && nuevoRol.value === "Sin rol favorito"))
+  ) {
+    mensajeError.value = "No has realizado ningún cambio.";
     toast.error(mensajeError.value);
     return;
   }
@@ -47,7 +54,7 @@ const actualizarPerfil = async () => {
   const rol = nuevoRol.value === "Sin rol favorito" ? null : nuevoRol.value;
 
   const datosActualizados = {
-    idUsuario: usuario.idUsuario,
+    idUsuario: Number(usuario.idUsuario),
     nombre: nuevoNombre.value,
     avatar: nuevoAvatar.value,
     rolFavorito: rol,
@@ -92,9 +99,10 @@ const actualizarPerfil = async () => {
         Nombre: <span>{{ nombre }}</span>
       </h2>
       <h3>
-        Rol Favorito: <span>{{ rolFavorito }}</span>
+        Rol Favorito: <span>{{ rolFavorito || "Sin rol favorito" }}</span>
       </h3>
       <button @click="abrirModal">Actualizar Perfil</button>
+      <button @click="irAAmigos" class="ver-amigos-btn">Ver mis amigos</button>
     </div>
   </div>
 
@@ -120,6 +128,7 @@ const actualizarPerfil = async () => {
             <option value="vidente">Vidente</option>
             <option value="lobo">Lobo</option>
             <option value="aldeano">Aldeano</option>
+            <option value="Sin rol favorito">Sin rol favorito</option>
           </select>
         </div>
 
@@ -187,6 +196,19 @@ button {
 
 button:hover {
   background-color: #444;
+}
+.ver-amigos-btn {
+  margin-top: 1rem;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 5px;
+  background-color: #4caf50;
+  color: white;
+  cursor: pointer;
+}
+
+.ver-amigos-btn:hover {
+  background-color: #45a049;
 }
 
 /* Estilos del modal */

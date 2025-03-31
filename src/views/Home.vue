@@ -99,7 +99,7 @@ async function loginUser() {
     if (response.status === 200 && response.data.usuario) {
       //Extraemos los datos del Backend que nos pasa el usuario
       const usuario = {
-        id: response.data.usuario.idUsuario,
+        idUsuario: response.data.usuario.idUsuario,
         nombre: response.data.usuario.nombre,
         fechaCreacion: response.data.usuario.fechaCreacion,
         avatar: response.data.usuario.avatar,
