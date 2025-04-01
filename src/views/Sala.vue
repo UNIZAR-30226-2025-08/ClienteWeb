@@ -20,6 +20,7 @@ const nombresala = ref(null);
 const cargando = ref(true); // Estado de carga
 const slotsCargando = ref({});
 const enPartida = ref(false);
+const partidaIniciada = ref(false); // Variable para evitar múltiples clics en "Iniciar Partida"
 
 // Función para unirse a la sala
 const unirseSala = () => {
@@ -48,8 +49,6 @@ const unirseSala = () => {
       alert("La sala no existe o fue eliminada.");
       router.push("/juego");
     }
-
-    // Desactivar pantalla de carga después de 1 segundo
   });
 };
 
@@ -78,7 +77,7 @@ onMounted(() => {
     slotsCargando.value[id] = true;
     setTimeout(() => {
       slotsCargando.value[id] = false;
-    }, 1000); // Duración de la animación de carga
+    }, 1000);
   });
 
   socket.on("jugadorSalido", ({ nombre, id }) => {
@@ -111,11 +110,9 @@ onMounted(() => {
 
   // Listener de enPartida en onMounted
   socket.on("enPartida", ({ mensaje, sala }) => {
-    // Actualiza y guarda la sala actual en localStorage
     actualizarSala(sala);
     enPartida.value = true;
     toast.success(mensaje);
-    // Redirigir a la vista de partida, asegurando que la información necesaria esté almacenada
     router.push(`/partida/${idSala.value}`);
   });
 });
@@ -171,10 +168,7 @@ const salirSala = () => {
     idUsuario: usuario.value.id,
   });
   localStorage.removeItem("salaActual");
-
-  // Mostrar toast de que el usuario se ha desconectado
   toast.info(`${usuario.value.nombre} ha salido de la sala 👋`);
-
   router.push("/juego");
 };
 
@@ -187,26 +181,25 @@ const espaciosJugadores = computed(() => {
   return espacios;
 });
 
-// Modificar la computed property todosListos
+// Computed property para verificar que todos los jugadores están listos
 const todosListos = computed(() => {
   return (
-    jugadores.value.length == maxJugadores.value &&
+    jugadores.value.length === maxJugadores.value &&
     jugadores.value.every((j) => j.listo === true)
   );
 });
 
-// Modificar la función iniciarPartida
+// Función para iniciar la partida (solo se puede pulsar una vez)
 const iniciarPartida = () => {
   if (usuario.value.id !== lider.value) {
     toast.error("Solo el líder puede iniciar la partida");
     return;
   }
-
   if (!todosListos.value) {
     toast.error("Todos los jugadores deben estar listos");
     return;
   }
-
+  partidaIniciada.value = true; // Deshabilitar el botón
   socket.emit("iniciarPartida", {
     idSala: idSala.value,
     idLider: usuario.value.id,
@@ -298,11 +291,17 @@ function IraPantallaDeAmigos() {
       </button>
       <button
         class="btn-start"
-        :disabled="!todosListos"
+        :disabled="!todosListos || partidaIniciada"
         @click="iniciarPartida"
         v-if="usuario?.id === lider && !enPartida"
       >
-        {{ !todosListos ? "Esperando jugadores listos" : "Iniciar Partida" }}
+        {{
+          !todosListos
+            ? "Esperando jugadores listos"
+            : partidaIniciada
+            ? "Iniciando partida..."
+            : "Iniciar Partida"
+        }}
       </button>
       <button class="btn-salir" @click="salirSala">Salir</button>
     </div>
@@ -412,7 +411,7 @@ function IraPantallaDeAmigos() {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 1.5rem; /* Mayor altura */
+  padding: 1.5rem;
   background-color: #302e2b;
 }
 
@@ -522,7 +521,6 @@ button.expulsar:hover {
   pointer-events: none;
 }
 
-/* Hover general para botones (opcional) */
 button {
   transition: background-color 0.2s, transform 0.2s;
 }
