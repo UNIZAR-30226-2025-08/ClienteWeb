@@ -28,9 +28,7 @@ const unirseSala = () => {
   // Solicitar información de la sala
   socket.emit("obtenerSala", idSala.value, (sala) => {
     if (sala) {
-      const estaEnSala = sala.jugadores.some(
-        (j) => j.id === usuario.value.idUsuario
-      );
+      const estaEnSala = sala.jugadores.some((j) => j.id === usuario.value.id);
       if (!estaEnSala) {
         // Emitir evento unirseSala con contraseña y código de invitación
         socket.emit("unirseSala", {
@@ -145,11 +143,11 @@ const GuardarMiRolInicial = (rol) => {
 
 // Cambiar estado (Listo/No Listo)
 const cambiarEstado = () => {
-  const jugador = jugadores.value.find((j) => j.id === usuario.value.idUsuario);
+  const jugador = jugadores.value.find((j) => j.id === usuario.value.id);
   if (jugador) {
     socket.emit("marcarEstado", {
       idSala: idSala.value,
-      idUsuario: usuario.value.idUsuario,
+      idUsuario: usuario.value.id,
       estado: !jugador.listo,
     });
   }
@@ -157,10 +155,10 @@ const cambiarEstado = () => {
 
 // Expulsar jugador
 const expulsarJugador = (idExpulsado) => {
-  if (usuario.value.idUsuario === lider.value) {
+  if (usuario.value.id === lider.value) {
     socket.emit("expulsarJugador", {
       idSala: idSala.value,
-      idLider: usuario.value.idUsuario,
+      idLider: usuario.value.id,
       idExpulsado,
     });
   }
@@ -170,7 +168,7 @@ const expulsarJugador = (idExpulsado) => {
 const salirSala = () => {
   socket.emit("salirSala", {
     idSala: idSala.value,
-    idUsuario: usuario.value.idUsuario,
+    idUsuario: usuario.value.id,
   });
   localStorage.removeItem("salaActual");
 
@@ -199,7 +197,7 @@ const todosListos = computed(() => {
 
 // Modificar la función iniciarPartida
 const iniciarPartida = () => {
-  if (usuario.value.idUsuario !== lider.value) {
+  if (usuario.value.id !== lider.value) {
     toast.error("Solo el líder puede iniciar la partida");
     return;
   }
@@ -211,7 +209,7 @@ const iniciarPartida = () => {
 
   socket.emit("iniciarPartida", {
     idSala: idSala.value,
-    idLider: usuario.value.idUsuario,
+    idLider: usuario.value.id,
   });
 };
 

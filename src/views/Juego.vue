@@ -36,8 +36,8 @@ function irARanking() {
   router.push("/ranking");
 }
 
-function irAConfiguracion() {
-  router.push("/configuracion");
+function irASugerencias() {
+  router.push("/sugerencias");
 }
 
 function irABuscarSalas() {
@@ -55,8 +55,8 @@ function irABuscarSalas() {
         </button>
         <button class="action-button-sidebar" @click="irARoles">Roles</button>
         <button class="action-button-sidebar" @click="irAReglas">Reglas</button>
-        <button class="action-button-sidebar" @click="irAConfiguracion">
-          Configuración
+        <button class="action-button-sidebar" @click="irASugerencias">
+          Sugerencias
         </button>
         <button class="action-button salir-button" @click="irAHome">
           Salir

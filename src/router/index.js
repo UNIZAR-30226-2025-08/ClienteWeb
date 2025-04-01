@@ -11,6 +11,7 @@ import Amigos from "../views/Amigos.vue";
 import ranking from "../views/ranking.vue";
 import Partida from "../views/partida/partida.vue";
 import Perfil from "../views/Perfil.vue";
+import Sugerencias from "../views/Sugerencias.vue";
 
 const routes = [
   { path: "/", component: Home }, // Página principal
@@ -25,6 +26,7 @@ const routes = [
   { path: "/ranking", component: ranking },
   { path: "/partida/:idSala", component: Partida },
   { path: "/perfil", name: "perfil", component: Perfil },
+  { path: "/sugerencias", name: "sugerencias", component: Sugerencias },
 ];
 
 const router = createRouter({

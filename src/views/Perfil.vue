@@ -54,7 +54,7 @@ const actualizarPerfil = async () => {
   const rol = nuevoRol.value === "Sin rol favorito" ? null : nuevoRol.value;
 
   const datosActualizados = {
-    idUsuario: Number(usuario.idUsuario),
+    idUsuario: Number(usuario.id),
     nombre: nuevoNombre.value,
     avatar: nuevoAvatar.value,
     rolFavorito: rol,
