@@ -1,10 +1,7 @@
 <template>
-  <!-- Contenedor principal, aplicamos modo-noche si currentPeriod === 'NOCHE' -->
-  <div
-    class="partida-container"
-    :class="{ 'modo-noche': currentPeriod === 'NOCHE' }"
-  >
-    <!-- Mostrar exclusivamente los overlays si la fase actual es una overlay -->
+  <!-- Contenedor principal: se aplica la clase "modo-noche" si currentPeriod es "NOCHE" -->
+  <div class="partida-container" :class="{ 'modo-noche': currentPeriod === 'NOCHE' }">
+    <!-- Si la fase actual es tratada como overlay, se muestran sólo los overlays -->
     <template v-if="isOverlayActive">
       <!-- Overlays iniciales -->
       <IntroOverlay v-if="currentPhase === 'intro'" />
@@ -22,17 +19,11 @@
       <NocheOverlay v-else-if="currentPhase === 'night'" :visible="true" />
 
       <!-- Overlays de la vidente -->
-      <VidenteOverlay
-        v-else-if="currentPhase === 'vidente_awaken'"
-        :visible="true"
-      />
-      <OjoCerradoOverlay
-        v-else-if="currentPhase === 'ojo_cerrado'"
-        :visible="true"
-      />
+      <VidenteOverlay v-else-if="currentPhase === 'vidente_awaken'" :visible="true" />
+      <OjoCerradoOverlay v-else-if="currentPhase === 'ojo_cerrado'" :visible="true" />
     </template>
 
-    <!-- Mostrar el contenido principal del juego cuando NO es fase overlay -->
+    <!-- Cuando no es fase overlay se muestra el contenido principal -->
     <template v-else>
       <GameStatus
         :aliveVillagers="aliveVillagers"
@@ -44,7 +35,7 @@
       />
       <RoleInfoPanel :role="chosenRole" />
 
-      <!-- Círculo de jugadores, donde se puede hacer clic para votar -->
+      <!-- Círculo de jugadores -->
       <PlayersCircle
         :players="players"
         :alguacil-voting-active="isVotingPhase"
@@ -53,16 +44,28 @@
         @select-player="selectPlayer"
       />
 
-      <!-- Contador de tiempo para la votación -->
+      <!-- Contador: se muestra en fase "game_voting" y en "vidente_action" -->
       <CountdownTimer v-if="isVotingPhase" :time-left="timeLeft" />
 
-      <!-- Botón de voto -->
+      <!-- Botón de voto se muestra solo en fase de votación (y para quienes NO son la Vidente) -->
       <VoteButton
-        v-if="isVotingPhase"
+        v-if="isVotingPhase && !isVidente()"
         :selected-player-index="selectedPlayerIndex"
         :has-voted="hasVoted"
         @vote="voteForPlayer"
       />
+
+      <!-- Nuevo bloque para la acción de la Vidente (fase "vidente_action") -->
+      <div v-if="currentPhase === 'vidente_action' && isVidente()" class="vidente-buttons">
+        <TurnButton
+          :has-passed="hasPassedTurn"
+          @pass="handlePassTurn"
+        />
+        <DiscoverRoleButton
+          :has-discovered="hasDiscoveredRole"
+          @discover="handleDiscoverRole"
+        />
+      </div>
 
       <!-- Mensaje cuando ya has votado -->
       <div v-if="hasVoted && isVotingPhase" class="vote-message">
@@ -91,6 +94,9 @@ import NocheOverlay from "../../views/partida/Overlay/InicioNocheOverlay.vue";
 import VidenteOverlay from "../../views/partida/Overlay/VidenteOverlay.vue";
 import OjoCerradoOverlay from "../../views/partida/Overlay/OjoCerradoOverlay.vue";
 
+import TurnButton from "../../views/partida/Componentes/TurnButton.vue";
+import DiscoverRoleButton from "../../views/partida/Componentes/DiscoverRoleButton.vue";
+
 export default {
   name: "Partida",
   components: {
@@ -107,17 +113,19 @@ export default {
     NocheOverlay,
     VidenteOverlay,
     OjoCerradoOverlay,
+    TurnButton,
+    DiscoverRoleButton,
   },
   data() {
     return {
       // Fases posibles:
       // 'intro', 'role', 'start', 'alguacil_announce', 'game_voting', 'alguacil_result',
-      // 'night', 'vidente_awaken', 'ojo_cerrado', 'game'
+      // 'night', 'vidente_awaken', 'vidente_action', 'ojo_cerrado', 'game'
       currentPhase: "intro",
       isGameActive: false,
       isVotingPhase: false,
 
-      // Temporizador
+      // Variables del temporizador
       timeLeft: 60,
       countdownInterval: null,
 
@@ -128,7 +136,7 @@ export default {
       revealVotes: false,
       revealIndex: 0,
 
-      // Roles y estado del juego
+      // Datos de rol y estado del juego
       chosenRole: {},
       alguacilWinnerIndex: null,
       aliveVillagers: 5,
@@ -137,13 +145,16 @@ export default {
       totalWolves: 2,
       currentDay: 1,
       currentPeriod: "DÍA",
+
+      // Nuevas propiedades para la acción de la Vidente
+      hasPassedTurn: false,
+      hasDiscoveredRole: false,
     };
   },
   computed: {
     /**
-     * Define qué fases deben mostrar únicamente un overlay
-     * No incluimos "game_voting" aquí, para que en esa fase
-     * se muestre el contenido principal (contador, jugadores, etc.).
+     * Se tratan como overlay las siguientes fases.
+     * No se incluyen "game_voting" ni "vidente_action" para que se muestre el contenido principal.
      */
     isOverlayActive() {
       return [
@@ -167,10 +178,10 @@ export default {
     }
     const sala = JSON.parse(salaGuardada);
 
-    // Sincronizar lista de jugadores
+    // Sincronizar la lista de jugadores
     this.players = sala.jugadores || [];
 
-    // Asignar el rol del jugador actual
+    // Obtener el rol del jugador (por ejemplo, de localStorage)
     const rol = localStorage.getItem("miRol");
     const rolMayus = JSON.parse(rol);
     if (rolMayus) {
@@ -181,31 +192,17 @@ export default {
       console.error("No se encontró el rol del jugador actual");
     }
 
+    // Ajustar totales: se usan maxJugadores para aldeanos y maxRoles para lobos
     this.aliveVillagers = sala.maxJugadores;
     this.totalVillagers = sala.maxJugadores;
-    // Sincronizar los totales a partir de maxRoles (si existe)
     this.aliveWolves = sala.maxRoles["Hombre lobo"] || 0;
     this.totalWolves = sala.maxRoles["Hombre lobo"] || 0;
 
-    // Iniciar flujo de juego
+    // Iniciar el flujo de juego
     this.startGameFlow();
-    /* Ejemplo de conexión con socket:
-    const idPartida = "partida_" + sala.id;
-    socket.emit("unirsePartida", { idPartida, idUsuario: myId });
-    socket.on("turnoCambiado", ({ estado, mensaje }) => {
-      this.currentPhase = estado.turno || "game";
-      this.players = estado.jugadores || this.players;
-      this.currentDay = estado.currentDay || this.currentDay;
-      this.currentPeriod = estado.currentPeriod || this.currentPeriod;
-    });
-    */
   },
   beforeUnmount() {
     clearInterval(this.countdownInterval);
-    // Si usas sockets, desuscríbete aquí
-    // socket.off("turnoCambiado");
-    // socket.off("votoRegistrado");
-    // socket.off("rolAsignado");
   },
   methods: {
     getMyId() {
@@ -213,19 +210,17 @@ export default {
       return user ? JSON.parse(user).id : null;
     },
 
-    // Saber si el jugador actual es la Vidente
+    // Retorna true si el jugador actual es la Vidente
     isVidente() {
       return this.chosenRole && this.chosenRole.nombre === "Vidente";
     },
 
     startGameFlow() {
-      // Secuencia inicial
       setTimeout(() => {
         this.currentPhase = "role";
-
+        this.chosenRole = this.getRandomRole();
         setTimeout(() => {
           this.currentPhase = "start";
-
           setTimeout(() => {
             this.startMainGame();
           }, 6000);
@@ -236,8 +231,7 @@ export default {
     startMainGame() {
       this.currentPhase = "game";
       this.isGameActive = true;
-
-      // Pasados 30s en game, se anuncia la votación del alguacil
+      // Después de 30 s en game, se anuncia la votación del alguacil
       setTimeout(() => {
         this.currentPhase = "alguacil_announce";
         setTimeout(() => {
@@ -246,12 +240,11 @@ export default {
       }, 30000);
     },
 
-    // Fase de votación de Alguacil (NO es overlay, se ve en el contenido principal)
+    // Fase de votación del alguacil (se muestra en el contenido principal)
     startAlguacilVoting() {
       this.currentPhase = "game_voting";
       this.isVotingPhase = true;
       this.timeLeft = 60;
-
       this.countdownInterval = setInterval(() => {
         if (this.timeLeft > 0) {
           this.timeLeft--;
@@ -262,57 +255,99 @@ export default {
       }, 1000);
     },
 
-    // Cuando termina la votación, calculamos el ganador y mostramos el resultado
+    // Al finalizar la votación, se calcula el ganador y se inicia el proceso nocturno
     endVotingPhase() {
       this.isVotingPhase = false;
       this.revealVotes = true;
       this.showVotesProgressively();
-
-      // Calcular ganador
-      const maxVotes = Math.max(...this.players.map((p) => p.votes));
-      const winners = this.players.filter((p) => p.votes === maxVotes);
+      const maxVotes = Math.max(...this.players.map(p => p.votes));
+      const winners = this.players.filter(p => p.votes === maxVotes);
       this.alguacilWinnerIndex = winners[0]?.id || null;
-
-      // Pasamos a mostrar el overlay de resultado
       this.currentPhase = "alguacil_result";
-
       setTimeout(() => {
-        // Llamamos a la función que gestiona TODO el proceso de noche
         this.startNightSequence();
       }, 6000);
     },
 
     /**
+     * Inicia un contador (setInterval) que decrementa timeLeft cada segundo.
+     * Al llegar a 0, se ejecuta endCallback.
+     */
+    startCountdown(endCallback) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = setInterval(() => {
+        if (this.timeLeft > 0) {
+          this.timeLeft--;
+        } else {
+          clearInterval(this.countdownInterval);
+          endCallback && endCallback();
+        }
+      }, 1000);
+    },
+
+    /**
      * Encapsula TODO el proceso de la noche:
-     *  1) Overlay de noche
-     *  2) Vidente se despierta
-     *  3) Ojo cerrado para los demás
-     *  4) Volver al juego
+     * 1) Se muestra el overlay "night" y se activa el modo NOCHE.
+     * 2) Se muestra el overlay "vidente_awaken" para TODOS.
+     * 3) Luego:
+     *    - Si el jugador es la Vidente, se cambia a la fase "vidente_action" (contenido principal) y se inicia un countdown de 40 s,
+     *      mostrando además los botones "Pasar turno" y "Descubrir rol".
+     *    - Si no es la Vidente, se muestra el overlay "ojo_cerrado" durante 40 s.
+     * 4) Al finalizar, se vuelve a la fase "game" y se reinicia el estado.
      */
     startNightSequence() {
-      // 1) Comenzamos la noche
+      // 1) Mostrar overlay de noche y activar modo NOCHE
       this.currentPhase = "night";
       this.currentPeriod = "NOCHE";
-
       setTimeout(() => {
-        // 2) Overlay: la Vidente se despierta (para TODOS)
+        // 2) Mostrar overlay "vidente_awaken" para TODOS
         this.currentPhase = "vidente_awaken";
         setTimeout(() => {
-          // 3) Si eres la Vidente, vas directo al juego
+          // 3) Diferenciar según el rol:
           if (this.isVidente()) {
-            this.currentPhase = "game";
-            this.resetVotingState();
+            // Si es la Vidente, pasar a "vidente_action" y mostrar el contador de 40 s
+            this.currentPhase = "vidente_action";
+            // Inicializamos las propiedades para los botones
+            this.hasPassedTurn = false;
+            this.hasDiscoveredRole = false;
+            this.isVotingPhase = true; // Para mostrar el CountdownTimer
+            this.timeLeft = 40;
+            this.startCountdown(() => {
+              // Si se agota el tiempo sin acción, finalizamos la acción de la vidente
+              this.finishVidenteAction();
+            });
           } else {
-            // Si NO eres la Vidente, ves el ojo cerrado
+            // Si no es la Vidente, se muestra el overlay "ojo_cerrado" durante 40 s
             this.currentPhase = "ojo_cerrado";
             setTimeout(() => {
-              // 4) Todos vuelven al juego
-              this.currentPhase = "game";
               this.resetVotingState();
-            }, 6000);
+              this.currentPhase = "game";
+            }, 40000);
           }
         }, 6000);
       }, 6000);
+    },
+
+    finishVidenteAction() {
+      this.isVotingPhase = false;
+      this.resetVotingState();
+      this.currentPhase = "game";
+    },
+
+    handlePassTurn() {
+      if (!this.hasPassedTurn && !this.hasDiscoveredRole) {
+        this.hasPassedTurn = true;
+        // Puedes agregar lógica extra aquí si es necesario
+        this.finishVidenteAction();
+      }
+    },
+
+    handleDiscoverRole() {
+      if (!this.hasDiscoveredRole && !this.hasPassedTurn) {
+        this.hasDiscoveredRole = true;
+        // Aquí podrías agregar lógica para revelar el rol de algún jugador
+        this.finishVidenteAction();
+      }
     },
 
     showVotesProgressively() {
@@ -345,13 +380,12 @@ export default {
       this.hasVoted = false;
       this.revealVotes = false;
       this.revealIndex = 0;
-      this.players.forEach((p) => (p.votes = 0));
+      this.players.forEach(p => (p.votes = 0));
     },
 
     getRandomRole() {
-      // Lógica para elegir rol (por ejemplo, excluir 'alguacil' si es un rol aparte)
       const validRoles = roles.filter(
-        (role) => role.nombre.toLowerCase() !== "alguacil"
+        role => role.nombre.toLowerCase() !== "alguacil"
       );
       return validRoles[Math.floor(Math.random() * validRoles.length)];
     },
@@ -371,7 +405,6 @@ export default {
   overflow: hidden;
 }
 
-/* Aplica un filtro de oscuridad cuando sea de noche */
 .modo-noche {
   filter: brightness(0.4);
 }
@@ -384,9 +417,20 @@ export default {
   background-color: #262522;
   color: white;
   padding: 1.25rem 2.5rem;
-  border-radius: 0.625;
+  border-radius: 0.625rem;
   font-size: 1.5rem;
   z-index: 1000;
   box-shadow: 0 0 1.25rem rgba(0, 0, 0, 0.5);
+}
+
+/* Opcional: estilos para el contenedor de los botones de la vidente */
+.vidente-buttons {
+  position: absolute;
+  top: 42rem; /* Ajusta según necesites */
+  right: 5rem; /* Ajusta según tu layout */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  z-index: 9999;
 }
 </style>
