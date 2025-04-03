@@ -1,47 +1,56 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { toast } from "vue3-toastify"; // Asegúrate de que está importado en tu archivo
-import "vue3-toastify/dist/index.css"; // Asegúrate de que los estilos estén importados
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 import Cabecera from "../components/Cabecera.vue";
+
 const router = useRouter();
 const loginSuccess = localStorage.getItem("loginSuccess"); // Verificar si ya hubo un login exitoso
 
+// Variable para controlar el pop-up de confirmación de salida
+const showExitConfirm = ref(false);
+
 onMounted(() => {
-  // Mostrar la alerta solo si la variable de loginSuccess está almacenada en el localStorage
   if (loginSuccess === "true") {
-    toast.success("Conexión exitosa, bienvenido!", { autoClose: 3000 }); // Mostrar alerta de éxito durante 5 segundos
-    localStorage.removeItem("loginSuccess"); // Eliminar la variable del localStorage después de mostrarla
+    toast.success("Conexión exitosa, bienvenido!", { autoClose: 3000 });
+    localStorage.removeItem("loginSuccess");
   }
 });
 
-// Lógica de navegación (por ejemplo, para navegar a otras páginas)
+// Funciones de navegación
 function irAHome() {
-  router.push("/"); // Redirigir al home
+  router.push("/");
 }
-
 function irACrearSala() {
   router.push("/crear-sala");
 }
-
 function irARoles() {
   router.push("/roles");
 }
-
 function irAReglas() {
   router.push("/reglas");
 }
-
 function irARanking() {
   router.push("/ranking");
 }
-
 function irASugerencias() {
   router.push("/sugerencias");
 }
-
 function irABuscarSalas() {
   router.push("/servidores");
+}
+
+// Funciones para el pop-up de confirmación de salida
+function openExitConfirm() {
+  showExitConfirm.value = true;
+}
+function confirmExit() {
+  showExitConfirm.value = false;
+  irAHome();
+}
+function cancelExit() {
+  showExitConfirm.value = false;
 }
 </script>
 
@@ -58,7 +67,8 @@ function irABuscarSalas() {
         <button class="action-button-sidebar" @click="irASugerencias">
           Sugerencias
         </button>
-        <button class="action-button salir-button" @click="irAHome">
+        <!-- En vez de ir directamente a Home, se abre el pop-up de confirmación -->
+        <button class="action-button salir-button" @click="openExitConfirm">
           Salir
         </button>
       </div>
@@ -103,6 +113,17 @@ function irABuscarSalas() {
             Buscar Salas
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pop-up de confirmación de salida -->
+  <div v-if="showExitConfirm" class="exit-modal-overlay">
+    <div class="exit-modal">
+      <p>¿Estás seguro de que deseas salir?</p>
+      <div class="exit-buttons">
+        <button class="confirm-button" @click="confirmExit">Sí</button>
+        <button class="cancel-button" @click="cancelExit">No</button>
       </div>
     </div>
   </div>
@@ -273,12 +294,12 @@ function irABuscarSalas() {
 
 /* Fila oscura (Fecha/Modo/Resultado) */
 .dark-row {
-  background-color: #1f1e1c; /* Más oscura */
+  background-color: #1e1c1a;
 }
 
 /* Fila clara (ejemplo --) */
 .light-row {
-  background-color: #262522; /* Más clara */
+  background-color: #262522;
 }
 
 .history-table tbody td {
@@ -347,51 +368,55 @@ function irABuscarSalas() {
   font-weight: bold;
 }
 
-/* Fondo oscuro semitransparente para el modal */
-.modal-overlay {
+/* ------------------------- */
+/* POP-UP DE CONFIRMACIÓN DE SALIDA */
+/* ------------------------- */
+.exit-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  z-index: 2000;
 }
-
-/* Estilo del modal */
-.modal {
-  background: white;
+.exit-modal {
+  background-color: #1e1c1a;
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 8px;
   text-align: center;
-  width: 300px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  width: 80%;
+  max-width: 400px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
-
-/* Botones del modal */
-.modal-buttons {
+.exit-modal p {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+}
+.exit-buttons {
   display: flex;
   justify-content: space-around;
-  margin-top: 15px;
 }
-
-.confirm-button {
-  background-color: red;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
+.confirm-button,
 .cancel-button {
-  background-color: gray;
-  color: white;
-  padding: 10px 20px;
+  background-color: #007bff;
   border: none;
+  color: #fff;
+  padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s;
+}
+.confirm-button:hover {
+  background-color: #0056b3;
+}
+.cancel-button {
+  background-color: #e74c3c;
+}
+.cancel-button:hover {
+  background-color: #c0392b;
 }
 </style>
