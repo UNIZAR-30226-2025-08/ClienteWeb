@@ -7,7 +7,7 @@ import axios from "axios";
 
 // Función para obtener el ID del usuario logueado desde localStorage
 const getUserId = () => {
-  return JSON.parse(localStorage.getItem("usuario")).idUsuario;
+  return JSON.parse(localStorage.getItem("usuario")).id;
 };
 
 const friends = ref([]);

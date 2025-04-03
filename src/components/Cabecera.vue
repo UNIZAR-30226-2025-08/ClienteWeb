@@ -1,142 +1,3 @@
-<script setup>
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import axios from "axios";
-
-// Propiedades recibidas
-const props = defineProps({
-  titulo: {
-    type: String,
-    default: "Mi Aplicación",
-  },
-  compacto: {
-    type: Boolean,
-    default: false,
-  },
-});
-
-const router = useRouter();
-const user = ref({});
-
-// Variables para el desplegable de notificaciones y solicitudes
-const showNotifications = ref(false);
-const friendRequests = ref([]);
-const loadingRequests = ref(false);
-const errorRequests = ref(null);
-
-// Variables para el modal de feedback
-const showFeedbackModal = ref(false);
-const feedbackMessage = ref("");
-const feedbackType = ref(""); // "success" o "error"
-
-// Al montar, obtenemos el usuario del localStorage
-onMounted(() => {
-  const storedUser = localStorage.getItem("usuario");
-  if (storedUser) {
-    user.value = JSON.parse(storedUser);
-    // Opcional: cargar solicitudes de inmediato
-    // fetchFriendRequests();
-  } else {
-    user.value = {
-      nombre: "NombreCuenta",
-      avatar: "src/assets/profile_icon.jpg",
-      rolFavorito: "Sin rol favorito",
-    };
-  }
-});
-
-// Función para redirigir a Perfil.vue
-const irAlPerfil = () => {
-  if (user.value) {
-    router.push({
-      name: "perfil",
-      query: {
-        nombre: user.value.nombre,
-        avatar: user.value.avatar || "",
-        rolFavorito: user.value.rolFavorito || "Sin rol favorito",
-      },
-    });
-  }
-};
-
-// Alterna la visibilidad del desplegable y carga solicitudes al abrirlo
-const toggleNotifications = () => {
-  showNotifications.value = !showNotifications.value;
-  if (showNotifications.value) {
-    fetchFriendRequests();
-  }
-};
-
-// Función para obtener las solicitudes de amistad (se espera que el endpoint use user.value.id como receptor)
-const fetchFriendRequests = async () => {
-  loadingRequests.value = true;
-  errorRequests.value = null;
-  try {
-    // Se asume que el endpoint GET /api/solicitud/listar/:idUsuario devuelve { solicitudes: [...] }
-    const response = await axios.get(`/api/solicitud/listar/${user.value.id}`);
-    friendRequests.value = response.data.solicitudes || [];
-  } catch (err) {
-    console.error("Error al obtener solicitudes de amistad:", err);
-    errorRequests.value = "Error al obtener solicitudes de amistad.";
-  } finally {
-    loadingRequests.value = false;
-  }
-};
-
-// Función para cerrar el modal de feedback
-const closeFeedbackModal = () => {
-  showFeedbackModal.value = false;
-  feedbackMessage.value = "";
-  feedbackType.value = "";
-};
-
-// Función para aceptar una solicitud de amistad y mostrar retroalimentación en modal
-const acceptRequest = async (solicitud) => {
-  try {
-    await axios.post("/api/solicitud/aceptar", {
-      idEmisor: solicitud.idUsuarioEmisor,
-      idReceptor: user.value.id,
-    });
-    // Elimina la solicitud aceptada de la lista
-    friendRequests.value = friendRequests.value.filter(
-      (req) => req.idSolicitud !== solicitud.idSolicitud
-    );
-    feedbackMessage.value = "¡Solicitud aceptada! Tienes un nuevo amigo.";
-    feedbackType.value = "success";
-    showFeedbackModal.value = true;
-  } catch (err) {
-    console.error("Error al aceptar solicitud:", err);
-    feedbackMessage.value =
-      "Error al aceptar la solicitud. Inténtalo nuevamente.";
-    feedbackType.value = "error";
-    showFeedbackModal.value = true;
-  }
-};
-
-// Función para rechazar una solicitud de amistad y mostrar retroalimentación en modal
-const rejectRequest = async (solicitud) => {
-  try {
-    await axios.post("/api/solicitud/rechazar", {
-      idEmisor: solicitud.idUsuarioEmisor,
-      idReceptor: user.value.id,
-    });
-    // Elimina la solicitud rechazada de la lista
-    friendRequests.value = friendRequests.value.filter(
-      (req) => req.idSolicitud !== solicitud.idSolicitud
-    );
-    feedbackMessage.value = "Solicitud rechazada.";
-    feedbackType.value = "success";
-    showFeedbackModal.value = true;
-  } catch (err) {
-    console.error("Error al rechazar solicitud:", err);
-    feedbackMessage.value =
-      "Error al rechazar la solicitud. Inténtalo nuevamente.";
-    feedbackType.value = "error";
-    showFeedbackModal.value = true;
-  }
-};
-</script>
-
 <template>
   <header class="cabecera">
     <link
@@ -161,9 +22,9 @@ const rejectRequest = async (solicitud) => {
           />
           <div class="profile-info">
             <span class="user-name">{{ user.nombre || "NombreCuenta" }}</span>
-            <span class="Rol">{{
-              user.rolFavorito || "Sin rol favorito"
-            }}</span>
+            <span class="Rol">
+              {{ user.rolFavorito || "Sin rol favorito" }}
+            </span>
           </div>
         </div>
         <div class="notifications">
@@ -229,6 +90,129 @@ const rejectRequest = async (solicitud) => {
   </header>
 </template>
 
+<script>
+import axios from "axios";
+
+export default {
+  name: "Cabecera",
+  props: {
+    titulo: {
+      type: String,
+      default: "Mi Aplicación",
+    },
+    compacto: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data() {
+    return {
+      user: {},
+      showNotifications: false,
+      friendRequests: [],
+      loadingRequests: false,
+      errorRequests: null,
+      showFeedbackModal: false,
+      feedbackMessage: "",
+      feedbackType: "",
+    };
+  },
+  created() {
+    const storedUser = localStorage.getItem("usuario");
+    if (storedUser) {
+      this.user = JSON.parse(storedUser);
+    } else {
+      this.user = {
+        nombre: "NombreCuenta",
+        avatar: "src/assets/profile_icon.jpg",
+        rolFavorito: "Sin rol favorito",
+      };
+    }
+  },
+  methods: {
+    irAlPerfil() {
+      this.$router.push({
+        name: "perfil",
+        query: {
+          nombre: this.user.nombre,
+          avatar: this.user.avatar || "",
+          rolFavorito: this.user.rolFavorito || "Sin rol favorito",
+        },
+      });
+    },
+    toggleNotifications() {
+      this.showNotifications = !this.showNotifications;
+      if (this.showNotifications) {
+        this.fetchFriendRequests();
+      }
+    },
+    async fetchFriendRequests() {
+      this.loadingRequests = true;
+      this.errorRequests = null;
+      try {
+        // Se asume que el endpoint GET /api/solicitud/listar/:idUsuario devuelve { solicitudes: [...] }
+        const response = await axios.get(
+          `/api/solicitud/listar/${this.user.id}`
+        );
+        this.friendRequests = response.data.solicitudes || [];
+      } catch (err) {
+        console.error("Error al obtener solicitudes de amistad:", err);
+        this.errorRequests = "Error al obtener solicitudes de amistad.";
+      } finally {
+        this.loadingRequests = false;
+      }
+    },
+    async acceptRequest(solicitud) {
+      try {
+        await axios.post("/api/solicitud/aceptar", {
+          idEmisor: solicitud.idUsuarioEmisor,
+          idReceptor: this.user.id,
+        });
+        // Elimina la solicitud aceptada de la lista
+        this.friendRequests = this.friendRequests.filter(
+          (req) => req.idSolicitud !== solicitud.idSolicitud
+        );
+        this.feedbackMessage = "¡Solicitud aceptada! Tienes un nuevo amigo.";
+        this.feedbackType = "success";
+        this.showFeedbackModal = true;
+      } catch (err) {
+        console.error("Error al aceptar solicitud:", err);
+        this.feedbackMessage =
+          "Error al aceptar la solicitud. Inténtalo nuevamente.";
+        this.feedbackType = "error";
+        this.showFeedbackModal = true;
+      }
+    },
+    async rejectRequest(solicitud) {
+      try {
+        await axios.post("/api/solicitud/rechazar", {
+          idEmisor: solicitud.idUsuarioEmisor,
+          idReceptor: this.user.id,
+        });
+        // Elimina la solicitud rechazada de la lista
+        this.friendRequests = this.friendRequests.filter(
+          (req) => req.idSolicitud !== solicitud.idSolicitud
+        );
+        this.feedbackMessage = "Solicitud rechazada.";
+        this.feedbackType = "success";
+        this.showFeedbackModal = true;
+      } catch (err) {
+        console.error("Error al rechazar solicitud:", err);
+        this.feedbackMessage =
+          "Error al rechazar la solicitud. Inténtalo nuevamente.";
+        this.feedbackType = "error";
+        this.showFeedbackModal = true;
+      }
+    },
+    closeFeedbackModal() {
+      this.showFeedbackModal = false;
+      this.feedbackMessage = "";
+      this.feedbackType = "";
+    },
+  },
+};
+</script>
+
 <style scoped>
 /* CABECERA */
 .cabecera {
@@ -252,7 +236,7 @@ const rejectRequest = async (solicitud) => {
   margin-right: auto;
 }
 
-/* PERFIL + NOTIFICACIONES */
+/* PERFIL Y NOTIFICACIONES */
 .perfil-notificaciones {
   display: flex;
   align-items: center;
@@ -263,9 +247,14 @@ const rejectRequest = async (solicitud) => {
   display: flex;
   align-items: center;
   gap: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  padding: 5px;
+  border-radius: 8px;
 }
-.profile.compacto {
-  margin-left: 5rem;
+.profile:hover {
+  background-color: #333;
+  transform: scale(1.03);
 }
 .user-icon {
   width: 40px;
