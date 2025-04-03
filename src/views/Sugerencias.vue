@@ -59,13 +59,13 @@ export default {
         return;
       }
       // Usar usuario.idUsuario
-      if (!this.usuario || !this.usuario.idUsuario) {
+      if (!this.usuario || !this.usuario.id) {
         this.error = "No se pudo obtener el ID del usuario.";
         return;
       }
       try {
         const { data } = await axios.post("/api/sugerencias/enviar", {
-          idUsuario: this.usuario.idUsuario,
+          idUsuario: this.usuario.id,
           contenido: this.contenido,
         });
         this.mensaje = data.mensaje;
