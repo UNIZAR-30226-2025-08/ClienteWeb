@@ -54,7 +54,7 @@ const actualizarPerfil = async () => {
   const rol = nuevoRol.value === "Sin rol favorito" ? null : nuevoRol.value;
 
   const datosActualizados = {
-    idUsuario: Number(usuario.id),
+    idUsuario: usuario.id,
     nombre: nuevoNombre.value,
     avatar: nuevoAvatar.value,
     rolFavorito: rol,
@@ -67,7 +67,15 @@ const actualizarPerfil = async () => {
     );
 
     if (response.status === 200 && response.data?.usuario) {
-      localStorage.setItem("usuario", JSON.stringify(response.data.usuario));
+      //TODO: Cambiar la forma en la que pasamos idusuario y unificarla
+      const datosActualizados2 = {
+        id: usuario.id,
+        nombre: nuevoNombre.value,
+        avatar: nuevoAvatar.value,
+        rolFavorito: rol,
+      };
+      localStorage.removeItem("usuario");
+      localStorage.setItem("usuario", JSON.stringify(datosActualizados2));
 
       nombre.value = response.data.usuario.nombre;
       avatar.value = response.data.usuario.avatar;
