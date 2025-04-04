@@ -1,6 +1,9 @@
 <template>
   <!-- Contenedor principal: se aplica la clase "modo-noche" si currentPeriod es "NOCHE" -->
-  <div class="partida-container" :class="{ 'modo-noche': currentPeriod === 'NOCHE' }">
+  <div
+    class="partida-container"
+    :class="{ 'modo-noche': currentPeriod === 'NOCHE' }"
+  >
     <!-- Si la fase actual es tratada como overlay, se muestran sólo los overlays -->
     <template v-if="isOverlayActive">
       <!-- Overlays iniciales -->
@@ -19,8 +22,14 @@
       <NocheOverlay v-else-if="currentPhase === 'night'" :visible="true" />
 
       <!-- Overlays de la vidente -->
-      <VidenteOverlay v-else-if="currentPhase === 'vidente_awaken'" :visible="true" />
-      <OjoCerradoOverlay v-else-if="currentPhase === 'ojo_cerrado'" :visible="true" />
+      <VidenteOverlay
+        v-else-if="currentPhase === 'vidente_awaken'"
+        :visible="true"
+      />
+      <OjoCerradoOverlay
+        v-else-if="currentPhase === 'ojo_cerrado'"
+        :visible="true"
+      />
     </template>
 
     <!-- Cuando no es fase overlay se muestra el contenido principal -->
@@ -56,11 +65,11 @@
       />
 
       <!-- Nuevo bloque para la acción de la Vidente (fase "vidente_action") -->
-      <div v-if="currentPhase === 'vidente_action' && isVidente()" class="vidente-buttons">
-        <TurnButton
-          :has-passed="hasPassedTurn"
-          @pass="handlePassTurn"
-        />
+      <div
+        v-if="currentPhase === 'vidente_action' && isVidente()"
+        class="vidente-buttons"
+      >
+        <TurnButton :has-passed="hasPassedTurn" @pass="handlePassTurn" />
         <DiscoverRoleButton
           :has-discovered="hasDiscoveredRole"
           @discover="handleDiscoverRole"
@@ -218,7 +227,7 @@ export default {
     startGameFlow() {
       setTimeout(() => {
         this.currentPhase = "role";
-        this.chosenRole = this.getRandomRole();
+
         setTimeout(() => {
           this.currentPhase = "start";
           setTimeout(() => {
@@ -260,8 +269,8 @@ export default {
       this.isVotingPhase = false;
       this.revealVotes = true;
       this.showVotesProgressively();
-      const maxVotes = Math.max(...this.players.map(p => p.votes));
-      const winners = this.players.filter(p => p.votes === maxVotes);
+      const maxVotes = Math.max(...this.players.map((p) => p.votes));
+      const winners = this.players.filter((p) => p.votes === maxVotes);
       this.alguacilWinnerIndex = winners[0]?.id || null;
       this.currentPhase = "alguacil_result";
       setTimeout(() => {
@@ -380,12 +389,12 @@ export default {
       this.hasVoted = false;
       this.revealVotes = false;
       this.revealIndex = 0;
-      this.players.forEach(p => (p.votes = 0));
+      this.players.forEach((p) => (p.votes = 0));
     },
 
     getRandomRole() {
       const validRoles = roles.filter(
-        role => role.nombre.toLowerCase() !== "alguacil"
+        (role) => role.nombre.toLowerCase() !== "alguacil"
       );
       return validRoles[Math.floor(Math.random() * validRoles.length)];
     },
