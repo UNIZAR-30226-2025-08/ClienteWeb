@@ -31,7 +31,7 @@
     background-color: #262522;
     color: #fff;
     font-size: 1rem;
-    padding: 0.75rem 1.875rem;
+    padding: 0.3rem 6rem;
     border: 0.125rem solid #fff;
     border-radius: 0.5rem;
     cursor: pointer;
