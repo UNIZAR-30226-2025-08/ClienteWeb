@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import Volver from "../components/Volver.vue";
 import Cabecera from "../components/Cabecera.vue";
 
 const router = useRouter();
@@ -91,6 +92,7 @@ const sortedPlayers = computed(() => {
       </tbody>
     </table>
   </div>
+  <Volver />
 </template>
 
 <style scoped>

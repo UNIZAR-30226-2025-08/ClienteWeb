@@ -1,7 +1,9 @@
 <template>
+  <Cabecera
+    :titulo="'Reglas del Juego: Los Hombres Lobos de Castronegro'"
+    :compacto="true"
+  />
   <div class="reglas-page">
-    <h1>Reglas del Juego: Los Hombres Lobos de Castronegro</h1>
-
     <div class="reglas-content">
       <section class="introduccion">
         <h2>Introducción</h2>
@@ -108,12 +110,15 @@
       </section>
     </div>
   </div>
+  <Volver />
 </template>
 
 <script setup>
 // No es necesario agregar código adicional para este componente.
 import { useRouter } from "vue-router";
 const router = useRouter();
+import Volver from "../components/Volver.vue";
+import Cabecera from "../components/Cabecera.vue";
 </script>
 
 <style scoped>

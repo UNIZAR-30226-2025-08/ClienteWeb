@@ -31,8 +31,8 @@ onMounted(() => {
     </div>
 
     <!-- Botón de volver -->
-    <Volver />
   </div>
+  <Volver />
 </template>
 
 <style scoped>
