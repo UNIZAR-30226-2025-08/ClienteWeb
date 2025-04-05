@@ -80,6 +80,9 @@
       <div v-if="hasVoted && isVotingPhase" class="vote-message">
         Has votado al <strong>Jugador {{ selectedPlayerIndex }}</strong>
       </div>
+
+      <Chat :messages="chatMessages" @new-message="addMessage" />
+
     </template>
   </div>
 </template>
@@ -106,6 +109,9 @@ import OjoCerradoOverlay from "../../views/partida/Overlay/OjoCerradoOverlay.vue
 import TurnButton from "../../views/partida/Componentes/TurnButton.vue";
 import DiscoverRoleButton from "../../views/partida/Componentes/DiscoverRoleButton.vue";
 
+import Chat from "../../views/partida/Componentes/Chat.vue"; 
+
+
 export default {
   name: "Partida",
   components: {
@@ -115,6 +121,7 @@ export default {
     VoteButton,
     PlayersCircle,
     IntroOverlay,
+    Chat,
     RoleOverlay,
     EmpiezaOverlay,
     AlguacilOverlay,
@@ -144,6 +151,9 @@ export default {
       hasVoted: false,
       revealVotes: false,
       revealIndex: 0,
+
+      //Chat
+      chatMessages: [],
 
       // Datos de rol y estado del juego
       chosenRole: {},
@@ -214,6 +224,11 @@ export default {
     clearInterval(this.countdownInterval);
   },
   methods: {
+
+    addMessage(message) {
+      this.chatMessages.push(message); // Agregar mensaje al array de mensajes
+    },
+  
     getMyId() {
       const user = localStorage.getItem("usuario");
       return user ? JSON.parse(user).id : null;
