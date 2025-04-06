@@ -63,22 +63,19 @@ export default {
   position: absolute; /* o relative, según tu necesidad */
   top: 54%; /* centrado vertical */
   left: 50%; /* centrado horizontal */
-  width: 0px; /* No necesita ancho/alto específico, ya que se usa para posicionar */
+  width: 0px;
   height: 0px;
   transform: translate(-50%, -50%);
-  /* Para debug, puedes agregar un borde:
-  border: 2px dashed red;
-  */
 }
 
 /* Cada "jugador" se ubica en posición absoluta dentro del contenedor */
 .player-icon {
   position: absolute;
-  width: 5.625rem; /* Tamaño del circulito */
+  width: 5.625rem;
   height: 5.625rem;
-  background-color: #262522; /* Fondo oscuro */
-  border-radius: 50%; /* Circulo */
-  display: flex; /* Centrado del contenido */
+  background-color: #262522;
+  border-radius: 50%;
+  display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -92,10 +89,10 @@ export default {
   object-fit: cover;
 }
 
-/* Etiqueta del jugador (ej: "Jugador 1") */
+/* Etiqueta del jugador */
 .player-label {
   position: absolute;
-  top: 100%; /* Justo debajo de la imagen */
+  top: 100%;
   left: 50%;
   transform: translateX(-50%);
   color: #000000;
@@ -103,9 +100,9 @@ export default {
   white-space: nowrap;
 }
 
-/* Destacar jugador seleccionado */
+/* Destacar jugador seleccionado: ahora con outline verde */
 .selected {
-  outline: 0.125rem solid yellow;
+  outline: 0.125rem solid #33ff00;
   border-radius: 50%;
 }
 </style>

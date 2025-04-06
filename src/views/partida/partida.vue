@@ -47,6 +47,7 @@
       <!-- Círculo de jugadores -->
       <PlayersCircle
         :players="players"
+        :selected-player-index="selectedPlayerIndex"
         :alguacil-voting-active="isVotingPhase"
         :reveal-votes="revealVotes"
         :reveal-index="revealIndex"
@@ -88,7 +89,7 @@
 
 <script>
 import { io } from "socket.io-client";
-const socket = io("http://localhost:5000")
+const socket = io("http://localhost:5000");
 
 import { roles } from "../../assets/data/roles.js";
 import GameStatus from "../../views/partida/Componentes/GameStatus.vue";
@@ -402,16 +403,20 @@ export default {
       }, 500);
     },
 
-    selectPlayer(playerIndex) {
+    selectPlayer(playerId) {
       if (!this.isVotingPhase || this.hasVoted) return;
+      // Si el jugador ya está seleccionado, lo deselecciona; de lo contrario, asigna el ID del jugador seleccionado
       this.selectedPlayerIndex =
-        this.selectedPlayerIndex === playerIndex ? null : playerIndex;
+        this.selectedPlayerIndex === playerId ? null : playerId;
     },
 
     // NUEVO: Método modificado para emitir la votación al servidor
     voteForPlayer() {
       if (this.selectedPlayerIndex && !this.hasVoted) {
-        const jugadorObjetivo = this.players[this.selectedPlayerIndex - 1];
+        // Buscar el jugador objetivo por su ID
+        const jugadorObjetivo = this.players.find(
+          player => player.id === this.selectedPlayerIndex
+        );
         if (!jugadorObjetivo || !jugadorObjetivo.id) {
           console.error("El jugador seleccionado no tiene un ID definido");
           return;
