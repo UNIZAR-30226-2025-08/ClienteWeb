@@ -1,3 +1,149 @@
+<script>
+import axios from "axios";
+import { ref, onMounted, onUnmounted, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+
+const route = useRoute();
+const router = useRouter();
+import socket from "../utils/socket"; // Usa la ruta real según tu estructura
+
+export default {
+  name: "Cabecera",
+  props: {
+    titulo: {
+      type: String,
+      default: "Mi Aplicación",
+    },
+    compacto: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data() {
+    return {
+      user: {},
+      showNotifications: false,
+      friendRequests: [],
+      loadingRequests: false,
+      errorRequests: null,
+      showFeedbackModal: false,
+      feedbackMessage: "",
+      feedbackType: "",
+    };
+  },
+  created() {
+    const storedUser = localStorage.getItem("usuario");
+    if (storedUser) {
+      this.user = JSON.parse(storedUser);
+    } else {
+      this.user = {
+        nombre: "NombreCuenta",
+        avatar: "src/assets/profile_icon.jpg",
+        rolFavorito: "Sin rol favorito",
+      };
+    }
+  },
+  mounted() {
+    // Conectar el socket si aún no lo está
+    if (!socket.connected) {
+      socket.connect();
+    }
+    // Escuchar la notificación de nueva solicitud de amistad
+    socket.on("nuevaSolicitud", (data) => {
+      console.log("Nueva solicitud de amistad:", data);
+      // Actualizamos la lista de solicitudes, por ejemplo volviendo a llamar al endpoint
+      this.fetchFriendRequests();
+      // Mostramos una notificación (toast) al usuario
+      toast.info("Nueva solicitud de amistad recibida", { autoClose: 3000 });
+    });
+  },
+  beforeUnmount() {
+    socket.off("estadoAmigo");
+    socket.off("estadoAmigos");
+    socket.off("nuevaSolicitud");
+  },
+  methods: {
+    irAlPerfil() {
+      this.$router.push({
+        name: "perfil",
+        query: {
+          nombre: this.user.nombre,
+          avatar: this.user.avatar || "",
+          rolFavorito: this.user.rolFavorito || "Sin rol favorito",
+        },
+      });
+    },
+    toggleNotifications() {
+      this.showNotifications = !this.showNotifications;
+      if (this.showNotifications) {
+        this.fetchFriendRequests();
+      }
+    },
+    async fetchFriendRequests() {
+      this.loadingRequests = true;
+      this.errorRequests = null;
+      try {
+        // Se asume que el endpoint GET /api/solicitud/listar/:idUsuario devuelve { solicitudes: [...] }
+        const response = await axios.get(
+          `/api/solicitud/listar/${this.user.id}`
+        );
+        this.friendRequests = response.data.solicitudes || [];
+      } catch (err) {
+        console.error("Error al obtener solicitudes de amistad:", err);
+        this.errorRequests = "Error al obtener solicitudes de amistad.";
+      } finally {
+        this.loadingRequests = false;
+      }
+    },
+    async acceptRequest(solicitud) {
+      try {
+        await axios.post("/api/solicitud/aceptar", {
+          idEmisor: solicitud.idUsuarioEmisor,
+          idReceptor: this.user.id,
+        });
+        this.friendRequests = this.friendRequests.filter(
+          (req) => req.idSolicitud !== solicitud.idSolicitud
+        );
+        this.feedbackMessage = "¡Solicitud aceptada! Tienes un nuevo amigo.";
+        this.feedbackType = "success";
+        this.showFeedbackModal = true;
+      } catch (err) {
+        console.error("Error al aceptar solicitud:", err);
+        this.feedbackMessage =
+          "Error al aceptar la solicitud. Inténtalo nuevamente.";
+        this.feedbackType = "error";
+        this.showFeedbackModal = true;
+      }
+    },
+    async rejectRequest(solicitud) {
+      try {
+        await axios.post("/api/solicitud/rechazar", {
+          idEmisor: solicitud.idUsuarioEmisor,
+          idReceptor: this.user.id,
+        });
+        this.friendRequests = this.friendRequests.filter(
+          (req) => req.idSolicitud !== solicitud.idSolicitud
+        );
+        this.feedbackMessage = "Solicitud rechazada.";
+        this.feedbackType = "success";
+        this.showFeedbackModal = true;
+      } catch (err) {
+        console.error("Error al rechazar solicitud:", err);
+        this.feedbackMessage =
+          "Error al rechazar la solicitud. Inténtalo nuevamente.";
+        this.feedbackType = "error";
+        this.showFeedbackModal = true;
+      }
+    },
+    closeFeedbackModal() {
+      this.showFeedbackModal = false;
+      this.feedbackMessage = "";
+      this.feedbackType = "";
+    },
+  },
+};
+</script>
+
 <template>
   <header class="cabecera">
     <link
@@ -89,129 +235,6 @@
     </div>
   </header>
 </template>
-
-<script>
-import axios from "axios";
-
-export default {
-  name: "Cabecera",
-  props: {
-    titulo: {
-      type: String,
-      default: "Mi Aplicación",
-    },
-    compacto: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      user: {},
-      showNotifications: false,
-      friendRequests: [],
-      loadingRequests: false,
-      errorRequests: null,
-      showFeedbackModal: false,
-      feedbackMessage: "",
-      feedbackType: "",
-    };
-  },
-  created() {
-    const storedUser = localStorage.getItem("usuario");
-    if (storedUser) {
-      this.user = JSON.parse(storedUser);
-    } else {
-      this.user = {
-        nombre: "NombreCuenta",
-        avatar: "src/assets/profile_icon.jpg",
-        rolFavorito: "Sin rol favorito",
-      };
-    }
-  },
-  methods: {
-    irAlPerfil() {
-      this.$router.push({
-        name: "perfil",
-        query: {
-          nombre: this.user.nombre,
-          avatar: this.user.avatar || "",
-          rolFavorito: this.user.rolFavorito || "Sin rol favorito",
-        },
-      });
-    },
-    toggleNotifications() {
-      this.showNotifications = !this.showNotifications;
-      if (this.showNotifications) {
-        this.fetchFriendRequests();
-      }
-    },
-    async fetchFriendRequests() {
-      this.loadingRequests = true;
-      this.errorRequests = null;
-      try {
-        // Se asume que el endpoint GET /api/solicitud/listar/:idUsuario devuelve { solicitudes: [...] }
-        const response = await axios.get(
-          `/api/solicitud/listar/${this.user.id}`
-        );
-        this.friendRequests = response.data.solicitudes || [];
-      } catch (err) {
-        console.error("Error al obtener solicitudes de amistad:", err);
-        this.errorRequests = "Error al obtener solicitudes de amistad.";
-      } finally {
-        this.loadingRequests = false;
-      }
-    },
-    async acceptRequest(solicitud) {
-      try {
-        await axios.post("/api/solicitud/aceptar", {
-          idEmisor: solicitud.idUsuarioEmisor,
-          idReceptor: this.user.id,
-        });
-        // Elimina la solicitud aceptada de la lista
-        this.friendRequests = this.friendRequests.filter(
-          (req) => req.idSolicitud !== solicitud.idSolicitud
-        );
-        this.feedbackMessage = "¡Solicitud aceptada! Tienes un nuevo amigo.";
-        this.feedbackType = "success";
-        this.showFeedbackModal = true;
-      } catch (err) {
-        console.error("Error al aceptar solicitud:", err);
-        this.feedbackMessage =
-          "Error al aceptar la solicitud. Inténtalo nuevamente.";
-        this.feedbackType = "error";
-        this.showFeedbackModal = true;
-      }
-    },
-    async rejectRequest(solicitud) {
-      try {
-        await axios.post("/api/solicitud/rechazar", {
-          idEmisor: solicitud.idUsuarioEmisor,
-          idReceptor: this.user.id,
-        });
-        // Elimina la solicitud rechazada de la lista
-        this.friendRequests = this.friendRequests.filter(
-          (req) => req.idSolicitud !== solicitud.idSolicitud
-        );
-        this.feedbackMessage = "Solicitud rechazada.";
-        this.feedbackType = "success";
-        this.showFeedbackModal = true;
-      } catch (err) {
-        console.error("Error al rechazar solicitud:", err);
-        this.feedbackMessage =
-          "Error al rechazar la solicitud. Inténtalo nuevamente.";
-        this.feedbackType = "error";
-        this.showFeedbackModal = true;
-      }
-    },
-    closeFeedbackModal() {
-      this.showFeedbackModal = false;
-      this.feedbackMessage = "";
-      this.feedbackType = "";
-    },
-  },
-};
-</script>
 
 <style scoped>
 /* CABECERA */

@@ -112,7 +112,7 @@ import OjoCerradoOverlay from "../../views/partida/Overlay/OjoCerradoOverlay.vue
 import TurnButton from "../../views/partida/Componentes/TurnButton.vue";
 import DiscoverRoleButton from "../../views/partida/Componentes/DiscoverRoleButton.vue";
 
-import Chat from "../../views/partida/Componentes/Chat.vue"; 
+import Chat from "../../views/partida/Componentes/Chat.vue";
 
 export default {
   name: "Partida",
@@ -245,7 +245,7 @@ export default {
     addMessage(message) {
       this.chatMessages.push(message); // Agregar mensaje al array de mensajes
     },
-  
+
     getMyId() {
       const user = localStorage.getItem("usuario");
       return user ? JSON.parse(user).id : null;
@@ -412,28 +412,28 @@ export default {
 
     //Método modificado para emitir la votación al servidor
     voteForPlayer() {
-    if (this.selectedPlayerIndex && !this.hasVoted) {
-      // Buscar el jugador objetivo por su ID
-      const jugadorObjetivo = this.players.find(
-        (player) => player.id === this.selectedPlayerIndex
-      );
-      if (!jugadorObjetivo || !jugadorObjetivo.id) {
-        console.error("El jugador seleccionado no tiene un ID definido");
-        return;
+      if (this.selectedPlayerIndex && !this.hasVoted) {
+        // Buscar el jugador objetivo por su ID
+        const jugadorObjetivo = this.players.find(
+          (player) => player.id === this.selectedPlayerIndex
+        );
+        if (!jugadorObjetivo || !jugadorObjetivo.id) {
+          console.error("El jugador seleccionado no tiene un ID definido");
+          return;
+        }
+        // Incrementar el contador de votos del jugador seleccionado
+        jugadorObjetivo.votes++;
+
+        // Emitir el evento "votar" al servidor con los datos necesarios
+        socket.emit("votar", {
+          idPartida: this.idPartida,
+          idJugador: this.getMyId(),
+          idObjetivo: jugadorObjetivo.id,
+        });
+
+        this.hasVoted = true;
       }
-      // Incrementar el contador de votos del jugador seleccionado
-      jugadorObjetivo.votes++;
-
-      // Emitir el evento "votar" al servidor con los datos necesarios
-      socket.emit("votar", {
-        idPartida: this.idPartida,
-        idJugador: this.getMyId(),
-        idObjetivo: jugadorObjetivo.id,
-      });
-
-      this.hasVoted = true;
-    }
-  },
+    },
 
     resetVotingState() {
       this.selectedPlayerIndex = null;

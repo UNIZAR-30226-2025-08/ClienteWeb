@@ -105,6 +105,11 @@ const addFriend = async () => {
       idEmisor: userId,
       idReceptor: foundUser.idUsuario,
     });
+    // Emitimos el evento de socket para notificar la solicitud en tiempo real
+    socket.emit("solicitudAmistad", {
+      idEmisor: userId,
+      idReceptor: foundUser.idUsuario,
+    });
     // Actualizamos la lista de amigos
     await fetchFriends();
     // Limpiamos el campo de búsqueda
