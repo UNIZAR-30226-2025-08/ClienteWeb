@@ -16,6 +16,15 @@
       />
       <!-- Etiqueta con el número o nombre del jugador -->
       <span class="player-label"> {{ player.nombre }}</span>
+
+      <!-- Visualización de los votos (Palitos) -->
+      <div class="votes-bar">
+        <div
+          v-for="n in player.votes"
+          :key="n"
+          class="vote-stick"
+        ></div>
+      </div>
     </div>
   </div>
 </template>
@@ -79,6 +88,7 @@ export default {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  flex-direction: column;
 }
 
 /* Imagen del jugador */
@@ -100,9 +110,18 @@ export default {
   white-space: nowrap;
 }
 
-/* Destacar jugador seleccionado: ahora con outline verde */
-.selected {
-  outline: 0.125rem solid #33ff00;
-  border-radius: 50%;
+/* Visualización de los votos */
+.votes-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.vote-stick {
+  width: 0.25rem;
+  height: 1rem;
+  background-color: #33ff00;
+  margin: 0.25rem;
 }
 </style>

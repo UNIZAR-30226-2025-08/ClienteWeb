@@ -410,26 +410,30 @@ export default {
         this.selectedPlayerIndex === playerId ? null : playerId;
     },
 
-    // NUEVO: Método modificado para emitir la votación al servidor
+    //Método modificado para emitir la votación al servidor
     voteForPlayer() {
-      if (this.selectedPlayerIndex && !this.hasVoted) {
-        // Buscar el jugador objetivo por su ID
-        const jugadorObjetivo = this.players.find(
-          player => player.id === this.selectedPlayerIndex
-        );
-        if (!jugadorObjetivo || !jugadorObjetivo.id) {
-          console.error("El jugador seleccionado no tiene un ID definido");
-          return;
-        }
-        // Emitir el evento "votar" al servidor con los datos necesarios
-        socket.emit("votar", {
-          idPartida: this.idPartida,
-          idJugador: this.getMyId(),
-          idObjetivo: jugadorObjetivo.id,
-        });
-        this.hasVoted = true;
+    if (this.selectedPlayerIndex && !this.hasVoted) {
+      // Buscar el jugador objetivo por su ID
+      const jugadorObjetivo = this.players.find(
+        (player) => player.id === this.selectedPlayerIndex
+      );
+      if (!jugadorObjetivo || !jugadorObjetivo.id) {
+        console.error("El jugador seleccionado no tiene un ID definido");
+        return;
       }
-    },
+      // Incrementar el contador de votos del jugador seleccionado
+      jugadorObjetivo.votes++;
+
+      // Emitir el evento "votar" al servidor con los datos necesarios
+      socket.emit("votar", {
+        idPartida: this.idPartida,
+        idJugador: this.getMyId(),
+        idObjetivo: jugadorObjetivo.id,
+      });
+
+      this.hasVoted = true;
+    }
+  },
 
     resetVotingState() {
       this.selectedPlayerIndex = null;
