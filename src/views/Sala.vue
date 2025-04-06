@@ -8,7 +8,7 @@ import Cabecera from "../components/Cabecera.vue";
 
 const route = useRoute();
 const router = useRouter();
-const socket = io("http://localhost:5000");
+import socket from "../utils/socket"; // Usa la ruta real según tu estructura
 
 // Variables reactivas
 const idSala = ref(null);
@@ -53,6 +53,9 @@ const unirseSala = () => {
 };
 
 onMounted(() => {
+  if (!socket.connected) {
+    socket.connect();
+  }
   const usuarioGuardado = localStorage.getItem("usuario");
   if (!usuarioGuardado) {
     alert("Debes iniciar sesión para unirte a una sala.");

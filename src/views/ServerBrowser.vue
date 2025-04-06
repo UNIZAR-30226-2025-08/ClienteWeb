@@ -1,11 +1,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
-import { io } from "socket.io-client";
 import Volver from "../components/Volver.vue";
 import Cabecera from "../components/Cabecera.vue";
-
-const socket = io("http://localhost:5000"); // Asegúrate de que la URL del servidor es correcta
+import socket from "../utils/socket"; // Usa la ruta real según tu estructura
 const router = useRouter();
 
 // Variables reactivas
@@ -18,6 +16,9 @@ const obtenerSalas = () => {
 };
 
 onMounted(() => {
+  if (!socket.connected) {
+    socket.connect();
+  }
   const usuarioGuardado = localStorage.getItem("usuario");
   if (!usuarioGuardado) {
     alert("Debes iniciar sesión para ver las salas.");

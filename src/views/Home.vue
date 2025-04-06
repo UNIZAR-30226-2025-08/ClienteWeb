@@ -6,6 +6,7 @@ import axios from "axios"; // Importar axios para poder hacer la petición de lo
 import Musica from "../components/musica/musica.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import socket from "../utils/socket"; // Usa la ruta real según tu estructura
 
 const router = useRouter();
 
@@ -109,6 +110,10 @@ async function loginUser() {
       localStorage.setItem("usuario", JSON.stringify(usuario));
       // Si el login es exitoso, almacenar el mensaje de éxito
       localStorage.setItem("loginSuccess", "true"); // Almacenar en localStorage
+
+      //Emitimos el evento de conexión
+      socket.emit("registrarUsuario", { idUsuario: usuario.id });
+
       router.push("/juego"); // Redirigir al juego
     } else {
       // Si la respuesta no es 200 (exitoso), mostrar error
@@ -141,6 +146,9 @@ function slideSiguiente() {
   progreso.value = 0;
 }
 onMounted(() => {
+  if (!socket.connected) {
+    socket.connect();
+  }
   setInterval(() => {
     progreso.value += incremento;
     if (progreso.value >= 100) {

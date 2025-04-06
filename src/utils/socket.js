@@ -1,9 +1,6 @@
 // src/utils/socket.js
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000", {
-  autoConnect: false, // Evita que se conecte automáticamente
-  reconnection: true, // Habilita la reconexión automática
-});
+const socket = io("http://localhost:5000");
 
 export default socket;

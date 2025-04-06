@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import Cabecera from "../components/Cabecera.vue";
+import socket from "../utils/socket"; // Usa la ruta real según tu estructura
 
 const router = useRouter();
 const loginSuccess = localStorage.getItem("loginSuccess"); // Verificar si ya hubo un login exitoso
@@ -12,6 +13,9 @@ const loginSuccess = localStorage.getItem("loginSuccess"); // Verificar si ya hu
 const showExitConfirm = ref(false);
 
 onMounted(() => {
+  if (!socket.connected) {
+    socket.connect();
+  }
   if (loginSuccess === "true") {
     toast.success("Conexión exitosa, bienvenido!", { autoClose: 3000 });
     localStorage.removeItem("loginSuccess");
@@ -47,8 +51,17 @@ function openExitConfirm() {
 }
 function confirmExit() {
   showExitConfirm.value = false;
+
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  if (usuario?.id) {
+    // 🔥 Avisamos manualmente al backend antes de cerrar el socket
+    socket.emit("desconectarUsuario", { idUsuario: usuario.id });
+  }
+
+  socket.disconnect(); // Luego sí cerramos el socket
   irAHome();
 }
+
 function cancelExit() {
   showExitConfirm.value = false;
 }

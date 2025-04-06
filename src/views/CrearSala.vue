@@ -1,14 +1,10 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
 import Cabecera from "../components/Cabecera.vue";
 import Volver from "../components/Volver.vue";
 // Importar socket.io-client para conectarse al servidor de websockets
-import { io } from "socket.io-client";
-
-// Crear la conexión al servidor de websockets (ajusta la URL según tu entorno)
-const socket = io("http://localhost:5000");
+import socket from "../utils/socket"; // Usa la ruta real según tu estructura
 
 const router = useRouter();
 const usuario = ref(null);
@@ -18,6 +14,9 @@ const password = ref("");
 
 // Recuperar usuario autenticado al cargar la vista
 onMounted(() => {
+  if (!socket.connected) {
+    socket.connect();
+  }
   const usuarioGuardado = localStorage.getItem("usuario");
   if (usuarioGuardado) {
     usuario.value = JSON.parse(usuarioGuardado);

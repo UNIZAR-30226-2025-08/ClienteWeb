@@ -4,6 +4,13 @@ import { toast } from "vue3-toastify";
 import Cabecera from "../components/Cabecera.vue";
 import Volver from "../components/Volver.vue";
 import axios from "axios";
+import socket from "../utils/socket"; // Usa la ruta real según tu estructura
+import { onBeforeUnmount } from "vue";
+
+onBeforeUnmount(() => {
+  socket.off("estadoAmigo");
+  socket.off("estadoAmigos");
+});
 
 // Función para obtener el ID del usuario logueado desde localStorage
 const getUserId = () => {
@@ -127,8 +134,34 @@ const addFriend = async () => {
   }
 };
 
-onMounted(() => {
-  fetchFriends();
+onMounted(async () => {
+  const idUsuario = getUserId();
+
+  if (!socket.connected) {
+    socket.connect();
+  }
+
+  socket.emit("registrarUsuario", { idUsuario });
+
+  await fetchFriends();
+
+  socket.emit("solicitarEstadoAmigos", { idUsuario });
+
+  socket.on("estadoAmigo", ({ idUsuario, en_linea }) => {
+    const amigo = friends.value.find((f) => f.idUsuario === idUsuario);
+    if (amigo) {
+      amigo.enLinea = en_linea;
+    }
+  });
+
+  socket.on("estadoAmigos", (estadoAmigos) => {
+    estadoAmigos.forEach(({ idUsuario, en_linea }) => {
+      const amigo = friends.value.find((f) => f.idUsuario === idUsuario);
+      if (amigo) {
+        amigo.enLinea = en_linea;
+      }
+    });
+  });
 });
 </script>
 
@@ -169,11 +202,13 @@ onMounted(() => {
               <p class="friend-name">{{ friend.nombre }}</p>
               <p class="friend-status">
                 {{
-                  friend.estadisticas
-                    ? "En Sala / " +
-                      friend.estadisticas.partidasTotales +
-                      " Partidas"
-                    : "Disponible"
+                  friend.enLinea
+                    ? friend.estadisticas
+                      ? "🟢 En sala / " +
+                        friend.estadisticas.partidasTotales +
+                        " partidas"
+                      : "🟢 En línea"
+                    : "⚫ Desconectado"
                 }}
               </p>
             </div>
