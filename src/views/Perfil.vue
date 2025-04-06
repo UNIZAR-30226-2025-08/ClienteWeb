@@ -5,7 +5,29 @@ import { toast } from "vue3-toastify";
 import Volver from "../components/Volver.vue";
 import { useRouter } from "vue-router";
 
+// Importaciones explícitas de avatares
+import avatar1 from "../assets/avatares/imagenPerfil.webp";
+import avatar2 from "../assets/avatares/imagenPerfil2.webp";
+import avatar3 from "../assets/avatares/imagenPerfil3.webp";
+import avatar4 from "../assets/avatares/imagenPerfil4.webp";
+import avatar5 from "../assets/avatares/imagenPerfil5.webp";
+import avatar6 from "../assets/avatares/imagenPerfil6.webp";
+import avatar7 from "../assets/avatares/imagenPerfil7.webp";
+import avatar8 from "../assets/avatares/imagenPerfil8.webp";
+
 const router = useRouter();
+
+// Mapeo corregido usando imports directos
+const avatarMap = {
+  avatar1: avatar1,
+  avatar2: avatar2,
+  avatar3: avatar3,
+  avatar4: avatar4,
+  avatar5: avatar5,
+  avatar6: avatar6,
+  avatar7: avatar7,
+  avatar8: avatar8,
+};
 
 const usuario = JSON.parse(localStorage.getItem("usuario"));
 const nombre = ref(usuario.nombre);
@@ -67,7 +89,6 @@ const actualizarPerfil = async () => {
     );
 
     if (response.status === 200 && response.data?.usuario) {
-      //TODO: Cambiar la forma en la que pasamos idusuario y unificarla
       const datosActualizados2 = {
         id: usuario.id,
         nombre: nuevoNombre.value,
@@ -100,7 +121,7 @@ const actualizarPerfil = async () => {
   <h1 class="cabecera">Perfil</h1>
 
   <div class="perfil-container">
-    <img :src="avatar" alt="Avatar" class="avatar" />
+    <img :src="avatarMap[avatar]" alt="Avatar" class="avatar" />
 
     <div class="info-perfil">
       <h2>
@@ -124,10 +145,22 @@ const actualizarPerfil = async () => {
           <label for="nuevoNombre">Nuevo Nombre:</label>
           <input v-model="nuevoNombre" type="text" id="nuevoNombre" required />
         </div>
-        <div>
-          <label for="nuevoAvatar">Nueva URL del Avatar:</label>
-          <input v-model="nuevoAvatar" type="text" id="nuevoAvatar" required />
+
+        <div class="avatar-selection">
+          <label>Seleccionar Avatar:</label>
+          <div class="avatar-grid">
+            <div
+              v-for="(avatarUrl, avatarKey) in avatarMap"
+              :key="avatarKey"
+              class="avatar-option"
+              :class="{ selected: nuevoAvatar === avatarKey }"
+              @click="nuevoAvatar = avatarKey"
+            >
+              <img :src="avatarUrl" :alt="avatarKey" class="thumbnail" />
+            </div>
+          </div>
         </div>
+
         <div>
           <label for="nuevoRol">Nuevo Rol Favorito:</label>
           <select v-model="nuevoRol" id="nuevoRol" required>
@@ -258,6 +291,38 @@ button:hover {
   color: white;
   border-radius: 8px;
   margin-bottom: 1rem;
+}
+
+/* Estilos para selección de avatar */
+.avatar-selection {
+  margin: 1rem 0;
+}
+
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.avatar-option {
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 4px;
+  transition: all 0.2s;
+}
+
+.avatar-option.selected {
+  border-color: #4a90e2;
+  box-shadow: 0 0 8px rgba(74, 144, 226, 0.5);
+}
+
+.thumbnail {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
 }
 
 .modal-buttons {

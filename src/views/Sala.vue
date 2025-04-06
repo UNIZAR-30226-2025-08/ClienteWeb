@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { io } from "socket.io-client";
 import { toast } from "vue3-toastify"; // Importar toast
 import "vue3-toastify/dist/index.css"; // Importar estilos de toastify
 import Cabecera from "../components/Cabecera.vue";

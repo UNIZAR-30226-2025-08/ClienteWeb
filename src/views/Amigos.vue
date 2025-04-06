@@ -204,9 +204,9 @@ onMounted(async () => {
                 {{
                   friend.enLinea
                     ? friend.estadisticas
-                      ? "🟢 En sala / " +
+                      ? "🟢 Conectado / " +
                         friend.estadisticas.partidasTotales +
-                        " partidas"
+                        " partidas jugadas"
                       : "🟢 En línea"
                     : "⚫ Desconectado"
                 }}
