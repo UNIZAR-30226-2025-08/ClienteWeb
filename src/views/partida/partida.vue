@@ -82,12 +82,14 @@
       </div>
 
       <Chat :messages="chatMessages" @new-message="addMessage" />
-
     </template>
   </div>
 </template>
 
 <script>
+import { io } from "socket.io-client";
+const socket = io("http://localhost:5000")
+
 import { roles } from "../../assets/data/roles.js";
 import GameStatus from "../../views/partida/Componentes/GameStatus.vue";
 import RoleInfoPanel from "../../views/partida/Componentes/DescripcionRol.vue";
@@ -110,7 +112,6 @@ import TurnButton from "../../views/partida/Componentes/TurnButton.vue";
 import DiscoverRoleButton from "../../views/partida/Componentes/DiscoverRoleButton.vue";
 
 import Chat from "../../views/partida/Componentes/Chat.vue"; 
-
 
 export default {
   name: "Partida",
@@ -152,7 +153,7 @@ export default {
       revealVotes: false,
       revealIndex: 0,
 
-      //Chat
+      // Chat
       chatMessages: [],
 
       // Datos de rol y estado del juego
@@ -168,6 +169,8 @@ export default {
       // Nuevas propiedades para la acción de la Vidente
       hasPassedTurn: false,
       hasDiscoveredRole: false,
+
+      idPartida: null, // NUEVO: Propiedad para almacenar el ID de la partida
     };
   },
   computed: {
@@ -200,6 +203,9 @@ export default {
     // Sincronizar la lista de jugadores
     this.players = sala.jugadores || [];
 
+    // NUEVO: Asignar el ID de la partida (suponiendo que está en la propiedad "id" de la sala)
+    this.idPartida = sala.id;
+
     // Obtener el rol del jugador (por ejemplo, de localStorage)
     const rol = localStorage.getItem("miRol");
     const rolMayus = JSON.parse(rol);
@@ -219,12 +225,22 @@ export default {
 
     // Iniciar el flujo de juego
     this.startGameFlow();
+
+    // NUEVO: Escuchar eventos del socket para actualizar el estado tras votar
+    socket.on("votoRegistrado", (data) => {
+      console.log("Voto registrado, estado de partida:", data.estado);
+      if (data.estado && data.estado.jugadores) {
+        this.players = data.estado.jugadores;
+      }
+    });
+    socket.on("error", (mensajeError) => {
+      console.error("Error recibido del servidor:", mensajeError);
+    });
   },
   beforeUnmount() {
     clearInterval(this.countdownInterval);
   },
   methods: {
-
     addMessage(message) {
       this.chatMessages.push(message); // Agregar mensaje al array de mensajes
     },
@@ -392,9 +408,20 @@ export default {
         this.selectedPlayerIndex === playerIndex ? null : playerIndex;
     },
 
+    // NUEVO: Método modificado para emitir la votación al servidor
     voteForPlayer() {
       if (this.selectedPlayerIndex && !this.hasVoted) {
-        this.players[this.selectedPlayerIndex - 1].votes++;
+        const jugadorObjetivo = this.players[this.selectedPlayerIndex - 1];
+        if (!jugadorObjetivo || !jugadorObjetivo.id) {
+          console.error("El jugador seleccionado no tiene un ID definido");
+          return;
+        }
+        // Emitir el evento "votar" al servidor con los datos necesarios
+        socket.emit("votar", {
+          idPartida: this.idPartida,
+          idJugador: this.getMyId(),
+          idObjetivo: jugadorObjetivo.id,
+        });
         this.hasVoted = true;
       }
     },
