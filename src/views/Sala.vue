@@ -9,6 +9,28 @@ const route = useRoute();
 const router = useRouter();
 import socket from "../utils/socket"; // Usa la ruta real según tu estructura
 
+import avatar1 from "../assets/avatares/imagenPerfil.webp";
+import avatar2 from "../assets/avatares/imagenPerfil2.webp";
+import avatar3 from "../assets/avatares/imagenPerfil3.webp";
+import avatar4 from "../assets/avatares/imagenPerfil4.webp";
+import avatar5 from "../assets/avatares/imagenPerfil5.webp";
+import avatar6 from "../assets/avatares/imagenPerfil6.webp";
+import avatar7 from "../assets/avatares/imagenPerfil7.webp";
+import avatar8 from "../assets/avatares/imagenPerfil8.webp";
+import defaultAvatar from "../assets/profile_icon.jpg"; // Imagen por defecto
+
+// Mapa de avatares
+const avatarMap = {
+  avatar1,
+  avatar2,
+  avatar3,
+  avatar4,
+  avatar5,
+  avatar6,
+  avatar7,
+  avatar8,
+};
+
 // Variables reactivas
 const idSala = ref(null);
 const jugadores = ref([]);
@@ -62,7 +84,11 @@ onMounted(() => {
     return;
   }
 
-  usuario.value = JSON.parse(usuarioGuardado);
+  const userData = JSON.parse(usuarioGuardado);
+  usuario.value = {
+    ...userData,
+    avatar: userData.avatar || "avatar1", // Valor por defecto
+  };
   idSala.value = route.params.idSala;
 
   if (!idSala.value) {
@@ -236,7 +262,7 @@ function IraPantallaDeAmigos() {
           <div class="slot-avatar">
             <img
               v-if="jugador && !slotsCargando[jugador.id]"
-              src="../assets/player.png"
+              :src="avatarMap[jugador.avatar] || defaultAvatar"
               alt="Avatar Jugador"
             />
             <img
@@ -362,9 +388,11 @@ function IraPantallaDeAmigos() {
 }
 
 .slot-avatar img {
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
 }
 
 .slot-nombre {
@@ -499,22 +527,22 @@ button.expulsar:hover {
 
 /* Animación de carga para el avatar */
 .loading-avatar {
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  background-color: #444;
+  background: #2c2c2c;
   animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
   0% {
-    opacity: 0.4;
+    opacity: 0.6;
   }
   50% {
     opacity: 1;
   }
   100% {
-    opacity: 0.4;
+    opacity: 0.6;
   }
 }
 

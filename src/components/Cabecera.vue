@@ -1,4 +1,13 @@
 <script>
+import avatar1 from "../assets/avatares/imagenPerfil.webp";
+import avatar2 from "../assets/avatares/imagenPerfil2.webp";
+import avatar3 from "../assets/avatares/imagenPerfil3.webp";
+import avatar4 from "../assets/avatares/imagenPerfil4.webp";
+import avatar5 from "../assets/avatares/imagenPerfil5.webp";
+import avatar6 from "../assets/avatares/imagenPerfil6.webp";
+import avatar7 from "../assets/avatares/imagenPerfil7.webp";
+import avatar8 from "../assets/avatares/imagenPerfil8.webp";
+import defaultAvatar from "../assets/profile_icon.jpg"; // Asegúrate de tener esta imagen
 import axios from "axios";
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -21,6 +30,16 @@ export default {
   },
   data() {
     return {
+      avatarMap: {
+        avatar1: avatar1,
+        avatar2: avatar2,
+        avatar3: avatar3,
+        avatar4: avatar4,
+        avatar5: avatar5,
+        avatar6: avatar6,
+        avatar7: avatar7,
+        avatar8: avatar8,
+      },
       user: {},
       showNotifications: false,
       friendRequests: [],
@@ -35,10 +54,14 @@ export default {
     const storedUser = localStorage.getItem("usuario");
     if (storedUser) {
       this.user = JSON.parse(storedUser);
+      // Asegurar que el avatar tenga un valor por defecto si está vacío
+      if (!this.user.avatar) {
+        this.user.avatar = "avatar1";
+      }
     } else {
       this.user = {
         nombre: "NombreCuenta",
-        avatar: "src/assets/profile_icon.jpg",
+        avatar: "avatar1",
         rolFavorito: "Sin rol favorito",
       };
     }
@@ -162,7 +185,7 @@ export default {
           @click="irAlPerfil"
         >
           <img
-            :src="user.avatar || 'src/assets/profile_icon.jpg'"
+            :src="avatarMap[user.avatar] || defaultAvatar"
             alt="User Icon"
             class="user-icon"
           />
