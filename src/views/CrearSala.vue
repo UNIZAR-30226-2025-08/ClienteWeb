@@ -173,6 +173,7 @@ function crearSala() {
 
 socket.on("salaCreada", (data) => {
   if (data && data.id) {
+    localStorage.removeItem("salaActual");
     // Guardar la información de la sala para que el creador se vea dentro de ella
     localStorage.setItem("salaActual", JSON.stringify(data));
 

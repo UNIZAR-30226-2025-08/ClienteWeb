@@ -80,6 +80,28 @@ const confirmDelete = async () => {
       "Error al eliminar amigo. Por favor, inténtalo nuevamente.";
   }
 };
+const getSalaActual = () => {
+  const sala = localStorage.getItem("salaActual");
+  return sala ? JSON.parse(sala) : null;
+};
+
+const invitarASala = (friendId) => {
+  const salaActual = getSalaActual();
+  if (!salaActual) {
+    toast.error(
+      "No estás en ninguna sala. Únete a una sala para invitar a amigos.",
+      { autoClose: 3000 }
+    );
+    return;
+  }
+  const invitadorId = getUserId();
+  socket.emit("invitarASala", {
+    idAmigo: friendId,
+    idSala: salaActual.id, // Usamos el ID de la sala almacenada
+    idInvitador: invitadorId,
+  });
+  toast.success("Invitación enviada correctamente", { autoClose: 3000 });
+};
 
 const addFriend = async () => {
   if (!searchName.value.trim()) {
@@ -220,7 +242,13 @@ onMounted(async () => {
           </div>
           <div class="friend-buttons">
             <button class="green-button">Unirse</button>
-            <button class="green-button">Invitar</button>
+            <button
+              class="green-button"
+              @click="invitarASala(friend.idUsuario)"
+            >
+              Invitar
+            </button>
+
             <button
               class="red-button"
               @click="openDeleteModal(friend.idUsuario)"
