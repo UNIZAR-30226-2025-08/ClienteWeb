@@ -5,12 +5,29 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import Cabecera from "../components/Cabecera.vue";
 import socket from "../utils/socket"; // Usa la ruta real según tu estructura
+import axios from "axios";
 
 const router = useRouter();
 const loginSuccess = localStorage.getItem("loginSuccess"); // Verificar si ya hubo un login exitoso
 
+const esAdmin = ref(false); // Variable para controlar si es administrador
 // Variable para controlar el pop-up de confirmación de salida
 const showExitConfirm = ref(false);
+
+// Verificar si el usuario es administrador
+const verificarAdministrador = async () => {
+  try {
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    if (usuario?.id) {
+      const response = await axios.post("/api/admin/esAdministrador", {
+        idUsuario: usuario.id,
+      });
+      esAdmin.value = response.data.esAdministrador; // Si es administrador, lo asignamos a true
+    }
+  } catch (error) {
+    console.error("Error al verificar administrador:", error);
+  }
+};
 
 onMounted(() => {
   if (!socket.connected) {
@@ -20,9 +37,10 @@ onMounted(() => {
     toast.success("Conexión exitosa, bienvenido!", { autoClose: 3000 });
     localStorage.removeItem("loginSuccess");
   }
+  verificarAdministrador(); // Llamamos a la función de verificación al montar el componente
 });
 
-// Funciones de navegación
+// Funciones de navegación (como las que ya tenías)
 function irAHome() {
   router.push("/");
 }
@@ -44,7 +62,9 @@ function irASugerencias() {
 function irABuscarSalas() {
   router.push("/servidores");
 }
-
+function irASugerenciasAdmin() {
+  router.push("/SugerenciasAdmin"); // Redirige a la página de sugerencias para administradores
+}
 // Funciones para el pop-up de confirmación de salida
 function openExitConfirm() {
   showExitConfirm.value = true;
@@ -79,6 +99,14 @@ function cancelExit() {
         <button class="action-button-sidebar" @click="irAReglas">Reglas</button>
         <button class="action-button-sidebar" @click="irASugerencias">
           Sugerencias
+        </button>
+        <!-- Mostrar solo si es administrador -->
+        <button
+          v-if="esAdmin"
+          class="action-button-sidebar"
+          @click="irASugerenciasAdmin"
+        >
+          Ver Sugerencias
         </button>
         <!-- En vez de ir directamente a Home, se abre el pop-up de confirmación -->
         <button class="action-button salir-button" @click="openExitConfirm">

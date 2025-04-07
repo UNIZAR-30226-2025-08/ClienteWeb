@@ -1,3 +1,57 @@
+<template>
+  <div class="sugerencias-container">
+    <Cabecera :titulo="'Sugerencias'" :compacto="false" />
+    <div class="card">
+      <h2 class="card-title">Enviar Sugerencia</h2>
+      <form @submit.prevent="enviarSugerencia">
+        <textarea
+          v-model="contenido"
+          placeholder="Escribe tu sugerencia..."
+          class="sugerencia-input"
+        ></textarea>
+        <button type="submit" class="btn-submit">Enviar</button>
+      </form>
+    </div>
+
+    <!-- Botón para desplegar u ocultar las sugerencias enviadas por el usuario -->
+    <button class="btn-toggle" @click="toggleMisSugerencias">
+      {{
+        "mostrarMisSugerencias"
+          ? "Ocultar mis sugerencias"
+          : "Ver mis sugerencias"
+      }}
+    </button>
+
+    <!-- Sección desplegable con las sugerencias del usuario -->
+    <div v-if="mostrarMisSugerencias" class="sugerencias-dropdown">
+      <h3>Mis Sugerencias</h3>
+      <ul>
+        <li v-for="sugerencia in misSugerencias" :key="sugerencia.idSugerencia">
+          <p><strong>Sugerencia:</strong> {{ sugerencia.contenido }}</p>
+          <p>
+            <strong>Fecha:</strong> {{ formatDate(sugerencia.fechaSugerencia) }}
+          </p>
+          <p>
+            <strong>Estado:</strong>
+            <span
+              :class="{
+                'estado-cerrado': sugerencia.revisada,
+                'estado-abierto': !sugerencia.revisada,
+              }"
+            >
+              {{ sugerencia.revisada ? "Cerrada" : "Abierta" }}
+            </span>
+          </p>
+        </li>
+      </ul>
+      <p v-if="misSugerencias.length === 0" class="mensaje">
+        No has enviado sugerencias.
+      </p>
+    </div>
+  </div>
+  <Volver />
+</template>
+
 <script>
 import axios from "axios";
 import { toast } from "vue3-toastify";
@@ -101,53 +155,6 @@ export default {
   },
 };
 </script>
-
-<template>
-  <div class="sugerencias-container">
-    <Cabecera :titulo="'Sugerencias'" :compacto="false" />
-    <div class="card">
-      <h2 class="card-title">Enviar Sugerencia</h2>
-      <form @submit.prevent="enviarSugerencia">
-        <textarea
-          v-model="contenido"
-          placeholder="Escribe tu sugerencia..."
-          class="sugerencia-input"
-        ></textarea>
-        <button type="submit" class="btn-submit">Enviar</button>
-      </form>
-    </div>
-
-    <!-- Botón para desplegar u ocultar las sugerencias enviadas por el usuario -->
-    <button class="btn-toggle" @click="toggleMisSugerencias">
-      {{
-        mostrarMisSugerencias
-          ? "Ocultar mis sugerencias"
-          : "Ver mis sugerencias"
-      }}
-    </button>
-
-    <!-- Sección desplegable con las sugerencias del usuario -->
-    <div v-if="mostrarMisSugerencias" class="sugerencias-dropdown">
-      <h3>Mis Sugerencias</h3>
-      <ul>
-        <li v-for="sugerencia in misSugerencias" :key="sugerencia.idSugerencia">
-          <p><strong>Sugerencia:</strong> {{ sugerencia.contenido }}</p>
-          <p>
-            <strong>Fecha:</strong> {{ formatDate(sugerencia.fechaSugerencia) }}
-          </p>
-          <p>
-            <strong>Estado:</strong>
-            {{ sugerencia.revisada ? "Cerrada" : "Abierta" }}
-          </p>
-        </li>
-      </ul>
-      <p v-if="misSugerencias.length === 0" class="mensaje">
-        No has enviado sugerencias.
-      </p>
-    </div>
-  </div>
-  <Volver />
-</template>
 
 <style scoped>
 /* Contenedor principal con fondo oscuro */
@@ -263,5 +270,13 @@ export default {
 
 .sugerencias-dropdown li:last-child {
   border-bottom: none;
+}
+
+.estado-abierto {
+  color: green;
+}
+
+.estado-cerrado {
+  color: red;
 }
 </style>
