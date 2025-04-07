@@ -13,17 +13,15 @@ export default {
   data() {
     return {
       sugerencias: [],
-      filtroEstado: "todas",
       respuesta: {},
     };
   },
   computed: {
-    sugerenciasFiltradas() {
-      return this.sugerencias.filter((sug) => {
-        if (this.filtroEstado === "abiertas") return !sug.revisada;
-        if (this.filtroEstado === "cerradas") return sug.revisada;
-        return true;
-      });
+    sugerenciasAbiertas() {
+      return this.sugerencias.filter((sug) => !sug.revisada);
+    },
+    sugerenciasCerradas() {
+      return this.sugerencias.filter((sug) => sug.revisada);
     },
   },
   async created() {
@@ -91,68 +89,91 @@ export default {
   <div class="admin-container">
     <Cabecera titulo="Panel de Sugerencias" />
 
-    <div class="filtros">
-      <select v-model="filtroEstado" class="select-filtro">
-        <option value="todas">Todas las sugerencias</option>
-        <option value="abiertas">Abiertas</option>
-        <option value="cerradas">Cerradas</option>
-      </select>
-    </div>
-
-    <div class="lista-sugerencias">
-      <div
-        v-for="sugerencia in sugerenciasFiltradas"
-        :key="sugerencia.idSugerencia"
-        class="sugerencia-item"
-      >
-        <div class="sugerencia-header">
-          <span class="fecha">{{
-            formatDate(sugerencia.fechaSugerencia)
-          }}</span>
-          <span
-            :class="['estado', sugerencia.revisada ? 'cerrada' : 'abierta']"
+    <div class="columnas-contenedor">
+      <div class="columna">
+        <h2 class="titulo-columna">
+          Abiertas ({{ sugerenciasAbiertas.length }})
+        </h2>
+        <div class="lista-sugerencias">
+          <div
+            v-for="sugerencia in sugerenciasAbiertas"
+            :key="sugerencia.idSugerencia"
+            class="sugerencia-item"
           >
-            {{ sugerencia.revisada ? "Cerrada" : "Abierta" }}
-          </span>
-        </div>
+            <div class="sugerencia-header">
+              <span class="fecha">{{
+                formatDate(sugerencia.fechaSugerencia)
+              }}</span>
+              <span class="estado abierta">Abierta</span>
+            </div>
 
-        <div class="contenido">
-          {{ sugerencia.contenido }}
-        </div>
+            <div class="contenido">
+              {{ sugerencia.contenido }}
+            </div>
 
-        <div v-if="sugerencia.respuesta" class="respuesta">
-          <strong>Respuesta:</strong> {{ sugerencia.respuesta }}
-        </div>
+            <div v-if="sugerencia.respuesta" class="respuesta">
+              <strong>Respuesta:</strong> {{ sugerencia.respuesta }}
+            </div>
 
-        <div v-if="!sugerencia.revisada" class="acciones">
-          <textarea
-            v-model="respuesta[sugerencia.idSugerencia]"
-            placeholder="Escribe tu respuesta..."
-            class="respuesta-input"
-          ></textarea>
-          <div class="botones-accion">
-            <button
-              @click="responderSugerencia(sugerencia.idSugerencia)"
-              class="btn-responder"
-            >
-              Responder y Cerrar
-            </button>
-            <button
-              @click="marcarCerrada(sugerencia.idSugerencia)"
-              class="btn-cerrar"
-            >
-              Cerrar sin respuesta
-            </button>
+            <div class="acciones">
+              <textarea
+                v-model="respuesta[sugerencia.idSugerencia]"
+                placeholder="Escribe tu respuesta..."
+                class="respuesta-input"
+              ></textarea>
+              <div class="botones-accion">
+                <button
+                  @click="responderSugerencia(sugerencia.idSugerencia)"
+                  class="btn-responder"
+                >
+                  Responder y Cerrar
+                </button>
+                <button
+                  @click="marcarCerrada(sugerencia.idSugerencia)"
+                  class="btn-cerrar"
+                >
+                  Cerrar sin respuesta
+                </button>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div v-else class="acciones-cerradas">
-          <button
-            @click="marcarCerrada(sugerencia.idSugerencia, false)"
-            class="btn-reabrir"
+      <div class="columna">
+        <h2 class="titulo-columna">
+          Cerradas ({{ sugerenciasCerradas.length }})
+        </h2>
+        <div class="lista-sugerencias">
+          <div
+            v-for="sugerencia in sugerenciasCerradas"
+            :key="sugerencia.idSugerencia"
+            class="sugerencia-item"
           >
-            Reabrir Sugerencia
-          </button>
+            <div class="sugerencia-header">
+              <span class="fecha">{{
+                formatDate(sugerencia.fechaSugerencia)
+              }}</span>
+              <span class="estado cerrada">Cerrada</span>
+            </div>
+
+            <div class="contenido">
+              {{ sugerencia.contenido }}
+            </div>
+
+            <div v-if="sugerencia.respuesta" class="respuesta">
+              <strong>Respuesta:</strong> {{ sugerencia.respuesta }}
+            </div>
+
+            <div class="acciones-cerradas">
+              <button
+                @click="marcarCerrada(sugerencia.idSugerencia, false)"
+                class="btn-reabrir"
+              >
+                Reabrir Sugerencia
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -163,28 +184,41 @@ export default {
 
 <style scoped>
 .admin-container {
-  max-width: 800px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
   color: #fff;
 }
 
-.filtros {
-  margin: 20px 0;
+.columnas-contenedor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
 }
 
-.select-filtro {
-  padding: 8px 12px;
-  border-radius: 6px;
-  background: #2c2c2c;
+.titulo-columna {
   color: #fff;
-  border: 1px solid #444;
+  font-size: 1.4em;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #444;
+}
+
+.columna {
+  background: #1a1a1a;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .lista-sugerencias {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  height: calc(100vh - 220px);
+  overflow-y: auto;
+  padding-right: 10px;
 }
 
 .sugerencia-item {
@@ -253,6 +287,11 @@ export default {
   border-radius: 4px;
   color: #fff;
   cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-responder:hover {
+  background: #1976d2;
 }
 
 .btn-cerrar {
@@ -262,6 +301,11 @@ export default {
   border-radius: 4px;
   color: #fff;
   cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-cerrar:hover {
+  background: #f57c00;
 }
 
 .btn-reabrir {
@@ -272,9 +316,29 @@ export default {
   color: #fff;
   cursor: pointer;
   margin-top: 10px;
+  transition: background 0.3s;
+}
+
+.btn-reabrir:hover {
+  background: #388e3c;
 }
 
 .acciones-cerradas {
   margin-top: 15px;
+}
+
+@media (max-width: 768px) {
+  .columnas-contenedor {
+    grid-template-columns: 1fr;
+  }
+
+  .columna {
+    padding: 15px;
+  }
+
+  .lista-sugerencias {
+    height: auto;
+    max-height: 400px;
+  }
 }
 </style>

@@ -22,6 +22,7 @@ const goBack = () => {
   cursor: pointer;
   color: #fff; /* Texto y flecha en blanco */
   padding: 0.5rem;
+  background-color: #262522;
 }
 
 .arrow {
