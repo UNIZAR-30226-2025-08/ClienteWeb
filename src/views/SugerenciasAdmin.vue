@@ -86,9 +86,8 @@ export default {
 </script>
 
 <template>
+  <Cabecera titulo="Panel de Sugerencias" />
   <div class="admin-container">
-    <Cabecera titulo="Panel de Sugerencias" />
-
     <div class="columnas-contenedor">
       <div class="columna">
         <h2 class="titulo-columna">
@@ -177,9 +176,8 @@ export default {
         </div>
       </div>
     </div>
-
-    <Volver />
   </div>
+  <Volver />
 </template>
 
 <style scoped>

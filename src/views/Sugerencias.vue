@@ -1,54 +1,78 @@
 <template>
+  <Cabecera :titulo="'Sugerencias'" :compacto="false" />
   <div class="sugerencias-container">
-    <Cabecera :titulo="'Sugerencias'" :compacto="false" />
-    <div class="card">
-      <h2 class="card-title">Enviar Sugerencia</h2>
-      <form @submit.prevent="enviarSugerencia">
-        <textarea
-          v-model="contenido"
-          placeholder="Escribe tu sugerencia..."
-          class="sugerencia-input"
-        ></textarea>
-        <button type="submit" class="btn-submit">Enviar</button>
-      </form>
+    <!-- Contenedor que centra el formulario en el medio de la pantalla -->
+    <div class="enviar-sugerencia-wrapper">
+      <div class="card">
+        <h2 class="card-title">Enviar Sugerencia</h2>
+        <form @submit.prevent="enviarSugerencia">
+          <textarea
+            v-model="contenido"
+            placeholder="Escribe tu sugerencia..."
+            class="sugerencia-input"
+          ></textarea>
+          <button type="submit" class="btn-submit">Enviar</button>
+        </form>
+      </div>
     </div>
 
-    <!-- Botón para desplegar u ocultar las sugerencias enviadas por el usuario -->
+    <!-- Botón para mostrar/ocultar las sugerencias -->
     <button class="btn-toggle" @click="toggleMisSugerencias">
       {{
-        "mostrarMisSugerencias"
+        mostrarMisSugerencias
           ? "Ocultar mis sugerencias"
           : "Ver mis sugerencias"
       }}
     </button>
 
-    <!-- Sección desplegable con las sugerencias del usuario -->
-    <div v-if="mostrarMisSugerencias" class="sugerencias-dropdown">
-      <h3>Mis Sugerencias</h3>
-      <ul>
-        <li v-for="sugerencia in misSugerencias" :key="sugerencia.idSugerencia">
-          <p><strong>Sugerencia:</strong> {{ sugerencia.contenido }}</p>
-          <p>
-            <strong>Fecha:</strong> {{ formatDate(sugerencia.fechaSugerencia) }}
-          </p>
-          <p>
-            <strong>Estado:</strong>
-            <span
-              :class="{
-                'estado-cerrado': sugerencia.revisada,
-                'estado-abierto': !sugerencia.revisada,
-              }"
-            >
-              {{ sugerencia.revisada ? "Cerrada" : "Abierta" }}
-            </span>
-          </p>
-        </li>
-      </ul>
-      <p v-if="misSugerencias.length === 0" class="mensaje">
-        No has enviado sugerencias.
-      </p>
+    <!-- Sección con dos columnas: Abiertas y Cerradas -->
+    <div v-if="mostrarMisSugerencias" class="columnas-contenedor">
+      <div class="columna">
+        <h3 class="titulo-columna">
+          Abiertas ({{ sugerenciasAbiertas.length }})
+        </h3>
+        <div class="lista-sugerencias">
+          <div
+            v-for="sugerencia in sugerenciasAbiertas"
+            :key="sugerencia.idSugerencia"
+            class="sugerencia-item"
+          >
+            <div class="sugerencia-header">
+              <span class="fecha">{{
+                formatDate(sugerencia.fechaSugerencia)
+              }}</span>
+              <span class="estado abierta">Abierta</span>
+            </div>
+            <div class="contenido">{{ sugerencia.contenido }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="columna">
+        <h3 class="titulo-columna">
+          Cerradas ({{ sugerenciasCerradas.length }})
+        </h3>
+        <div class="lista-sugerencias">
+          <div
+            v-for="sugerencia in sugerenciasCerradas"
+            :key="sugerencia.idSugerencia"
+            class="sugerencia-item"
+          >
+            <div class="sugerencia-header">
+              <span class="fecha">{{
+                formatDate(sugerencia.fechaSugerencia)
+              }}</span>
+              <span class="estado cerrada">Cerrada</span>
+            </div>
+            <div class="contenido">{{ sugerencia.contenido }}</div>
+            <div v-if="sugerencia.respuesta" class="respuesta">
+              <strong>Respuesta:</strong> {{ sugerencia.respuesta }}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+  <!-- El componente Volver se posiciona fijo al fondo -->
   <Volver />
 </template>
 
@@ -87,20 +111,24 @@ export default {
     } else {
       toast.error(
         "No se encontró información del usuario en el localStorage.",
-        {
-          autoClose: 3000,
-        }
+        { autoClose: 3000 }
       );
     }
   },
+  computed: {
+    sugerenciasAbiertas() {
+      return this.misSugerencias.filter((sug) => !sug.revisada);
+    },
+    sugerenciasCerradas() {
+      return this.misSugerencias.filter((sug) => sug.revisada);
+    },
+  },
   methods: {
     async enviarSugerencia() {
-      // Validación básica
       if (!this.contenido.trim()) {
         toast.error("La sugerencia no puede estar vacía.", { autoClose: 3000 });
         return;
       }
-      // Usar usuario.id (asegúrate de que el objeto usuario tenga esta propiedad)
       if (!this.usuario || !this.usuario.id) {
         toast.error("No se pudo obtener el ID del usuario.", {
           autoClose: 3000,
@@ -114,6 +142,10 @@ export default {
         });
         toast.success(data.mensaje, { autoClose: 3000 });
         this.contenido = "";
+        // Actualiza la lista de sugerencias si ya está abierta
+        if (this.mostrarMisSugerencias) {
+          this.obtenerMisSugerencias();
+        }
       } catch (err) {
         toast.error(
           (err.response && err.response.data.error) ||
@@ -122,6 +154,7 @@ export default {
         );
       }
     },
+
     async obtenerMisSugerencias() {
       if (!this.usuario || !this.usuario.id) {
         toast.error("No se pudo obtener el ID del usuario.", {
@@ -157,126 +190,202 @@ export default {
 </script>
 
 <style scoped>
-/* Contenedor principal con fondo oscuro */
 .sugerencias-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #121212;
-  padding: 0px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  background: linear-gradient(145deg, #1e1c1a, #141414);
+  color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Tarjeta para el formulario con fondo oscuro */
+/* Wrapper para centrar el formulario sin dejar gran espacio vertical */
+.enviar-sugerencia-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* Tarjeta de envío con degradado sutil y efecto hover */
 .card {
-  background-color: #1e1c1a;
+  background: linear-gradient(135deg, #1e1c1a, #141414);
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
   padding: 30px;
   width: 100%;
   max-width: 600px;
   text-align: center;
-  margin-bottom: 20px;
-  margin-top: 20px;
+  transition: transform 0.3s;
 }
 
-/* Título de la tarjeta */
+.card:hover {
+  transform: translateY(-3px);
+}
+
 .card-title {
   margin-bottom: 20px;
-  color: #f0f0f0;
+  font-size: 1.8em;
+  letter-spacing: 0.5px;
 }
 
-/* Área de texto */
+/* Estilos del textarea */
 .sugerencia-input {
   width: 100%;
   height: 120px;
   padding: 12px;
   font-size: 1rem;
-  border: 1px solid #333;
+  border: 1px solid #444;
   border-radius: 6px;
+  background: #2c2c2c;
+  color: #fff;
   resize: vertical;
-  background-color: #2c2c2c;
-  color: #f0f0f0;
-  transition: border-color 0.3s ease;
   margin-top: 10px;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .sugerencia-input:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: #2196f3;
+  box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
 }
 
-/* Botón de envío */
+/* Botones con efecto hover y degradado */
+.btn-submit,
+.btn-toggle {
+  transition: background 0.3s, transform 0.3s;
+  border-radius: 6px;
+}
+
 .btn-submit {
-  background-color: #007bff;
+  background: linear-gradient(45deg, #2196f3, #1976d2);
   color: #fff;
   border: none;
   padding: 12px 24px;
   font-size: 1rem;
-  border-radius: 6px;
   cursor: pointer;
   margin-top: 25px;
-  transition: background-color 0.3s ease;
 }
 
 .btn-submit:hover {
-  background-color: #0056b3;
+  transform: scale(1.03);
 }
 
-/* Botón para desplegar/ocultar mis sugerencias */
 .btn-toggle {
-  background-color: #0056b3;
+  background: linear-gradient(45deg, #ff9800, #f57c00);
   color: #fff;
   border: none;
   padding: 10px 20px;
   font-size: 1rem;
-  border-radius: 6px;
   cursor: pointer;
-  margin-bottom: 40px;
-  transition: background-color 0.3s ease;
-  margin-top: 15px;
+  margin: 10px auto 20px;
+  display: block;
 }
 
 .btn-toggle:hover {
-  background-color: #003f7f;
+  transform: scale(1.03);
 }
 
-/* Desplegable de sugerencias del usuario */
-.sugerencias-dropdown {
-  background-color: #1e1c1a;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  padding: 20px;
+/* Contenedor para las columnas */
+.columnas-contenedor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
   width: 100%;
-  max-width: 600px;
-  margin-bottom: 20px;
-  color: #f0f0f0;
 }
 
-.sugerencias-dropdown h3 {
-  margin-bottom: 15px;
+/* Cada columna */
+.columna {
+  background: #1a1a1a;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s;
+}
+
+.columna:hover {
+  transform: translateY(-2px);
+}
+
+.titulo-columna {
+  font-size: 1.4em;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #444;
   text-align: center;
 }
 
-.sugerencias-dropdown ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* Lista de sugerencias con scroll vertical */
+.lista-sugerencias {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: calc(100vh - 300px);
+  overflow-y: auto;
+  padding-right: 10px;
 }
 
-.sugerencias-dropdown li {
-  border-bottom: 1px solid #333;
-  padding: 10px 0;
+/* Cada sugerencia */
+.sugerencia-item {
+  background: #1e1e1e;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.sugerencias-dropdown li:last-child {
-  border-bottom: none;
+.sugerencia-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
-.estado-abierto {
-  color: green;
+/* Cabecera de cada sugerencia */
+.sugerencia-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  font-size: 0.9em;
 }
 
-.estado-cerrado {
-  color: red;
+.estado {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.estado.abierta {
+  background: #4caf50;
+  color: #fff;
+}
+
+.estado.cerrada {
+  background: #f44336;
+  color: #fff;
+}
+
+.contenido {
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.respuesta {
+  padding: 10px;
+  background: #2d2d2d;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+/* Responsive: en móviles se muestra una sola columna */
+@media (max-width: 768px) {
+  .columnas-contenedor {
+    grid-template-columns: 1fr;
+  }
+  .lista-sugerencias {
+    height: auto;
+    max-height: 400px;
+  }
 }
 </style>
