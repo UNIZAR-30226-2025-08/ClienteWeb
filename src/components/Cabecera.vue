@@ -11,6 +11,7 @@ import defaultAvatar from "../assets/profile_icon.jpg"; // Asegúrate de tener e
 import axios from "axios";
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { toast } from "vue3-toastify";
 
 const route = useRoute();
 const router = useRouter();
@@ -48,13 +49,16 @@ export default {
       showFeedbackModal: false,
       feedbackMessage: "",
       feedbackType: "",
+      toast: null,
+      showToast: false,
+      showInvitationModal: false,
+      invitationData: null,
     };
   },
   created() {
     const storedUser = localStorage.getItem("usuario");
     if (storedUser) {
       this.user = JSON.parse(storedUser);
-      // Asegurar que el avatar tenga un valor por defecto si está vacío
       if (!this.user.avatar) {
         this.user.avatar = "avatar1";
       }
@@ -67,25 +71,51 @@ export default {
     }
   },
   mounted() {
-    // Conectar el socket si aún no lo está
+    socket.on("invitacionSala", (data) => {
+      console.log("Invitación recibida:", data);
+      // Utiliza 'this.' para asignar a las propiedades definidas en data()
+      this.invitationData = data;
+      this.showInvitationModal = true;
+    });
+
     if (!socket.connected) {
       socket.connect();
     }
-    // Escuchar la notificación de nueva solicitud de amistad
+
     socket.on("nuevaSolicitud", (data) => {
       console.log("Nueva solicitud de amistad:", data);
-      // Actualizamos la lista de solicitudes, por ejemplo volviendo a llamar al endpoint
+      // Ejemplo de actualizar solicitudes o llamar al endpoint correspondiente
       this.fetchFriendRequests();
-      // Mostramos una notificación (toast) al usuario
       toast.info("Nueva solicitud de amistad recibida", { autoClose: 3000 });
     });
   },
   beforeUnmount() {
+    socket.off("invitacionSala");
     socket.off("estadoAmigo");
     socket.off("estadoAmigos");
     socket.off("nuevaSolicitud");
   },
   methods: {
+    acceptInvitation() {
+      const usuario = JSON.parse(localStorage.getItem("usuario"));
+      socket.emit("unirseSala", {
+        idSala: this.invitationData.idSala,
+        usuario,
+        // Si la sala es privada, agrega la contraseña si fuera necesaria:
+        contrasena: null,
+        codigoInvitacion: this.invitationData.codigoInvitacion,
+      });
+      this.showInvitationModal = false;
+      toast.success("Te has unido a la sala");
+      window.location.href = `/sala/${this.invitationData.idSala}`;
+    },
+    rejectInvitation() {
+      socket.emit("invitacionRechazada", {
+        idAmigo: JSON.parse(localStorage.getItem("usuario")).id,
+      });
+      this.showInvitationModal = false;
+      toast.info("Invitación rechazada");
+    },
     irAlPerfil() {
       this.$router.push({
         name: "perfil",
@@ -257,6 +287,24 @@ export default {
       </div>
     </div>
   </header>
+
+  <!-- Modal de invitación a sala -->
+  <div v-if="showInvitationModal" class="invitation-modal">
+    <div class="modal-content">
+      <h2>Invitación a Sala</h2>
+      <p>
+        Has sido invitado a unirte a la sala
+        <strong>{{ invitationData?.idSala }}</strong
+        >.
+      </p>
+      <p>Invitación de: {{ invitationData?.idInvitador }}</p>
+      <p>Código: {{ invitationData?.codigoInvitacion }}</p>
+      <div class="modal-buttons">
+        <button class="green-button" @click="acceptInvitation">Aceptar</button>
+        <button class="red-button" @click="rejectInvitation">Rechazar</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -456,5 +504,51 @@ export default {
 }
 .feedback-modal button:hover {
   transform: scale(1.05);
+}
+
+.invitation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #262522;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+}
+
+.modal-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.green-button {
+  background-color: #a2d060;
+  border: none;
+  padding: 10px 20px;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.red-button {
+  background-color: #e74c3c;
+  border: none;
+  padding: 10px 20px;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
 }
 </style>
