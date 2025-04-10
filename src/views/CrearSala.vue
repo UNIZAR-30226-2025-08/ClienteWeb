@@ -281,20 +281,22 @@ socket.on("errorSala", (msg) => {
 
     <div class="acciones">
       <Volver />
-      <button
-        v-if="!botonCrearDeshabilitado"
-        class="crear-sala"
-        :disabled="botonCrearDeshabilitado"
-        @click="crearSala"
-      >
-        Crear Sala
-      </button>
+      <div class="acciones-derecha">
+        <button
+          v-if="!botonCrearDeshabilitado"
+          class="crear-sala"
+          :disabled="botonCrearDeshabilitado"
+          @click="crearSala"
+        >
+          Crear Sala
+        </button>
 
-      <p v-if="botonCrearDeshabilitado" class="warning-message">
-        <span v-if="numJugadores < 5">
-          Asegúrate de tener al menos 5 jugadores.
-        </span>
-      </p>
+        <p v-if="botonCrearDeshabilitado" class="warning-message">
+          <span v-if="numJugadores < 5">
+            Asegúrate de tener al menos 5 jugadores.
+          </span>
+        </p>
+      </div>
     </div>
   </div>
 </template>
@@ -395,10 +397,15 @@ socket.on("errorSala", (msg) => {
 .acciones {
   width: 90%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
   margin: 0 auto 20px;
+}
+
+.acciones-derecha {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
 }
 
 .crear-sala {
