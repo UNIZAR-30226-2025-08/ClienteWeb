@@ -84,82 +84,100 @@ function togglePasswordVisibility(field) {
 </script>
 
 <template>
-  <div class="register-container">
-    <button class="back-button" @click="volver">← Volver</button>
-    <h2 class="register-title">Únete a los hombres lobo de Castronegro</h2>
+  <div class="page-background">
+    <div class="register-container">
+      <button class="back-button" @click="volver">← Volver</button>
+      <h2 class="register-title">Únete a los hombres lobo de Castronegro</h2>
 
-    <form class="register-form" @submit.prevent="registerUser">
-      <label for="nombre">Nombre de usuario</label>
-      <input
-        id="nombre"
-        v-model="nombre"
-        type="text"
-        placeholder="Ingresa tu nombre de usuario"
-        required
-      />
-
-      <label for="correo">Correo electrónico</label>
-      <input
-        id="correo"
-        v-model="correo"
-        type="email"
-        placeholder="Ingresa tu correo"
-        required
-      />
-
-      <label for="contrasena">Contraseña</label>
-      <div class="password-container">
+      <form class="register-form" @submit.prevent="registerUser">
+        <label for="nombre">Nombre de usuario</label>
         <input
-          id="contrasena"
-          v-model="contrasena"
-          :type="showPassword ? 'text' : 'password'"
-          placeholder="********"
+          id="nombre"
+          v-model="nombre"
+          type="text"
+          placeholder="Ingresa tu nombre de usuario"
           required
         />
-        <button
-          type="button"
-          class="toggle-password"
-          @click="togglePasswordVisibility('password')"
-        >
-          {{ showPassword ? "👁️" : "🙈" }}
-        </button>
-      </div>
 
-      <label for="confirm-password">Confirmar Contraseña</label>
-      <div class="password-container">
+        <label for="correo">Correo electrónico</label>
         <input
-          id="confirm-password"
-          v-model="confirmacionContrasena"
-          :type="showConfirmPassword ? 'text' : 'password'"
-          placeholder="Repite la contraseña"
+          id="correo"
+          v-model="correo"
+          type="email"
+          placeholder="Ingresa tu correo"
           required
         />
-        <button
-          type="button"
-          class="toggle-password"
-          @click="togglePasswordVisibility('confirm-password')"
-        >
-          {{ showConfirmPassword ? "👁️" : "🙈" }}
-        </button>
-      </div>
 
-      <button type="submit" class="submit-button">REGISTRARSE</button>
-    </form>
+        <label for="contrasena">Contraseña</label>
+        <div class="password-container">
+          <input
+            id="contrasena"
+            v-model="contrasena"
+            :type="showPassword ? 'text' : 'password'"
+            placeholder="********"
+            required
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            @click="togglePasswordVisibility('password')"
+          >
+            {{ showPassword ? "👁️" : "🙈" }}
+          </button>
+        </div>
+
+        <label for="confirm-password">Confirmar Contraseña</label>
+        <div class="password-container">
+          <input
+            id="confirm-password"
+            v-model="confirmacionContrasena"
+            :type="showConfirmPassword ? 'text' : 'password'"
+            placeholder="Repite la contraseña"
+            required
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            @click="togglePasswordVisibility('confirm-password')"
+          >
+            {{ showConfirmPassword ? "👁️" : "🙈" }}
+          </button>
+        </div>
+
+        <button type="submit" class="submit-button">REGISTRARSE</button>
+      </form>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.page-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background-image: url("../assets/fondo.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+}
+
 /* Contenedor del formulario de registro */
 .register-container {
   width: 35%;
-  margin: 5rem auto;
   padding: 30px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(64, 60, 60);
   border-radius: 15px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 30px rgb(51, 20, 69);
   text-align: left;
   font-family: "MedievalSharp", cursive;
   backdrop-filter: blur(5px);
+  margin: 5rem auto;
 }
 
 /* Botón de volver */
