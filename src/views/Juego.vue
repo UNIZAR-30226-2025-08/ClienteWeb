@@ -117,7 +117,7 @@ function cancelExit() {
       <!-- Contenido principal -->
       <div class="main-content">
         <!-- Cabecera: Se utiliza el componente Cabecera -->
-        <Cabecera :titulo="'Mi Juego'" :compacto="false" />
+        <Cabecera :titulo="'Bienvenido'" />
 
         <!-- Contenido principal: Tabla -->
         <div class="content">

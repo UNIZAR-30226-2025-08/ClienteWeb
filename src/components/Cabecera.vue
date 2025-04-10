@@ -318,16 +318,17 @@ export default {
   margin-bottom: 2rem;
 }
 .contenido {
-  max-width: 1200px;
   margin: 0 auto;
   display: flex;
+  justify-content: flex-start; /* Asegura que todo se alinee a la izquierda */
   align-items: center;
+  width: 98%; /* Asegura que ocupe todo el ancho disponible */
 }
 .contenido h1 {
   margin: 0;
   padding: 0;
   white-space: nowrap;
-  margin-right: auto;
+  flex-grow: 1; /* Asegura que el título ocupe todo el espacio disponible */
 }
 
 /* PERFIL Y NOTIFICACIONES */

@@ -1,8 +1,5 @@
 <template>
-  <Cabecera
-    :titulo="'Reglas del Juego: Los Hombres Lobos de Castronegro'"
-    :compacto="true"
-  />
+  <Cabecera :titulo="'Reglas del Juego'" :compacto="true" />
   <div class="reglas-page">
     <div class="reglas-content">
       <section class="introduccion">
