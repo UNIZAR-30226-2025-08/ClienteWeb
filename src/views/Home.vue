@@ -344,7 +344,7 @@ onMounted(() => {
 
       <!-- Botón izquierdo con imagen -->
       <button class="carousel-button left" @click="slideAnterior">
-        <img src="../assets/flecha-izquierda.png" alt="Flecha izquierda" />
+        <img src="../assets/flecha-izquierda.png" alt="Flecha derecha" />
       </button>
 
       <div class="carousel-container">
@@ -361,7 +361,7 @@ onMounted(() => {
 
       <!-- Botón derecho con imagen -->
       <button class="carousel-button right" @click="slideSiguiente">
-        <img src="../assets/flecha-correcta.png" alt="Flecha derecha" />
+        <img src="../assets/flecha-correcta.png" alt="Flecha izquierda" />
       </button>
 
       <div class="carousel-indicators">
@@ -870,6 +870,8 @@ main {
   border: none;
   position: absolute;
   top: 50%;
+  left: 0%;
+  right: 0%;
   transform: translateY(-50%);
   z-index: 1000;
   cursor: pointer;
@@ -890,11 +892,11 @@ main {
 }
 
 .carousel-button.left {
-  left: 35rem;
+  right: 35rem;
 }
 
 .carousel-button.right {
-  right: 35rem;
+  left: 35rem;
 }
 
 .carousel-indicators {
