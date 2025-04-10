@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
@@ -38,6 +38,17 @@ onMounted(() => {
     localStorage.removeItem("loginSuccess");
   }
   verificarAdministrador(); // Llamamos a la función de verificación al montar el componente
+
+  // Manejo de errores
+  socket.on("error", (mensaje) => {
+    toast.error(mensaje);
+  });
+});
+
+onUnmounted(() => {
+  // Limpiar eventos al desmontar el componente
+  socket.off("error");
+  socket.off("salaActualizada");
 });
 
 // Funciones de navegación (como las que ya tenías)
@@ -85,6 +96,35 @@ function confirmExit() {
 function cancelExit() {
   showExitConfirm.value = false;
 }
+
+// Función para unirse a una sala rápidamente
+const unirseRapido = () => {
+  const usuarioGuardado = localStorage.getItem("usuario");
+  if (!usuarioGuardado) {
+    toast.error("Debes iniciar sesión para unirte a una sala");
+    return;
+  }
+
+  const userData = JSON.parse(usuarioGuardado);
+
+  // Emitir evento para unirse a una sala rápidamente
+  socket.emit("unirseRapido", {
+    usuario: userData,
+  });
+
+  // Escuchar la confirmación para evitar duplicados
+  const salaActualizadaHandler = (salaActualizada) => {
+    localStorage.setItem("salaActual", JSON.stringify(salaActualizada));
+
+    // 🔹 En lugar de router.push, recargamos la página completamente
+    window.location.href = `/sala/${salaActualizada.id}`;
+
+    // Limpiar el escuchador
+    socket.off("salaActualizada", salaActualizadaHandler);
+  };
+
+  socket.on("salaActualizada", salaActualizadaHandler);
+};
 </script>
 
 <template>
@@ -149,7 +189,9 @@ function cancelExit() {
           <button class="action-button" @click="irACrearSala">
             Crear Sala
           </button>
-          <button class="action-button">Partida Rápida</button>
+          <button class="action-button" @click="unirseRapido">
+            Unirse a Sala rápidamente
+          </button>
           <button class="action-button" @click="irABuscarSalas">
             Buscar Salas
           </button>

@@ -106,7 +106,7 @@ const unirseSala = (sala) => {
 
 <template>
   <div class="server-browser">
-    <Cabecera titulo="Server Browser" :compacto="true" />
+    <Cabecera titulo="Navegador de Salas" :compacto="true" />
 
     <div class="server-container">
       <div class="table-container">

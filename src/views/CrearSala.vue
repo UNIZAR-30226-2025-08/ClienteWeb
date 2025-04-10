@@ -20,7 +20,7 @@ onMounted(() => {
   const usuarioGuardado = localStorage.getItem("usuario");
   if (usuarioGuardado) {
     usuario.value = JSON.parse(usuarioGuardado);
-    nombreServidor.value = `Servidor de "${usuario.value.nombre}"`; // Usar el nombre del usuario
+    nombreServidor.value = `Sala de "${usuario.value.nombre}"`; // Usar el nombre del usuario
   } else {
     alert("Debes iniciar sesión para crear una sala.");
     router.push("/"); // Redirigir al home si no está autenticado
@@ -192,12 +192,12 @@ socket.on("errorSala", (msg) => {
 
 <template>
   <div class="container">
-    <Cabecera titulo="Server Settings" />
+    <Cabecera titulo="Configuración de Sala" />
 
     <div class="formulario">
       <div class="campo">
-        <label>Nombre del Servidor:</label>
-        <input v-model="nombreServidor" placeholder="Servidor de..." />
+        <label>Nombre de la Sala:</label>
+        <input v-model="nombreServidor" placeholder="Sala de..." />
       </div>
 
       <div class="campo">

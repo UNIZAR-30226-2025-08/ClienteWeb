@@ -241,7 +241,7 @@ function IraPantallaDeAmigos() {
 
 <template>
   <div class="sala-wrapper">
-    <Cabecera :titulo="`Sala: ${nombresala}`" :compacto="true" />
+    <Cabecera :titulo="`${nombresala}`" :compacto="true" />
 
     <div v-if="cargando" class="loading-container">
       <div class="loading-spinner"></div>
