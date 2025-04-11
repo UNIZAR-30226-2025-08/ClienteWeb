@@ -28,6 +28,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    esAdmin: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -209,6 +213,7 @@ export default {
 
       <!-- Perfil + notificaciones a la derecha -->
       <div class="perfil-notificaciones">
+        <span v-if="esAdmin" class="admin-label">Admin</span>
         <div
           class="profile"
           :class="{ compacto: compacto }"
@@ -219,10 +224,11 @@ export default {
             alt="User Icon"
             class="user-icon"
           />
+
           <div class="profile-info">
             <span class="user-name">{{ user.nombre || "NombreCuenta" }}</span>
             <span class="Rol">
-              {{ user.rolFavorito || "Sin rol favorito" }}
+              Rol favorito: {{ user.rolFavorito || "Sin rol favorito" }}
             </span>
           </div>
         </div>
@@ -369,7 +375,14 @@ export default {
   font-size: 0.9rem;
   color: #ccc;
 }
-
+.admin-label {
+  background-color: #e74c3c; /* Color de fondo (por ejemplo, rojo) */
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+}
 /* NOTIFICACIONES */
 .notifications {
   position: relative;

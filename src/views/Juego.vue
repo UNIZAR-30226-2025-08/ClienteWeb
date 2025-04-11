@@ -146,7 +146,7 @@ const unirseRapido = () => {
           class="action-button-sidebar"
           @click="irASugerenciasAdmin"
         >
-          Ver Sugerencias
+          Ver Sugerencias Admin
         </button>
         <!-- En vez de ir directamente a Home, se abre el pop-up de confirmación -->
         <button class="action-button salir-button" @click="openExitConfirm">
@@ -157,7 +157,7 @@ const unirseRapido = () => {
       <!-- Contenido principal -->
       <div class="main-content">
         <!-- Cabecera: Se utiliza el componente Cabecera -->
-        <Cabecera :titulo="'Bienvenido'" />
+        <Cabecera :titulo="'Bienvenido'" :esAdmin="esAdmin" />
 
         <!-- Contenido principal: Tabla -->
         <div class="content">
@@ -240,32 +240,34 @@ const unirseRapido = () => {
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 4%;
 }
 
 .action-button-sidebar {
   width: 100%;
   padding: 12px 16px;
-  background-color: #0e0d0c; /* Fondo sólido */
-  border: 2px solid rgba(255, 255, 255, 0.3); /* Borde sutil */
+  background-color: rgba(
+    14,
+    13,
+    12,
+    0.7
+  ); /* Fondo semitransparente para que se note el difuminado */
+  backdrop-filter: blur(6px); /* Efecto de difuminado en el fondo */
+  border: none;
   color: #fff;
   text-align: center;
   border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s,
-    border-color 0.3s;
+  transition: transform 0.2s, color 0.3s;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.6); /* Sombra inicial */
 }
 
 .action-button-sidebar:hover {
-  background-color: #333; /* Cambio de fondo en hover */
   transform: translateY(-2px);
-  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.4); /* Sombra más pronunciada */
-  border-color: rgba(255, 255, 255, 0.6); /* Borde más marcado en hover */
+  color: #ccc;
 }
 
 /* Contenido principal */
@@ -440,7 +442,7 @@ const unirseRapido = () => {
 
 /* Actualización de .action-button para mayor contraste */
 .action-button {
-  background-color: #0e0d0c; /* Fondo sólido */
+  background-color: #0e0d0c68; /* Fondo sólido */
   border: 2px solid rgba(255, 255, 255, 0.3); /* Borde sutil */
   padding: 14px 28px;
   font-size: 1.1rem;
