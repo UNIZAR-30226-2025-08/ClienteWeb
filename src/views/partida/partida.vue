@@ -193,6 +193,100 @@ export default {
     },
   },
   mounted() {
+    //Todos los sockets de escucha para eventos del backend
+    //Los he dejado numerados en el orden que seguiran más omenos, luego se repetiran los eventos
+
+    // 1. Evento de espera inicial para comenzar la partida
+    socket.on("esperaInicial", (data) => {
+      console.log("Esperando para iniciar la partida:", data.mensaje);
+      this.currentPhase = "intro";
+      this.currentPeriod = "DÍA"; // Inicialmente es de día
+    });
+    //2. Evento para iniciar la votación del alguacil
+    socket.on("iniciarVotacionAlguacil", (data) => {
+      console.log("Votación del alguacil iniciada", data);
+      this.currentPhase = "game_voting";
+      this.timeLeft = data.tiempo || 60; // Por ejemplo, si el servidor envía un tiempo
+      this.isVotingPhase = true;
+    });
+
+    //3. Escuchar evento para el comienzo de la noche
+    socket.on("nocheComienza", (data) => {
+      console.log("La noche ha comenzado", data);
+      this.currentPhase = "night";
+      this.currentPeriod = "NOCHE";
+      // Aquí podrías actualizar otros estados relacionados a la noche
+    });
+
+    //4. Escuchar evento para la habilidad de la vidente
+    socket.on("habilidadVidente", (data) => {
+      console.log("Habilidad de la vidente activada:", data.mensaje);
+      this.currentPhase = "vidente_awaken";
+      this.currentPeriod = "NOCHE"; // Cambiar a NOCHE si es necesario(Desconexion jugador? Preguntar a Oscar como lo quiere hacer)
+    });
+
+    //5. Escuchar evento para el turno de los hombres lobo
+    socket.on("turnoHombresLobos", (data) => {
+      console.log("Turno de hombres lobos:", data.mensaje);
+      this.currentPhase = "turno_hombres_lobos"; // Cambia a la fase correspondiente
+      this.currentPeriod = "NOCHE"; // Cambiar a NOCHE si es necesario
+    });
+
+    // 6. Evento que envía el resultado de los votos de la noche a cada jugador que corresponda
+    socket.on("resultadoVotosNoche", (data) => {
+      console.log("Resultado votos de noche:", data.mensaje);
+    });
+
+    // 7. Evento que notifica a la bruja con el mensaje y la víctima elegida por los lobos (Si la bruja existe)
+    socket.on("mensajeBruja", (data) => {
+      console.log(
+        "Mensaje para la bruja:",
+        data.mensaje,
+        "Víctima:",
+        data.victima
+      );
+      // En la UI, muestra la interfaz para que la bruja decida si curar o eliminar, mostrando los detalles pertinentes
+    });
+    // 8. Evento para activar la habilidad de la bruja
+    socket.on("habilidadBruja", (data) => {
+      console.log("Habilidad de la bruja activada:", data.mensaje);
+      // Muestra en la interfaz de la bruja la acción para usar la poción (curar o matar)
+    });
+
+    // 9. Escuchar evento para pasar al día
+    socket.on("diaComienza", (data) => {
+      console.log("El día ha comenzado", data);
+      this.currentPhase = "game";
+      this.currentPeriod = "DÍA";
+      // Actualizar los detalles de la partida (por ejemplo, lista de jugadores, votos, etc.)
+    });
+
+    // 10. Evento que notifica un empate en la votación del día y reinicia la votación
+    socket.on("empateVotacionDia", (data) => {
+      console.log("Primer empate en la votación diaria:", data.mensaje);
+      // Muestra mensaje de empate y, si es necesario, resetea la UI para permitir una segunda votación
+    });
+
+    // 11. Evento que notifica el segundo empate en la votación del día (ningún jugador es eliminado)
+    socket.on("segundoEmpateVotacionDia", (data) => {
+      console.log("Segundo empate en la votación diaria:", data.mensaje);
+      // Muestra mensaje de segundo empate y actualiza la UI para no eliminar a ningún jugador
+    });
+
+    // 12. Evento que envía el resultado de la votación del día (quién será eliminado)
+    socket.on("resultadoVotosDia", (data) => {
+      console.log("Resultado votación de día:", data.mensaje);
+      if (data.jugadorAEliminar) {
+        console.log("Jugador a eliminar:", data.jugadorAEliminar);
+      }
+      // Actualiza la UI para mostrar el resultado de la votación y la acción correspondiente (por ejemplo, marcar como eliminado al jugador)
+    });
+
+    // Escuchar la finalización de la partida
+    socket.on("partidaFinalizada", (resultado) => {
+      console.log("Partida finalizada", resultado);
+      // Manejar el final de la partida mostrando mensaje y redirigiendo o actualizando el estado
+    });
     const salaGuardada = localStorage.getItem("salaActual");
     if (!salaGuardada) {
       console.error("No se encontró la información de la sala");
@@ -239,6 +333,19 @@ export default {
     });
   },
   beforeUnmount() {
+    socket.off("iniciarVotacionAlguacil");
+    socket.off("nocheComienza");
+    socket.off("diaComienza");
+    socket.off("habilidadVidente");
+    socket.off("habilidadBruja");
+    socket.off("turnoHombresLobos");
+    socket.off("mensajeBruja");
+    socket.off("resultadoVotosNoche");
+    socket.off("resultadoVotosDia");
+    socket.off("empateVotacionDia");
+    socket.off("segundoEmpateVotacionDia");
+    socket.off("partidaFinalizada");
+    socket.off("votoRegistrado");
     clearInterval(this.countdownInterval);
   },
   methods: {
