@@ -234,8 +234,38 @@ const unirseRapido = () => {
 
 /* Barra lateral */
 .sidebar {
-  width: 220px;
-  background-color: #262522;
+  width: 250px;
+  background: linear-gradient(135deg, #1f1e1c, #2a2a27);
+  padding: 20px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.action-button-sidebar {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #0e0d0c; /* Fondo sólido */
+  border: 2px solid rgba(255, 255, 255, 0.3); /* Borde sutil */
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s,
+    border-color 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.6); /* Sombra inicial */
+}
+
+.action-button-sidebar:hover {
+  background-color: #333; /* Cambio de fondo en hover */
+  transform: translateY(-2px);
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.4); /* Sombra más pronunciada */
+  border-color: rgba(255, 255, 255, 0.6); /* Borde más marcado en hover */
 }
 
 /* Contenido principal */
@@ -401,54 +431,63 @@ const unirseRapido = () => {
 /* ----------------------- */
 .actions {
   position: absolute;
-  bottom: 120px; /* Ajusta para subir/bajar los botones */
+  bottom: 15%; /* Ajusta según la altura deseada */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 60px; /* Separación entre botones */
+  gap: 10%;
 }
 
+/* Actualización de .action-button para mayor contraste */
 .action-button {
-  background-color: #262522;
-  border: none;
-  padding: 12px 24px;
-  font-size: 1rem;
-  color: white;
+  background-color: #0e0d0c; /* Fondo sólido */
+  border: 2px solid rgba(255, 255, 255, 0.3); /* Borde sutil */
+  padding: 14px 28px;
+  font-size: 1.1rem;
+  color: #fff;
   cursor: pointer;
-  border-radius: 8px;
-  transition: background-color 0.3s, box-shadow 0.3s;
+  border-radius: 10px;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s,
+    border-color 0.3s;
+  white-space: nowrap; /* Forzamos que el texto esté en una sola línea */
+  width: 25rem; /* Ancho fijo para todos los botones */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.6); /* Sombra inicial para dar contraste */
 }
 
 .action-button:hover {
-  background-color: #444;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  background-color: #555;
+  transform: translateY(-3px);
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.4); /* Sombra más pronunciada en hover */
+  border-color: rgba(
+    255,
+    255,
+    255,
+    0.6
+  ); /* Borde más visible al pasar el mouse */
 }
 
-.action-button-sidebar {
-  width: 100%;
-  margin: 15px 0;
-  padding: 10px;
-  background-color: #262522;
-  color: white;
-  border: none;
-  cursor: pointer;
-  text-align: center;
-}
-
-.action-button-sidebar:hover {
-  background-color: #444;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-}
 /* Asegura que el botón "Salir" esté centrado abajo */
 .salir-button {
-  position: absolute;
-  bottom: 20px;
-  left: 6.7rem;
-  transform: translateX(-50%);
-  width: 10%;
-  background-color: red;
-  color: white;
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #d30000; /* Rojo sólido */
+  color: #fff;
   font-weight: bold;
+  border: 2px solid rgb(65, 0, 0); /* Borde sutil */
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s, border-color 0.3s;
+  margin-top: auto; /* Esto empuja el botón al fondo del sidebar */
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.6); /* Sombra inicial para dar contraste */
+}
+
+.salir-button:hover {
+  background-color: darkred;
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.6); /* Borde más visible en hover */
 }
 
 /* ------------------------- */
