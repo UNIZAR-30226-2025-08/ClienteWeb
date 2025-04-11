@@ -213,13 +213,11 @@ const unirseRapido = () => {
 </template>
 
 <style scoped>
-/* 
-   Colores (por referencia):
-   - Fondo principal: #262522
-   - Sidebar: #1F1E1C
-   - Elementos más claros (botones, fila clara): #302E2B
-   - Líneas de tabla en negro (#000)
-*/
+/* Aplica la fuente "MedievalSharp" a todo el contenido del componente */
+.juego-container,
+.juego-container * {
+  font-family: "MedievalSharp", cursive;
+}
 
 /* Contenedor principal */
 .juego-container {
@@ -228,7 +226,6 @@ const unirseRapido = () => {
   height: 100vh;
   background-color: #302e2b;
   color: #fff;
-  font-family: sans-serif;
   margin: 0;
 }
 
@@ -440,7 +437,6 @@ const unirseRapido = () => {
   gap: 10%;
 }
 
-/* Actualización de .action-button para mayor contraste */
 .action-button {
   background-color: #0e0d0c68; /* Fondo sólido */
   border: 2px solid rgba(255, 255, 255, 0.3); /* Borde sutil */
@@ -451,45 +447,40 @@ const unirseRapido = () => {
   border-radius: 10px;
   transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s,
     border-color 0.3s;
-  white-space: nowrap; /* Forzamos que el texto esté en una sola línea */
-  width: 100%; /* Ancho fijo para todos los botones */
+  white-space: nowrap;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.6); /* Sombra inicial para dar contraste */
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.6);
 }
 
 .action-button:hover {
   background-color: #555;
   transform: translateY(-3px);
-  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.4); /* Sombra más pronunciada en hover */
-  border-color: rgba(
-    255,
-    255,
-    255,
-    0.6
-  ); /* Borde más visible al pasar el mouse */
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
-/* Asegura que el botón "Salir" esté centrado abajo */
+/* Botón "Salir" */
 .salir-button {
   width: 100%;
   padding: 12px 16px;
-  background-color: #d30000; /* Rojo sólido */
+  background-color: #d30000;
   color: #fff;
   font-weight: bold;
-  border: 2px solid rgb(65, 0, 0); /* Borde sutil */
+  border: 2px solid rgb(65, 0, 0);
   border-radius: 12px;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.2s, border-color 0.3s;
-  margin-top: auto; /* Esto empuja el botón al fondo del sidebar */
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.6); /* Sombra inicial para dar contraste */
+  margin-top: auto;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.6);
 }
 
 .salir-button:hover {
   background-color: darkred;
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.6); /* Borde más visible en hover */
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 /* ------------------------- */

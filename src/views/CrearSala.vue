@@ -177,7 +177,7 @@ socket.on("salaCreada", (data) => {
     // Guardar la información de la sala para que el creador se vea dentro de ella
     localStorage.setItem("salaActual", JSON.stringify(data));
 
-    // 🔹 En lugar de router.push, forzamos una recarga completa de la página
+    // Forzar una recarga completa de la página
     window.location.href = `/sala/${data.id}`;
   } else {
     alert("Hubo un error al crear la sala. Por favor, inténtalo nuevamente.");
@@ -238,7 +238,12 @@ socket.on("errorSala", (msg) => {
 
       <h3>Roles asignados:</h3>
       <div class="roles">
-        <div v-for="rol in rolesCantidad" :key="rol.id" class="rol">
+        <div
+          v-for="rol in rolesCantidad"
+          :key="rol.id"
+          class="rol"
+          :data-role="rol.nombre"
+        >
           <img :src="rol.imagen" :alt="rol.nombre" />
           <span>{{ rol.nombre }}: {{ rol.cantidad }}</span>
 
@@ -307,7 +312,8 @@ socket.on("errorSala", (msg) => {
   min-height: 100vh;
   background: linear-gradient(135deg, #2c2a28 0%, #1a1917 100%);
   color: #fff;
-  font-family: "Segoe UI", system-ui, sans-serif;
+  /* Se utiliza MedievalSharp para todos los textos */
+  font-family: "MedievalSharp", cursive;
   display: flex;
   flex-direction: column;
   padding: 20px;
@@ -516,7 +522,6 @@ socket.on("errorSala", (msg) => {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Role specific styling */
 .rol[data-role="Hombre lobo"] {
   border-color: rgba(231, 76, 60, 0.2);
 }
@@ -533,7 +538,6 @@ socket.on("errorSala", (msg) => {
   border-color: rgba(241, 196, 15, 0.2);
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .roles {
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -604,7 +608,6 @@ socket.on("errorSala", (msg) => {
   box-shadow: none;
 }
 
-/* Mobile adjustment */
 @media (max-width: 768px) {
   .acciones {
     bottom: 10px;
