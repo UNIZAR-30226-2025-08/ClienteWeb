@@ -25,6 +25,30 @@ export default {
     },
   },
   async created() {
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    if (!usuario?.id) {
+      // Si no existe el usuario, redirige a "/juego"
+      this.$router.push("/juego");
+      return;
+    }
+
+    try {
+      // Verificamos si el usuario es administrador consultando el backend
+      const { data } = await axios.post("/api/admin/esAdministrador", {
+        idUsuario: usuario.id,
+      });
+      if (!data.esAdministrador) {
+        // Si no es admin, redirige a "/juego"
+        this.$router.push("/juego");
+        return;
+      }
+    } catch (error) {
+      // En caso de error, podrías redirigir o mostrar un mensaje de error
+      this.$router.push("/juego");
+      return;
+    }
+
+    // Si llega hasta aquí, el usuario es admin y se cargan las sugerencias
     await this.obtenerTodasSugerencias();
   },
   methods: {
