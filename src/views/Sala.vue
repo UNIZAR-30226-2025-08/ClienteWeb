@@ -52,7 +52,7 @@ const unirseSala = () => {
     if (sala) {
       const estaEnSala = sala.jugadores.some((j) => j.id === usuario.value.id);
       if (!estaEnSala) {
-        // Emitir evento unirseSala con contraseña y código de invitación
+        // Emitir evento unirseSala con contraseña y código de invitacióncd
         socket.emit("unirseSala", {
           idSala: idSala.value,
           usuario: usuario.value,
