@@ -89,7 +89,7 @@
 
 <script>
 import { io } from "socket.io-client";
-const socket = io("http://localhost:5000");
+import socket from "../../utils/socket";
 
 import { roles } from "../../assets/data/roles.js";
 import GameStatus from "../../views/partida/Componentes/GameStatus.vue";
@@ -196,17 +196,22 @@ export default {
     //Todos los sockets de escucha para eventos del backend
     //Los he dejado numerados en el orden que seguiran más omenos, luego se repetiran los eventos
 
+    this.startGameFlow();
+
     // 1. Evento de espera inicial para comenzar la partida
     socket.on("esperaInicial", (data) => {
       console.log("Esperando para iniciar la partida:", data.mensaje);
-      this.currentPhase = "intro";
+      this.currentPhase = "game";
       this.currentPeriod = "DÍA"; // Inicialmente es de día
+      this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
     });
+
     //2. Evento para iniciar la votación del alguacil
     socket.on("iniciarVotacionAlguacil", (data) => {
       console.log("Votación del alguacil iniciada", data);
-      this.currentPhase = "game_voting";
-      this.timeLeft = data.tiempo || 60; // Por ejemplo, si el servidor envía un tiempo
+      this.flujoVotacionAlguacil();
+      //this.currentPhase = "game_voting";
+      this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
       this.isVotingPhase = true;
     });
 
@@ -215,14 +220,19 @@ export default {
       console.log("La noche ha comenzado", data);
       this.currentPhase = "night";
       this.currentPeriod = "NOCHE";
-      // Aquí podrías actualizar otros estados relacionados a la noche
     });
 
     //4. Escuchar evento para la habilidad de la vidente
     socket.on("habilidadVidente", (data) => {
       console.log("Habilidad de la vidente activada:", data.mensaje);
-      this.currentPhase = "vidente_awaken";
+      if (this.isVidente()) {
+        this.currentPhase = "vidente_action"; // Cambia a la fase correspondiente
+        this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
+      } else {
+        this.currentPhase = "ojo_cerrado"; // Cambia a la fase correspondiente para los demás jugadores
+      }
       this.currentPeriod = "NOCHE"; // Cambiar a NOCHE si es necesario(Desconexion jugador? Preguntar a Oscar como lo quiere hacer)
+      this.timeLeft = data.tiempo || 15; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
     });
 
     //5. Escuchar evento para el turno de los hombres lobo
@@ -230,6 +240,7 @@ export default {
       console.log("Turno de hombres lobos:", data.mensaje);
       this.currentPhase = "turno_hombres_lobos"; // Cambia a la fase correspondiente
       this.currentPeriod = "NOCHE"; // Cambiar a NOCHE si es necesario
+      this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
     });
 
     // 6. Evento que envía el resultado de los votos de la noche a cada jugador que corresponda
@@ -245,11 +256,13 @@ export default {
         "Víctima:",
         data.victima
       );
-      // En la UI, muestra la interfaz para que la bruja decida si curar o eliminar, mostrando los detalles pertinentes
+      // En la UI, muestra la interfaz para que la bruja decida si curar o eliminar, mostrando los detalles
     });
     // 8. Evento para activar la habilidad de la bruja
     socket.on("habilidadBruja", (data) => {
       console.log("Habilidad de la bruja activada:", data.mensaje);
+      this.currentPhase = //TODO: Desarrollar Bruja;
+        this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
       // Muestra en la interfaz de la bruja la acción para usar la poción (curar o matar)
     });
 
@@ -258,7 +271,7 @@ export default {
       console.log("El día ha comenzado", data);
       this.currentPhase = "game";
       this.currentPeriod = "DÍA";
-      // Actualizar los detalles de la partida (por ejemplo, lista de jugadores, votos, etc.)
+      this.timeLeft = data.tiempo || 60; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
     });
 
     // 10. Evento que notifica un empate en la votación del día y reinicia la votación
@@ -319,7 +332,7 @@ export default {
     this.totalWolves = sala.maxRoles["Hombre lobo"] || 0;
 
     // Iniciar el flujo de juego
-    this.startGameFlow();
+    //this.startGameFlow();
 
     // NUEVO: Escuchar eventos del socket para actualizar el estado tras votar
     socket.on("votoRegistrado", (data) => {
@@ -366,26 +379,34 @@ export default {
     startGameFlow() {
       setTimeout(() => {
         this.currentPhase = "role";
-
         setTimeout(() => {
           this.currentPhase = "start";
-          setTimeout(() => {
-            this.startMainGame();
-          }, 6000);
         }, 6000);
       }, 6000);
     },
 
-    startMainGame() {
-      this.currentPhase = "game";
-      this.isGameActive = true;
-      // Después de 30 s en game, se anuncia la votación del alguacil
+    flujoVotacionAlguacil() {
+      this.currentPhase = "alguacil_announce";
       setTimeout(() => {
-        this.currentPhase = "alguacil_announce";
-        setTimeout(() => {
-          this.startAlguacilVoting();
-        }, 6000);
-      }, 30000);
+        this.currentPhase = "game_voting";
+        this.isVotingPhase = true;
+        this.timeLeft = 25;
+        this.countdownInterval = setInterval(() => {
+          if (this.timeLeft > 0) {
+            this.timeLeft--;
+          } else {
+            clearInterval(this.countdownInterval);
+            this.endVotingPhase();
+          }
+        }, 1000);
+      }, 6000);
+    },
+    ////////////////////////////////////////////////////////////////////////
+    startMainGame() {
+      this.currentPhase = "alguacil_announce";
+      setTimeout(() => {
+        this.startAlguacilVoting();
+      }, 6000);
     },
 
     // Fase de votación del alguacil (se muestra en el contenido principal)
@@ -402,6 +423,8 @@ export default {
         }
       }, 1000);
     },
+
+    ////////////////////////////////////////////////////////////////////////
 
     // Al finalizar la votación, se calcula el ganador y se inicia el proceso nocturno
     endVotingPhase() {
