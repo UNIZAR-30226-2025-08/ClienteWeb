@@ -137,8 +137,9 @@ onMounted(() => {
   });
 
   // Listener de enPartida en onMounted
-  socket.on("enPartida", ({ mensaje, sala }) => {
+  socket.on("enPartida", ({ mensaje, partidaID, sala }) => {
     actualizarSala(sala);
+    guardarPartida(partidaID);
     enPartida.value = true;
     toast.success(mensaje);
     router.push(`/partida/${idSala.value}`);
@@ -160,7 +161,9 @@ const actualizarSala = (sala) => {
   maxJugadores.value = sala.maxJugadores;
   nombresala.value = sala.nombre;
 };
-
+const guardarPartida = (partidaID) => {
+  localStorage.setItem("partidaID", partidaID);
+};
 const GuardarMiRolInicial = (rol) => {
   localStorage.removeItem("miRol");
   localStorage.setItem("miRol", JSON.stringify(rol));

@@ -59,7 +59,7 @@
 
       <!-- Botón de voto se muestra solo en fase de votación (y para quienes NO son la Vidente) -->
       <VoteButton
-        v-if="isVotingPhase && !isVidente()"
+        v-if="isVotingPhase"
         :selected-player-index="selectedPlayerIndex"
         :has-voted="hasVoted"
         @vote="voteForPlayer"
@@ -201,7 +201,7 @@ export default {
     // 1. Evento de espera inicial para comenzar la partida
     socket.on("esperaInicial", (data) => {
       console.log("Esperando para iniciar la partida:", data.mensaje);
-      this.currentPhase = "game";
+      //this.currentPhase = "game";
       this.currentPeriod = "DÍA"; // Inicialmente es de día
       this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
     });
@@ -312,7 +312,14 @@ export default {
     this.players = sala.jugadores || [];
 
     // NUEVO: Asignar el ID de la partida (suponiendo que está en la propiedad "id" de la sala)
-    this.idPartida = sala.id;
+    const partidaGuardada = localStorage.getItem("partidaID");
+    if (!partidaGuardada) {
+      console.error("No se encontró la información de la partida");
+      this.$router.push("/juego");
+      return;
+    }
+
+    this.idPartida = JSON.parse(partidaGuardada);
 
     // Obtener el rol del jugador (por ejemplo, de localStorage)
     const rol = localStorage.getItem("miRol");
@@ -381,6 +388,9 @@ export default {
         this.currentPhase = "role";
         setTimeout(() => {
           this.currentPhase = "start";
+          setTimeout(() => {
+            this.currentPhase = "game";
+          }, 3000);
         }, 6000);
       }, 6000);
     },
@@ -390,7 +400,7 @@ export default {
       setTimeout(() => {
         this.currentPhase = "game_voting";
         this.isVotingPhase = true;
-        this.timeLeft = 25;
+        // this.timeLeft = 25;
         this.countdownInterval = setInterval(() => {
           if (this.timeLeft > 0) {
             this.timeLeft--;
@@ -553,9 +563,11 @@ export default {
         }
         // Incrementar el contador de votos del jugador seleccionado
         jugadorObjetivo.votes++;
-
+        console.log(
+          `Jugador ${this.getMyId()} votó por el jugador ${jugadorObjetivo.id}`
+        );
         // Emitir el evento "votar" al servidor con los datos necesarios
-        socket.emit("votar", {
+        socket.emit("votarAlguacil", {
           idPartida: this.idPartida,
           idJugador: this.getMyId(),
           idObjetivo: jugadorObjetivo.id,
