@@ -450,7 +450,7 @@ const unirseRapido = () => {
   transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s,
     border-color 0.3s;
   white-space: nowrap; /* Forzamos que el texto esté en una sola línea */
-  width: 25rem; /* Ancho fijo para todos los botones */
+  width: 100%; /* Ancho fijo para todos los botones */
   display: flex;
   justify-content: center;
   align-items: center;
