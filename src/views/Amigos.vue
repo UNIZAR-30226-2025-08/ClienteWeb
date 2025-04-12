@@ -39,12 +39,10 @@ const loadingSearch = ref(false);
 // Variable reactiva para la lista de salas (en tiempo real)
 const salas = ref([]);
 
-// Función para actualizar el estado de tus amigos según las salas
-// Recorre cada amigo y, si alguno aparece en el listado de jugadores de alguna sala,
-// se marca como que está en sala (y se almacena el id de la sala en friend.sala)
+// Función para actualizar el estado de cada amigo, asignando las propiedades
+// friend.enSala (true/false) y friend.sala (el id de la sala en la que se encuentre)
 const actualizarEstadoDeAmigos = () => {
   friends.value.forEach((friend) => {
-    // Se reinicia el estado a false y sala a null
     friend.enSala = false;
     friend.sala = null;
     salas.value.forEach((sala) => {
@@ -59,7 +57,7 @@ const actualizarEstadoDeAmigos = () => {
   });
 };
 
-// Función para obtener la lista de amigos (la información de estadísticas viene desde el endpoint)
+// Obtener la lista de amigos
 const fetchFriends = async () => {
   try {
     const userId = getUserId();
@@ -76,6 +74,7 @@ const fetchFriends = async () => {
   }
 };
 
+// Abrir modal para eliminar amigo
 const openDeleteModal = (friendId) => {
   friendToDelete.value = friendId;
   deleteError.value = null;
@@ -105,9 +104,29 @@ const confirmDelete = async () => {
   }
 };
 
+// Función para obtener la sala actual del usuario desde localStorage
 const getSalaActual = () => {
   const sala = localStorage.getItem("salaActual");
   return sala ? JSON.parse(sala) : null;
+};
+
+// Función que devuelve verdadero si el botón de INVITAR debe mostrarse.
+// Se muestra únicamente si TÚ estás en una sala (salaActual existe) y
+// el amigo no está ya en la misma sala.
+const shouldShowInviteButton = (friend) => {
+  const salaActual = getSalaActual();
+  if (!salaActual) return false;
+  return !friend.enSala || (friend.enSala && friend.sala !== salaActual.id);
+};
+
+// Función que devuelve verdadero si se debe mostrar el botón de UNIRSE.
+// Se muestra si el amigo está en una sala y esa sala es distinta a la tuya
+// (o si tú no estás en una sala).
+const shouldShowJoinButton = (friend) => {
+  const salaActual = getSalaActual();
+  if (!friend.enSala) return false;
+  if (!salaActual) return true;
+  return friend.sala !== salaActual.id;
 };
 
 const invitarASala = (friendId) => {
@@ -128,7 +147,6 @@ const invitarASala = (friendId) => {
   toast.success("Invitación enviada correctamente", { autoClose: 3000 });
 };
 
-// Función para agregar un amigo (solicitud de amistad)
 const addFriend = async () => {
   if (!searchName.value.trim()) {
     searchError.value = "Por favor, ingresa un nombre.";
@@ -181,7 +199,6 @@ const addFriend = async () => {
   }
 };
 
-// Función para unirse a la sala en la que se encuentra el amigo
 const unirseASala = (friendId) => {
   const friend = friends.value.find((f) => f.idUsuario === friendId);
   if (!friend) return;
@@ -193,7 +210,6 @@ const unirseASala = (friendId) => {
     toast.error("No se pudo obtener la sala del amigo.", { autoClose: 3000 });
     return;
   }
-  // Redirigimos a la sala donde se encuentra el amigo
   router.push(`/sala/${friend.sala}`);
 };
 
@@ -205,11 +221,10 @@ onMounted(async () => {
   socket.emit("registrarUsuario", { idUsuario });
   await fetchFriends();
 
-  // Desde aquí solicitamos la lista de salas activas para actualizar el estado
+  // Solicitar la lista de salas activas para actualizar el estado de los amigos
   socket.emit("obtenerSalas");
   socket.emit("solicitarEstadoAmigos", { idUsuario });
 
-  // Listen para actualizaciones de estado de amigos
   socket.on("estadoAmigo", ({ idUsuario, en_linea }) => {
     const amigo = friends.value.find((f) => f.idUsuario === idUsuario);
     if (amigo) {
@@ -225,12 +240,10 @@ onMounted(async () => {
     });
   });
 
-  // Listener para la lista de salas
   socket.on("listaSalas", (salasRecibidas) => {
     salas.value = salasRecibidas;
     actualizarEstadoDeAmigos();
   });
-  // Listener para actualizaciones de sala en tiempo real
   socket.on("actualizarSala", (salaActualizada) => {
     const index = salas.value.findIndex((s) => s.id === salaActualizada.id);
     if (index !== -1) {
@@ -245,10 +258,8 @@ onMounted(async () => {
 
 <template>
   <div class="amigos-page">
-    <!-- Cabecera reutilizable -->
     <Cabecera titulo="Juega Con Amigos" :compacto="true" />
 
-    <!-- Sección de búsqueda para agregar amigos -->
     <div class="friend-search">
       <input
         type="text"
@@ -260,7 +271,6 @@ onMounted(async () => {
       </button>
     </div>
 
-    <!-- Contenedor principal para la lista de amigos -->
     <div class="amigos-container">
       <div v-if="loading">Cargando amigos...</div>
       <div v-else-if="error" class="error">{{ error }}</div>
@@ -279,7 +289,6 @@ onMounted(async () => {
             <div class="friend-text">
               <p class="friend-name">{{ friend.nombre }}</p>
               <p class="friend-status">
-                <!-- Se muestra "En sala" si está conectado y marcado en una sala -->
                 {{
                   friend.enLinea
                     ? friend.enSala
@@ -295,15 +304,15 @@ onMounted(async () => {
             </div>
           </div>
           <div class="friend-buttons">
-            <!-- Botón "Unirse" habilitado solo si el amigo está en una sala -->
             <button
+              v-if="shouldShowJoinButton(friend)"
               class="green-button"
               @click="unirseASala(friend.idUsuario)"
-              :disabled="!friend.enSala"
             >
               Unirse
             </button>
             <button
+              v-if="shouldShowInviteButton(friend)"
               class="green-button"
               @click="invitarASala(friend.idUsuario)"
             >
@@ -320,7 +329,6 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- Modal de confirmación para eliminar amigo -->
     <div v-if="showDeleteModal" class="modal-overlay">
       <div class="modal">
         <h3>Confirmar Eliminación</h3>
@@ -333,7 +341,6 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- Barra inferior con botón Volver -->
     <div class="bottom-bar">
       <Volver />
     </div>
