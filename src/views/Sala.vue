@@ -199,6 +199,7 @@ const salirSala = () => {
     idUsuario: usuario.value.id,
   });
   localStorage.removeItem("salaActual");
+  socket.emit("registrarUsuario", { idUsuario: usuario.value.id });
   toast.info(`${usuario.value.nombre} ha salido de la sala 👋`);
   router.push("/juego");
 };
