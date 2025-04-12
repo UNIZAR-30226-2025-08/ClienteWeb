@@ -8,16 +8,28 @@
       :style="getPlayerPositionStyle(index, players.length)"
       @click="onPlayerClick(player.id)"
     >
-      <!-- Imagen de cada jugador -->
-      <img src="../assets/player.png" alt="Jugador" class="player-image" />
+      <!-- Contenedor exclusivo para la imagen con overflow hidden -->
+      <div class="avatar-wrapper">
+        <img
+          :src="avatarMap[player.avatar] || defaultAvatar"
+          alt="Avatar Jugador"
+          class="player-image"
+        />
+      </div>
 
-      <!-- Etiqueta con el número o nombre del jugador -->
+      <!-- Etiqueta con el nombre del jugador, fuera del contenedor de imagen -->
       <span class="player-label">{{ player.nombre }}</span>
+
+      <!-- Visualización de los votos (Palitos) -->
+      <div class="votes-bar">
+        <div v-for="n in player.votes" :key="n" class="vote-stick"></div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import defaultAvatar from "../../../assets/profile_icon.jpg"; // Imagen por defecto
 export default {
   name: "PlayersCircle",
   props: {
@@ -28,6 +40,14 @@ export default {
     selectedPlayerIndex: {
       type: Number,
       default: null,
+    },
+    avatarMap: {
+      type: Object,
+      required: true,
+    },
+    defaultAvatar: {
+      type: String,
+      required: true,
     },
   },
   methods: {

@@ -8,22 +8,21 @@
       :style="getPlayerPositionStyle(index, players.length)"
       @click="onPlayerClick(player.id)"
     >
-      <!-- Imagen de cada jugador -->
-      <img
-        src="../../../assets/player.png"
-        alt="Jugador"
-        class="player-image"
-      />
-      <!-- Etiqueta con el número o nombre del jugador -->
-      <span class="player-label"> {{ player.nombre }}</span>
+      <!-- Contenedor exclusivo para la imagen con overflow hidden -->
+      <div class="avatar-wrapper">
+        <img
+          :src="avatarMap[player.avatar] || defaultAvatar"
+          alt="Avatar Jugador"
+          class="player-image"
+        />
+      </div>
+
+      <!-- Etiqueta con el nombre del jugador, fuera del contenedor de imagen -->
+      <span class="player-label">{{ player.nombre }}</span>
 
       <!-- Visualización de los votos (Palitos) -->
       <div class="votes-bar">
-        <div
-          v-for="n in player.votes"
-          :key="n"
-          class="vote-stick"
-        ></div>
+        <div v-for="n in player.votes" :key="n" class="vote-stick"></div>
       </div>
     </div>
   </div>
@@ -40,6 +39,14 @@ export default {
     selectedPlayerIndex: {
       type: Number,
       default: null,
+    },
+    avatarMap: {
+      type: Object,
+      required: true,
+    },
+    defaultAvatar: {
+      type: String,
+      required: true,
     },
   },
   methods: {
@@ -78,38 +85,41 @@ export default {
 }
 
 /* Cada "jugador" se ubica en posición absoluta dentro del contenedor */
+/* Contenedor del círculo completo */
 .player-icon {
   position: absolute;
   width: 5.625rem;
-  height: 5.625rem;
-  background-color: #262522;
-  border-radius: 50%;
+  /* Altura suficiente para el avatar + label (puedes ajustar) */
+  /* Por ejemplo: */
   display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
   flex-direction: column;
+  align-items: center;
+  cursor: pointer;
 }
 
-/* Imagen del jugador */
-.player-image {
-  width: 4.375rem;
-  height: 4.375rem;
+/* Contenedor exclusivo del avatar */
+.avatar-wrapper {
+  width: 5.625rem;
+  height: 5.625rem;
   border-radius: 50%;
-  object-fit: cover;
+  overflow: hidden; /* Recorta la imagen al contorno circular */
 }
 
-/* Etiqueta del jugador */
+/* Imagen del jugador ocupa todo el contenedor */
+.player-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Se asegura de que la imagen llene el contenedor sin deformarse */
+}
+
+/* Etiqueta del jugador: se posiciona debajo del avatar */
 .player-label {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  color: #000000;
-  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  color: #000;
+  font-size: 1.2rem; /* Aumenta este valor para mayor tamaño */
+  font-weight: bold; /* Engrosa el texto */
   white-space: nowrap;
 }
-
 /* Visualización de los votos */
 .votes-bar {
   display: flex;

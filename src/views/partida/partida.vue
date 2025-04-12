@@ -48,6 +48,8 @@
       <PlayersCircle
         :players="players"
         :selected-player-index="selectedPlayerIndex"
+        :avatarMap="avatarMap"
+        :defaultAvatar="defaultAvatar"
         :alguacil-voting-active="isVotingPhase"
         :reveal-votes="revealVotes"
         :reveal-index="revealIndex"
@@ -114,6 +116,16 @@ import DiscoverRoleButton from "../../views/partida/Componentes/DiscoverRoleButt
 
 import Chat from "../../views/partida/Componentes/Chat.vue";
 
+import avatar1 from "../../assets/avatares/imagenPerfil.webp";
+import avatar2 from "../../assets/avatares/imagenPerfil2.webp";
+import avatar3 from "../../assets/avatares/imagenPerfil3.webp";
+import avatar4 from "../../assets/avatares/imagenPerfil4.webp";
+import avatar5 from "../../assets/avatares/imagenPerfil5.webp";
+import avatar6 from "../../assets/avatares/imagenPerfil6.webp";
+import avatar7 from "../../assets/avatares/imagenPerfil7.webp";
+import avatar8 from "../../assets/avatares/imagenPerfil8.webp";
+import defaultAvatar from "../../assets/profile_icon.jpg"; // Imagen por defecto
+
 export default {
   name: "Partida",
   components: {
@@ -149,6 +161,18 @@ export default {
 
       // Jugadores y votación
       players: [],
+
+      avatarMap: {
+        avatar1: avatar1,
+        avatar2: avatar2,
+        avatar3: avatar3,
+        avatar4: avatar4,
+        avatar5: avatar5,
+        avatar6: avatar6,
+        avatar7: avatar7,
+        avatar8: avatar8,
+      },
+      defaultAvatar: defaultAvatar,
       selectedPlayerIndex: null,
       hasVoted: false,
       revealVotes: false,
