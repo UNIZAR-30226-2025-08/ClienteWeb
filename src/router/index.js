@@ -1,3 +1,4 @@
+// src/router/index.js (o la ruta correspondiente)
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Home.vue";
 import Register from "../views/Register.vue";
@@ -15,8 +16,8 @@ import Sugerencias from "../views/Sugerencias.vue";
 import SugerenciasAdmin from "../views/SugerenciasAdmin.vue";
 
 const routes = [
-  { path: "/", component: Home }, // Página principal
-  { path: "/Roles", component: Roles }, // Página principal
+  { path: "/", component: Home },
+  { path: "/Roles", component: Roles },
   { path: "/register", component: Register },
   { path: "/crear-sala", component: CrearSala },
   { path: "/juego", component: Juego },
@@ -40,4 +41,15 @@ const router = createRouter({
   routes,
 });
 
+// Variable global para almacenar la última ruta (desde la que venimos)
+let lastRoute = null;
+
+router.beforeEach((to, from, next) => {
+  // Almacena la ruta "from" para usarla en el botón de volver
+  lastRoute = from;
+  next();
+});
+
+// Exportamos tanto router como lastRoute para poder usarlo en otros componentes
+export { router, lastRoute };
 export default router;

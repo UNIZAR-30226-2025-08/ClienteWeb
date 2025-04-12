@@ -1,16 +1,20 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import { toast } from "vue3-toastify";
 import Cabecera from "../components/Cabecera.vue";
 import Volver from "../components/Volver.vue";
 import axios from "axios";
-import socket from "../utils/socket"; // Usa la ruta real según tu estructura
-import { onBeforeUnmount } from "vue";
+import socket from "../utils/socket"; // Ajusta la ruta según tu proyecto
+import { useRouter } from "vue-router";
 
 onBeforeUnmount(() => {
   socket.off("estadoAmigo");
   socket.off("estadoAmigos");
+  socket.off("listaSalas");
+  socket.off("actualizarSala");
 });
+
+const router = useRouter();
 
 // Función para obtener el ID del usuario logueado desde localStorage
 const getUserId = () => {
@@ -32,10 +36,33 @@ const searchError = ref(null);
 const searchSuccess = ref("");
 const loadingSearch = ref(false);
 
+// Variable reactiva para la lista de salas (en tiempo real)
+const salas = ref([]);
+
+// Función para actualizar el estado de tus amigos según las salas
+// Recorre cada amigo y, si alguno aparece en el listado de jugadores de alguna sala,
+// se marca como que está en sala (y se almacena el id de la sala en friend.sala)
+const actualizarEstadoDeAmigos = () => {
+  friends.value.forEach((friend) => {
+    // Se reinicia el estado a false y sala a null
+    friend.enSala = false;
+    friend.sala = null;
+    salas.value.forEach((sala) => {
+      if (
+        sala.jugadores &&
+        sala.jugadores.some((jugador) => jugador.id === friend.idUsuario)
+      ) {
+        friend.enSala = true;
+        friend.sala = sala.id;
+      }
+    });
+  });
+};
+
+// Función para obtener la lista de amigos (la información de estadísticas viene desde el endpoint)
 const fetchFriends = async () => {
   try {
     const userId = getUserId();
-    // Llamamos al endpoint: GET /api/amistad/listarConEstadisticas/:idUsuario (No sé porqué ponemos el usuario en la URL, preguntar ÓSCAR si o ha hecho el)
     const response = await axios.get(
       `/api/amistad/listarConEstadisticas/${userId}`
     );
@@ -45,6 +72,7 @@ const fetchFriends = async () => {
     error.value = "Error al obtener la lista de amigos.";
   } finally {
     loading.value = false;
+    actualizarEstadoDeAmigos();
   }
 };
 
@@ -63,12 +91,8 @@ const confirmDelete = async () => {
   try {
     const userId = getUserId();
     await axios.delete("/api/amistad/eliminar", {
-      data: {
-        idUsuario1: userId,
-        idUsuario2: friendToDelete.value,
-      },
+      data: { idUsuario1: userId, idUsuario2: friendToDelete.value },
     });
-    // Actualizar la lista de amigos eliminando el amigo borrado
     friends.value = friends.value.filter(
       (friend) => friend.idUsuario !== friendToDelete.value
     );
@@ -80,6 +104,7 @@ const confirmDelete = async () => {
       "Error al eliminar amigo. Por favor, inténtalo nuevamente.";
   }
 };
+
 const getSalaActual = () => {
   const sala = localStorage.getItem("salaActual");
   return sala ? JSON.parse(sala) : null;
@@ -97,12 +122,13 @@ const invitarASala = (friendId) => {
   const invitadorId = getUserId();
   socket.emit("invitarASala", {
     idAmigo: friendId,
-    idSala: salaActual.id, // Usamos el ID de la sala almacenada
+    idSala: salaActual.id,
     idInvitador: invitadorId,
   });
   toast.success("Invitación enviada correctamente", { autoClose: 3000 });
 };
 
+// Función para agregar un amigo (solicitud de amistad)
 const addFriend = async () => {
   if (!searchName.value.trim()) {
     searchError.value = "Por favor, ingresa un nombre.";
@@ -112,7 +138,6 @@ const addFriend = async () => {
   searchError.value = null;
   searchSuccess.value = "";
   try {
-    // Buscamos el usuario por nombre
     const response = await axios.post("/api/usuario/obtener_por_nombre", {
       nombre: searchName.value,
     });
@@ -122,21 +147,16 @@ const addFriend = async () => {
     }
     const foundUser = response.data.usuario;
     const userId = getUserId();
-    // Enviamos la solicitud de amistad y almacenamos la respuesta del backend
     const sendResponse = await axios.post("/api/solicitud/enviar", {
       idEmisor: userId,
       idReceptor: foundUser.idUsuario,
     });
-    // Emitimos el evento de socket para notificar la solicitud en tiempo real
     socket.emit("solicitudAmistad", {
       idEmisor: userId,
       idReceptor: foundUser.idUsuario,
     });
-    // Actualizamos la lista de amigos
     await fetchFriends();
-    // Limpiamos el campo de búsqueda
     searchName.value = "";
-    // Si el backend responde con un mensaje, lo mostramos
     if (sendResponse.data && sendResponse.data.mensaje) {
       toast.info(sendResponse.data.mensaje, { autoClose: 3000 });
       searchSuccess.value = sendResponse.data.mensaje;
@@ -161,26 +181,41 @@ const addFriend = async () => {
   }
 };
 
+// Función para unirse a la sala en la que se encuentra el amigo
+const unirseASala = (friendId) => {
+  const friend = friends.value.find((f) => f.idUsuario === friendId);
+  if (!friend) return;
+  if (!friend.enSala) {
+    toast.error("El amigo no se encuentra en una sala.", { autoClose: 3000 });
+    return;
+  }
+  if (!friend.sala) {
+    toast.error("No se pudo obtener la sala del amigo.", { autoClose: 3000 });
+    return;
+  }
+  // Redirigimos a la sala donde se encuentra el amigo
+  router.push(`/sala/${friend.sala}`);
+};
+
 onMounted(async () => {
   const idUsuario = getUserId();
-
   if (!socket.connected) {
     socket.connect();
   }
-
   socket.emit("registrarUsuario", { idUsuario });
-
   await fetchFriends();
 
+  // Desde aquí solicitamos la lista de salas activas para actualizar el estado
+  socket.emit("obtenerSalas");
   socket.emit("solicitarEstadoAmigos", { idUsuario });
 
+  // Listen para actualizaciones de estado de amigos
   socket.on("estadoAmigo", ({ idUsuario, en_linea }) => {
     const amigo = friends.value.find((f) => f.idUsuario === idUsuario);
     if (amigo) {
       amigo.enLinea = en_linea;
     }
   });
-
   socket.on("estadoAmigos", (estadoAmigos) => {
     estadoAmigos.forEach(({ idUsuario, en_linea }) => {
       const amigo = friends.value.find((f) => f.idUsuario === idUsuario);
@@ -188,6 +223,22 @@ onMounted(async () => {
         amigo.enLinea = en_linea;
       }
     });
+  });
+
+  // Listener para la lista de salas
+  socket.on("listaSalas", (salasRecibidas) => {
+    salas.value = salasRecibidas;
+    actualizarEstadoDeAmigos();
+  });
+  // Listener para actualizaciones de sala en tiempo real
+  socket.on("actualizarSala", (salaActualizada) => {
+    const index = salas.value.findIndex((s) => s.id === salaActualizada.id);
+    if (index !== -1) {
+      salas.value[index] = salaActualizada;
+    } else {
+      salas.value.push(salaActualizada);
+    }
+    actualizarEstadoDeAmigos();
   });
 });
 </script>
@@ -228,9 +279,12 @@ onMounted(async () => {
             <div class="friend-text">
               <p class="friend-name">{{ friend.nombre }}</p>
               <p class="friend-status">
+                <!-- Se muestra "En sala" si está conectado y marcado en una sala -->
                 {{
                   friend.enLinea
-                    ? friend.estadisticas
+                    ? friend.enSala
+                      ? "🟢 En sala"
+                      : friend.estadisticas
                       ? "🟢 Conectado / " +
                         friend.estadisticas.partidasTotales +
                         " partidas jugadas"
@@ -241,14 +295,20 @@ onMounted(async () => {
             </div>
           </div>
           <div class="friend-buttons">
-            <button class="green-button">Unirse</button>
+            <!-- Botón "Unirse" habilitado solo si el amigo está en una sala -->
+            <button
+              class="green-button"
+              @click="unirseASala(friend.idUsuario)"
+              :disabled="!friend.enSala"
+            >
+              Unirse
+            </button>
             <button
               class="green-button"
               @click="invitarASala(friend.idUsuario)"
             >
               Invitar
             </button>
-
             <button
               class="red-button"
               @click="openDeleteModal(friend.idUsuario)"
