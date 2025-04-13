@@ -30,6 +30,10 @@
         v-else-if="currentPhase === 'ojo_cerrado'"
         :visible="true"
       />
+      <DespertarHombresLobo v-else-if="currentPhase === 'despertar_hombres_lobo'" />
+      <EstadoDurmiendo v-else-if="currentPhase === 'estado_durmiendo'" />
+      <FinTurnoLobos v-else-if="currentPhase === 'fin_turno_lobos'" />
+
     </template>
 
     <!-- Cuando no es fase overlay se muestra el contenido principal -->
@@ -116,6 +120,12 @@ import DiscoverRoleButton from "../../views/partida/Componentes/DiscoverRoleButt
 
 import Chat from "../../views/partida/Componentes/Chat.vue";
 
+// Nuevos overlays para el turno de hombres lobo
+import DespertarHombresLobo from "../../views/partida/Overlay/DespertarHombresLobo.vue";
+import FinTurnoLobos from "../../views/partida/Overlay/FinTurnoLobos.vue";
+import EstadoDurmiendo from "./Overlay/EstadoDurmiendo.vue";
+
+
 import avatar1 from "../../assets/avatares/imagenPerfil.webp";
 import avatar2 from "../../assets/avatares/imagenPerfil2.webp";
 import avatar3 from "../../assets/avatares/imagenPerfil3.webp";
@@ -145,6 +155,9 @@ export default {
     OjoCerradoOverlay,
     TurnButton,
     DiscoverRoleButton,
+    DespertarHombresLobo,
+    FinTurnoLobos,
+    EstadoDurmiendo,
   },
   data() {
     return {
@@ -213,6 +226,9 @@ export default {
         "night",
         "vidente_awaken",
         "ojo_cerrado",
+        "despertar_hombres_lobo", 
+        "estado_durmiendo",        
+        "fin_turno_lobos"          
       ].includes(this.currentPhase);
     },
   },
@@ -221,7 +237,7 @@ export default {
     //Los he dejado numerados en el orden que seguiran más omenos, luego se repetiran los eventos
 
     this.startGameFlow();
-
+    
     // 1. Evento de espera inicial para comenzar la partida
     socket.on("esperaInicial", (data) => {
       console.log("Esperando para iniciar la partida:", data.mensaje);
@@ -262,7 +278,7 @@ export default {
     //5. Escuchar evento para el turno de los hombres lobo
     socket.on("turnoHombresLobos", (data) => {
       console.log("Turno de hombres lobos:", data.mensaje);
-      this.currentPhase = "turno_hombres_lobos"; // Cambia a la fase correspondiente
+      this.handleTurnoHombresLobo(data);
       this.currentPeriod = "NOCHE"; // Cambiar a NOCHE si es necesario
       this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
     });
@@ -407,6 +423,16 @@ export default {
       return this.chosenRole && this.chosenRole.nombre === "Vidente";
     },
 
+    // Devuelve true si el jugador es un Hombre Lobo
+    isLobo() {
+      return (
+        this.chosenRole &&
+        this.chosenRole.nombre.toLowerCase() === "hombre lobo"
+      );
+    },
+
+
+
     startGameFlow() {
       setTimeout(() => {
         this.currentPhase = "role";
@@ -435,30 +461,6 @@ export default {
         }, 1000);
       }, 6000);
     },
-    ////////////////////////////////////////////////////////////////////////
-    startMainGame() {
-      this.currentPhase = "alguacil_announce";
-      setTimeout(() => {
-        this.startAlguacilVoting();
-      }, 6000);
-    },
-
-    // Fase de votación del alguacil (se muestra en el contenido principal)
-    startAlguacilVoting() {
-      this.currentPhase = "game_voting";
-      this.isVotingPhase = true;
-      this.timeLeft = 60;
-      this.countdownInterval = setInterval(() => {
-        if (this.timeLeft > 0) {
-          this.timeLeft--;
-        } else {
-          clearInterval(this.countdownInterval);
-          this.endVotingPhase();
-        }
-      }, 1000);
-    },
-
-    ////////////////////////////////////////////////////////////////////////
 
     // Al finalizar la votación, se calcula el ganador y se inicia el proceso nocturno
     endVotingPhase() {
@@ -469,9 +471,6 @@ export default {
       const winners = this.players.filter((p) => p.votes === maxVotes);
       this.alguacilWinnerIndex = winners[0]?.id || null;
       this.currentPhase = "alguacil_result";
-      setTimeout(() => {
-        this.startNightSequence();
-      }, 6000);
     },
 
     /**
@@ -538,6 +537,33 @@ export default {
       this.resetVotingState();
       this.currentPhase = "game";
     },
+
+    handleTurnoHombresLobos(data) {
+      console.log("Turno de hombres lobos:", data.mensaje);
+      // 1. Mostrar overlay de despertar (3 segundos)
+      this.currentPhase = "despertar_hombres_lobo";
+      this.currentPeriod = "NOCHE";
+      setTimeout(() => {
+        // 2. Durante los siguientes 24 segundos:
+        if (this.isLobo()) {
+          // Si es lobo, se muestra la sala (contenido principal)
+          this.currentPhase = "game";
+        } else {
+          // Si no es lobo, se muestra el overlay de estado durmiendo
+          this.currentPhase = "estado_durmiendo";
+        }
+        // Esperar 24 segundos en este estado
+        setTimeout(() => {
+          // 3. Mostrar overlay de fin del turno de lobos
+          this.currentPhase = "fin_turno_lobos";
+          setTimeout(() => {
+            // Finalizado el overlay de fin, volver a la sala para todos
+            this.currentPhase = "game";
+          }, 6000); // Duración del overlay FinTurnoLobos (6 segundos)
+        }, 24000);
+      }, 3000);
+    },
+
 
     handlePassTurn() {
       if (!this.hasPassedTurn && !this.hasDiscoveredRole) {
