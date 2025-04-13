@@ -14,6 +14,45 @@ const esAdmin = ref(false); // Variable para controlar si es administrador
 // Variable para controlar el pop-up de confirmación de salida
 const showExitConfirm = ref(false);
 
+const partidas = ref([]); // Lista de partidas
+const partidaSeleccionada = ref(null); // Partida seleccionada para mostrar detalles
+const mostrarDetalles = ref(false); // Controla la visibilidad del modal de detalles
+
+// Función para obtener el historial de partidas
+const obtenerHistorialPartidas = async () => {
+  try {
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    if (!usuario?.id) {
+      toast.error("No se encontró información del usuario.");
+      return;
+    }
+
+    const response = await axios.get(`/api/juega/usuario/${usuario.id}`);
+    partidas.value = response.data.map((partida) => {
+      const resultado =
+        (partida.rolJugado === "lobo" && partida.ganadores === "lobos") ||
+        (partida.rolJugado !== "lobo" && partida.ganadores === "aldeanos")
+          ? "Ganada"
+          : "Perdida";
+      return { ...partida, resultado };
+    });
+  } catch (error) {
+    console.error("Error al obtener el historial de partidas:", error);
+    toast.error("No se pudo cargar el historial de partidas.");
+  }
+};
+
+// Función para seleccionar una partida y mostrar detalles
+const seleccionarPartida = (partida) => {
+  partidaSeleccionada.value = partida;
+  mostrarDetalles.value = true;
+};
+
+// Cerrar el modal de detalles
+const cerrarDetalles = () => {
+  mostrarDetalles.value = false;
+};
+
 // Verificar si el usuario es administrador
 const verificarAdministrador = async () => {
   try {
@@ -38,6 +77,8 @@ onMounted(() => {
     localStorage.removeItem("loginSuccess");
   }
   verificarAdministrador(); // Llamamos a la función de verificación al montar el componente
+
+  obtenerHistorialPartidas(); // Cargar el historial de partidas al montar el componente
 
   // Manejo de errores
   socket.on("error", (mensaje) => {
@@ -167,20 +208,36 @@ const unirseRapido = () => {
                 <tr>
                   <th colspan="3" class="main-title">Historial de Partidas</th>
                 </tr>
-              </thead>
-              <tbody>
+
                 <tr class="dark-row">
                   <td>Fecha</td>
                   <td>Modo</td>
                   <td>Resultado</td>
                 </tr>
-                <tr class="light-row">
-                  <td>--</td>
-                  <td>--</td>
-                  <td>--</td>
-                </tr>
-              </tbody>
+              </thead>
             </table>
+            <div class="history-table-container">
+              <table class="history-table">
+                <tbody>
+                  <tr
+                    v-for="partida in partidas"
+                    :key="partida.idPartida"
+                    class="light-row"
+                    @click="seleccionarPartida(partida)"
+                    style="cursor: pointer"
+                  >
+                    <td>{{ new Date(partida.fecha).toLocaleDateString() }}</td>
+                    <td>
+                      {{
+                        partida.tipo.charAt(0).toUpperCase() +
+                        partida.tipo.slice(1)
+                      }}
+                    </td>
+                    <td>{{ partida.resultado }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -196,6 +253,52 @@ const unirseRapido = () => {
             Buscar Salas
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Modal de detalles de la partida -->
+    <div v-if="mostrarDetalles" class="exit-modal-overlay">
+      <div class="exit-modal">
+        <h3>Detalles de la Partida</h3>
+        <p>
+          <strong>Fecha completa:</strong>
+          {{ new Date(partidaSeleccionada.fecha).toLocaleString() }}
+        </p>
+
+        <p>
+          <strong>Modo:</strong>
+          {{
+            partidaSeleccionada.tipo.charAt(0).toUpperCase() +
+            partidaSeleccionada.tipo.slice(1)
+          }}
+        </p>
+
+        <p>
+          <strong>Estado:</strong>
+          {{
+            partidaSeleccionada.estado === "en_curso" ? "En curso" : "Terminada"
+          }}
+        </p>
+
+        <p>
+          <strong>Ganadores:</strong>
+          {{
+            partidaSeleccionada.ganadores
+              ? partidaSeleccionada.ganadores.charAt(0).toUpperCase() +
+                partidaSeleccionada.ganadores.slice(1)
+              : "Sin determinar"
+          }}
+        </p>
+
+        <p>
+          <strong>Rol Jugado:</strong>
+          {{
+            partidaSeleccionada.rolJugado.charAt(0).toUpperCase() +
+            partidaSeleccionada.rolJugado.slice(1)
+          }}
+        </p>
+        
+        <button class="cancel-button" @click="cerrarDetalles">Cerrar</button>
       </div>
     </div>
   </div>
@@ -387,12 +490,14 @@ const unirseRapido = () => {
 /* --------------------- */
 .history-table {
   width: 100%;
-  border-collapse: separate;
+  border-collapse: collapse;
   border-spacing: 0;
-  border-radius: 8px;
+  /*border-radius: 8px;*/
   overflow: hidden;
   color: #fff;
   margin-bottom: 20px;
+  table-layout: fixed; /* Asegura que las columnas tengan un ancho consistente */
+  margin: 0; /* Márgenes entre tablas */
 }
 
 /* Fila principal del thead */
@@ -407,6 +512,9 @@ const unirseRapido = () => {
 /* Fila oscura (Fecha/Modo/Resultado) */
 .dark-row {
   background-color: #1e1c1a;
+  border-radius: 0;
+  padding: 0;
+  margin-left: 20px;
 }
 
 /* Fila clara (ejemplo --) */
@@ -414,15 +522,45 @@ const unirseRapido = () => {
   background-color: #262522;
 }
 
-.history-table tbody td {
-  padding: 12px;
-  border-bottom: 1px solid #302e2b; /* línea negra */
-  font-size: 0.95rem;
+/* Quitar la línea inferior de la última fila si lo deseas */
+.history-table tbody tr:last-child {
+  border-bottom: none;
+  border-radius: 10px;
+  box-sizing: border-box;
 }
 
-/* Quitar la línea inferior de la última fila si lo deseas */
-.history-table tbody tr:last-child td {
-  border-bottom: none;
+/* Titulo de la tabla */
+.history-table thead th {
+  position: sticky; /* Fija el encabezado */
+  top: 0; /* Posición superior */
+  background-color: #262522; /* Fondo del encabezado */
+  z-index: 1; /* Asegura que el encabezado esté por encima del contenido */
+  text-align: left;
+  padding: 12px;
+  height: 20px; /* Altura consistente con las filas del cuerpo */
+  border-bottom: 1px solid #302e2b; /* Línea negra */
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  border-radius: 0;
+}
+
+/* Encabezado de la tabla */
+.history-table thead tr {
+  padding: 12px;
+  border-bottom: 1px solid #302e2b; /* Línea negra */
+  font-size: 0.95rem;
+  height: 48px; /* Altura consistente con las filas del cuerpo */
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  border-radius: 0;
+}
+
+/* Cuerpo de la tabla */
+.history-table tbody td {
+  padding: 12px;
+  height: 20px; /* Altura consistente con el encabezado */
+  border-bottom: 1px solid #302e2b; /* Línea negra */
+  font-size: 0.95rem;
 }
 
 /* ----------------------- */
@@ -533,5 +671,17 @@ const unirseRapido = () => {
 }
 .cancel-button:hover {
   background-color: #c0392b;
+}
+.history {
+  border: 1px solid #302e2b; /* Opcional: borde para delimitar el área */
+  border-radius: 8px; /* Opcional: bordes redondeados */
+}
+.history-table-container {
+  max-height: 500px; /* Altura máxima del contenido de la tabla */
+  overflow-y: auto; /* Habilitar desplazamiento vertical */
+}
+/* Estilos para el modal */
+.exit-modal h3 {
+  margin-bottom: 15px;
 }
 </style>
