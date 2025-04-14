@@ -241,16 +241,15 @@ export default {
     // 1. Evento de espera inicial para comenzar la partida
     socket.on("esperaInicial", (data) => {
       console.log("Esperando para iniciar la partida:", data.mensaje);
-      //this.currentPhase = "game";
       this.currentPeriod = "DÍA"; // Inicialmente es de día
       this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
     });
+
 
     //2. Evento para iniciar la votación del alguacil
     socket.on("iniciarVotacionAlguacil", (data) => {
       console.log("Votación del alguacil iniciada", data);
       this.flujoVotacionAlguacil();
-      //this.currentPhase = "game_voting";
       this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
       this.isVotingPhase = true;
     });
@@ -265,12 +264,7 @@ export default {
     //4. Escuchar evento para la habilidad de la vidente
     socket.on("habilidadVidente", (data) => {
       console.log("Habilidad de la vidente activada:", data.mensaje);
-      if (this.isVidente()) {
-        this.currentPhase = "vidente_action"; // Cambia a la fase correspondiente
-        this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
-      } else {
-        this.currentPhase = "ojo_cerrado"; // Cambia a la fase correspondiente para los demás jugadores
-      }
+      this.handleHabilidadVidente();
       this.currentPeriod = "NOCHE"; // Cambiar a NOCHE si es necesario(Desconexion jugador? Preguntar a Oscar como lo quiere hacer)
       this.timeLeft = data.tiempo || 15; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
     });
@@ -489,6 +483,18 @@ export default {
       }, 1000);
     },
 
+    handleHabilidadVidente(){
+      this.currentPhase = "vidente_awaken"
+      setTimeout(() => {
+        if (this.isVidente()) {
+          this.currentPhase = "vidente_action"; // Cambia a la fase correspondiente
+          this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
+        } else {
+          this.currentPhase = "ojo_cerrado"; // Cambia a la fase correspondiente para los demás jugadores
+        }
+      }, 6000)
+    },
+
     /**
      * Encapsula TODO el proceso de la noche:
      * 1) Se muestra el overlay "night" y se activa el modo NOCHE.
@@ -538,7 +544,7 @@ export default {
       this.currentPhase = "game";
     },
 
-    handleTurnoHombresLobos(data) {
+    handleTurnoHombresLobo(data) {
       console.log("Turno de hombres lobos:", data.mensaje);
       // 1. Mostrar overlay de despertar (3 segundos)
       this.currentPhase = "despertar_hombres_lobo";
