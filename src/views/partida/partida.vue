@@ -30,10 +30,11 @@
         v-else-if="currentPhase === 'ojo_cerrado'"
         :visible="true"
       />
-      <DespertarHombresLobo v-else-if="currentPhase === 'despertar_hombres_lobo'" />
+      <DespertarHombresLobo
+        v-else-if="currentPhase === 'despertar_hombres_lobo'"
+      />
       <EstadoDurmiendo v-else-if="currentPhase === 'estado_durmiendo'" />
       <FinTurnoLobos v-else-if="currentPhase === 'fin_turno_lobos'" />
-
     </template>
 
     <!-- Cuando no es fase overlay se muestra el contenido principal -->
@@ -124,7 +125,6 @@ import Chat from "../../views/partida/Componentes/Chat.vue";
 import DespertarHombresLobo from "../../views/partida/Overlay/DespertarHombresLobo.vue";
 import FinTurnoLobos from "../../views/partida/Overlay/FinTurnoLobos.vue";
 import EstadoDurmiendo from "./Overlay/EstadoDurmiendo.vue";
-
 
 import avatar1 from "../../assets/avatares/imagenPerfil.webp";
 import avatar2 from "../../assets/avatares/imagenPerfil2.webp";
@@ -226,9 +226,9 @@ export default {
         "night",
         "vidente_awaken",
         "ojo_cerrado",
-        "despertar_hombres_lobo", 
-        "estado_durmiendo",        
-        "fin_turno_lobos"          
+        "despertar_hombres_lobo",
+        "estado_durmiendo",
+        "fin_turno_lobos",
       ].includes(this.currentPhase);
     },
   },
@@ -237,14 +237,13 @@ export default {
     //Los he dejado numerados en el orden que seguiran más omenos, luego se repetiran los eventos
 
     this.startGameFlow();
-    
+
     // 1. Evento de espera inicial para comenzar la partida
     socket.on("esperaInicial", (data) => {
       console.log("Esperando para iniciar la partida:", data.mensaje);
       this.currentPeriod = "DÍA"; // Inicialmente es de día
       this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
     });
-
 
     //2. Evento para iniciar la votación del alguacil
     socket.on("iniciarVotacionAlguacil", (data) => {
@@ -253,15 +252,29 @@ export default {
       this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
       this.isVotingPhase = true;
     });
+    //3. Evento que notifica en caso de empate en la votación del alguacil
+    socket.on("empateVotacionAlguacil", (data) => {
+      console.log("Empate en la votación del alguacil:", data.mensaje);
+      //TODO: Nico si llega este socket Muestra mensaje de empate y se reinicia la votacion  del alguacil
+      this.flujoVotacionAlguacil();
+      this.isVotingPhase = true;
+    });
+    //4. Evento que notifica el resultado de la votación del alguacil
+    socket.on("alguacilElegido", (data) => {
+      console.log("Alguacil elegido:", data.mensaje);
+      this.alguacilWinnerIndex = Number(data.alguacil);
+      this.endVotingPhase(); // Finaliza la votación y muestra el resultado
+      this.isVotingPhase = false; // Desactivar la fase de votación
+    });
 
-    //3. Escuchar evento para el comienzo de la noche
+    //5. Escuchar evento para el comienzo de la noche
     socket.on("nocheComienza", (data) => {
       console.log("La noche ha comenzado", data);
       this.currentPhase = "night";
       this.currentPeriod = "NOCHE";
     });
 
-    //4. Escuchar evento para la habilidad de la vidente
+    //6. Escuchar evento para la habilidad de la vidente
     socket.on("habilidadVidente", (data) => {
       console.log("Habilidad de la vidente activada:", data.mensaje);
       this.handleHabilidadVidente();
@@ -269,7 +282,7 @@ export default {
       this.timeLeft = data.tiempo || 15; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
     });
 
-    //5. Escuchar evento para el turno de los hombres lobo
+    //7. Escuchar evento para el turno de los hombres lobo
     socket.on("turnoHombresLobos", (data) => {
       console.log("Turno de hombres lobos:", data.mensaje);
       this.handleTurnoHombresLobo(data);
@@ -277,12 +290,12 @@ export default {
       this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
     });
 
-    // 6. Evento que envía el resultado de los votos de la noche a cada jugador que corresponda
+    //8. Evento que envía el resultado de los votos de la noche a cada jugador que corresponda
     socket.on("resultadoVotosNoche", (data) => {
       console.log("Resultado votos de noche:", data.mensaje);
     });
 
-    // 7. Evento que notifica a la bruja con el mensaje y la víctima elegida por los lobos (Si la bruja existe)
+    //9. Evento que notifica a la bruja con el mensaje y la víctima elegida por los lobos (Si la bruja existe)
     socket.on("mensajeBruja", (data) => {
       console.log(
         "Mensaje para la bruja:",
@@ -292,7 +305,7 @@ export default {
       );
       // En la UI, muestra la interfaz para que la bruja decida si curar o eliminar, mostrando los detalles
     });
-    // 8. Evento para activar la habilidad de la bruja
+    //10. Evento para activar la habilidad de la bruja
     socket.on("habilidadBruja", (data) => {
       console.log("Habilidad de la bruja activada:", data.mensaje);
       this.currentPhase = //TODO: Desarrollar Bruja;
@@ -300,7 +313,7 @@ export default {
       // Muestra en la interfaz de la bruja la acción para usar la poción (curar o matar)
     });
 
-    // 9. Escuchar evento para pasar al día
+    //11. Escuchar evento para pasar al día
     socket.on("diaComienza", (data) => {
       console.log("El día ha comenzado", data);
       this.currentPhase = "game";
@@ -308,19 +321,19 @@ export default {
       this.timeLeft = data.tiempo || 60; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
     });
 
-    // 10. Evento que notifica un empate en la votación del día y reinicia la votación
+    //12. Evento que notifica un empate en la votación del día y reinicia la votación
     socket.on("empateVotacionDia", (data) => {
       console.log("Primer empate en la votación diaria:", data.mensaje);
       // Muestra mensaje de empate y, si es necesario, resetea la UI para permitir una segunda votación
     });
 
-    // 11. Evento que notifica el segundo empate en la votación del día (ningún jugador es eliminado)
+    //13. Evento que notifica el segundo empate en la votación del día (ningún jugador es eliminado)
     socket.on("segundoEmpateVotacionDia", (data) => {
       console.log("Segundo empate en la votación diaria:", data.mensaje);
       // Muestra mensaje de segundo empate y actualiza la UI para no eliminar a ningún jugador
     });
 
-    // 12. Evento que envía el resultado de la votación del día (quién será eliminado)
+    //14. Evento que envía el resultado de la votación del día (quién será eliminado)
     socket.on("resultadoVotosDia", (data) => {
       console.log("Resultado votación de día:", data.mensaje);
       if (data.jugadorAEliminar) {
@@ -425,8 +438,6 @@ export default {
       );
     },
 
-
-
     startGameFlow() {
       setTimeout(() => {
         this.currentPhase = "role";
@@ -450,7 +461,7 @@ export default {
             this.timeLeft--;
           } else {
             clearInterval(this.countdownInterval);
-            this.endVotingPhase();
+            //TODO: he quitado lo de pasar al endingvoting phase porque lo hago cuando llega el socket de que ha acabado la votacion
           }
         }, 1000);
       }, 6000);
@@ -461,9 +472,9 @@ export default {
       this.isVotingPhase = false;
       this.revealVotes = true;
       this.showVotesProgressively();
-      const maxVotes = Math.max(...this.players.map((p) => p.votes));
-      const winners = this.players.filter((p) => p.votes === maxVotes);
-      this.alguacilWinnerIndex = winners[0]?.id || null;
+      const maxVotes = Math.max(...this.players.map((p) => p.votes)); //TODO: Esto no sé muy bien que es supongo que lo podemos quitar ya
+      const winners = this.players.filter((p) => p.votes === maxVotes); //TODO: Esto no sé muy bien que es //TODO: Esto no sé muy bien que es
+      // this.alguacilWinnerIndex = winners[0]?.id || null; //TODO: Lo he quitado porque lo asignamos en el socket
       this.currentPhase = "alguacil_result";
     },
 
@@ -483,8 +494,8 @@ export default {
       }, 1000);
     },
 
-    handleHabilidadVidente(){
-      this.currentPhase = "vidente_awaken"
+    handleHabilidadVidente() {
+      this.currentPhase = "vidente_awaken";
       setTimeout(() => {
         if (this.isVidente()) {
           this.currentPhase = "vidente_action"; // Cambia a la fase correspondiente
@@ -492,7 +503,7 @@ export default {
         } else {
           this.currentPhase = "ojo_cerrado"; // Cambia a la fase correspondiente para los demás jugadores
         }
-      }, 6000)
+      }, 6000);
     },
 
     /**
@@ -570,7 +581,6 @@ export default {
       }, 3000);
     },
 
-
     handlePassTurn() {
       if (!this.hasPassedTurn && !this.hasDiscoveredRole) {
         this.hasPassedTurn = true;
@@ -625,8 +635,8 @@ export default {
         // Emitir el evento "votar" al servidor con los datos necesarios
         socket.emit("votarAlguacil", {
           idPartida: this.idPartida,
-          idJugador: this.getMyId(),
-          idObjetivo: jugadorObjetivo.id,
+          idJugador: this.getMyId(), // Asegurarse de que sea número
+          idObjetivo: jugadorObjetivo.id.toString(), // Convertir el id del jugador votado a número
         });
 
         this.hasVoted = true;
