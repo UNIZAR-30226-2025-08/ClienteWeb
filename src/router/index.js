@@ -27,7 +27,8 @@ const routes = [
   { path: "/amigos", component: Amigos },
   { path: "/ranking", component: ranking },
   { path: "/partida/:idSala", component: Partida },
-  { path: "/perfil", name: "perfil", component: Perfil },
+  // Modificamos la ruta del perfil para aceptar un parámetro opcional (idUsuario)
+  { path: "/perfil/:idUsuario?", name: "perfil", component: Perfil },
   { path: "/sugerencias", name: "sugerencias", component: Sugerencias },
   {
     path: "/sugerenciasadmin",

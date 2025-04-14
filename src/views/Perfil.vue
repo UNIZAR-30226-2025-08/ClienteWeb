@@ -1,11 +1,11 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { toast } from "vue3-toastify";
 import Volver from "../components/Volver.vue";
-import { useRouter } from "vue-router";
 
-// Importaciones explícitas de avatares
+// Importación de avatares
 import avatar1 from "../assets/avatares/imagenPerfil.webp";
 import avatar2 from "../assets/avatares/imagenPerfil2.webp";
 import avatar3 from "../assets/avatares/imagenPerfil3.webp";
@@ -15,71 +15,59 @@ import avatar6 from "../assets/avatares/imagenPerfil6.webp";
 import avatar7 from "../assets/avatares/imagenPerfil7.webp";
 import avatar8 from "../assets/avatares/imagenPerfil8.webp";
 
+// Mapeo de avatares
+const avatarMap = {
+  avatar1,
+  avatar2,
+  avatar3,
+  avatar4,
+  avatar5,
+  avatar6,
+  avatar7,
+  avatar8,
+};
+
+const route = useRoute();
 const router = useRouter();
 
-// Mapeo corregido usando imports directos
-const avatarMap = {
-  avatar1: avatar1,
-  avatar2: avatar2,
-  avatar3: avatar3,
-  avatar4: avatar4,
-  avatar5: avatar5,
-  avatar6: avatar6,
-  avatar7: avatar7,
-  avatar8: avatar8,
-};
+// Función para obtener el id del usuario logueado (se asume que es un número)
+const getMyId = () => JSON.parse(localStorage.getItem("usuario")).id;
 
-const usuario = JSON.parse(localStorage.getItem("usuario"));
-const nombre = ref(usuario.nombre);
-const avatar = ref(usuario.avatar);
-const rolFavorito = ref(usuario.rolFavorito);
+// Variables para almacenar la información del perfil
+const nombre = ref("");
+const avatar = ref("");
+const rolFavorito = ref("Sin rol favorito");
 
+// Variables para la edición del perfil (solo se usan si es el propio usuario)
 const nuevoNombre = ref("");
 const nuevoAvatar = ref("");
-const nuevoRol = ref("Sin rol favorito");
-const mensajeError = ref("");
-
+const nuevoRol = ref("");
+const errorMensaje = ref("");
 const modalAbierto = ref(false);
 
-const irAAmigos = () => {
-  router.push("/amigos");
-};
+// Variables para el historial de partidas (se usan en ambos casos)
+const partidas = ref([]);
+const partidaSeleccionada = ref(null);
+const mostrarDetalles = ref(false);
 
-const abrirModal = () => {
-  modalAbierto.value = true;
-};
-
-const cerrarModal = () => {
-  modalAbierto.value = false;
-};
-
-onMounted(() => {
-  nuevoNombre.value = nombre.value;
-  nuevoAvatar.value = avatar.value;
-  nuevoRol.value = rolFavorito.value || "Sin rol favorito";
-});
-
+// Función para actualizar el perfil (solo para el perfil propio)
 const actualizarPerfil = async () => {
-  mensajeError.value = "";
-
+  errorMensaje.value = "";
   if (
     nuevoNombre.value === nombre.value &&
     nuevoAvatar.value === avatar.value &&
-    (nuevoRol.value === rolFavorito.value ||
-      (rolFavorito.value == null && nuevoRol.value === "Sin rol favorito"))
+    nuevoRol.value === rolFavorito.value
   ) {
-    mensajeError.value = "No has realizado ningún cambio.";
-    toast.error(mensajeError.value);
+    errorMensaje.value = "No se han realizado cambios";
+    toast.error(errorMensaje.value);
     return;
   }
 
-  const rol = nuevoRol.value === "Sin rol favorito" ? null : nuevoRol.value;
-
   const datosActualizados = {
-    idUsuario: usuario.id,
+    idUsuario: getMyId(),
     nombre: nuevoNombre.value,
     avatar: nuevoAvatar.value,
-    rolFavorito: rol,
+    rolFavorito: nuevoRol.value === "Sin rol favorito" ? null : nuevoRol.value,
   };
 
   try {
@@ -87,172 +75,404 @@ const actualizarPerfil = async () => {
       "/api/usuario/actualizar",
       datosActualizados
     );
-
     if (response.status === 200 && response.data?.usuario) {
-      const datosActualizados2 = {
-        id: usuario.id,
+      const newData = {
+        id: getMyId(),
         nombre: nuevoNombre.value,
         avatar: nuevoAvatar.value,
-        rolFavorito: rol,
+        rolFavorito:
+          nuevoRol.value === "Sin rol favorito" ? null : nuevoRol.value,
       };
-      localStorage.removeItem("usuario");
-      localStorage.setItem("usuario", JSON.stringify(datosActualizados2));
+      localStorage.setItem("usuario", JSON.stringify(newData));
 
-      nombre.value = response.data.usuario.nombre;
-      avatar.value = response.data.usuario.avatar;
-      rolFavorito.value = response.data.usuario.rolFavorito;
+      nombre.value = newData.nombre;
+      avatar.value = newData.avatar;
+      rolFavorito.value = newData.rolFavorito || "Sin rol favorito";
 
       toast.success("Perfil actualizado exitosamente", { autoClose: 3000 });
-      cerrarModal();
+      modalAbierto.value = false;
     } else {
-      mensajeError.value = "Hubo un error al actualizar el perfil";
-      toast.error(mensajeError.value, { autoClose: 3000 });
+      errorMensaje.value = "Error al actualizar el perfil";
+      toast.error(errorMensaje.value);
     }
   } catch (error) {
-    mensajeError.value =
-      error.response?.data?.error ||
-      "Hubo un problema al actualizar el perfil.";
-    toast.error(mensajeError.value, { autoClose: 3000 });
+    errorMensaje.value =
+      error.response?.data?.error || "Error al actualizar el perfil";
+    toast.error(errorMensaje.value);
   }
 };
+
+// Función para obtener el historial de partidas (para cualquier usuario)
+const obtenerHistorialPartidas = async (userId) => {
+  try {
+    const response = await axios.get(`/api/juega/usuario/${userId}`);
+    partidas.value = response.data.map((partida) => {
+      const resultado =
+        (partida.rolJugado === "lobo" && partida.ganadores === "lobos") ||
+        (partida.rolJugado !== "lobo" && partida.ganadores === "aldeanos")
+          ? "Ganada"
+          : "Perdida";
+      return { ...partida, resultado };
+    });
+  } catch (error) {
+    console.error("Error al obtener el historial de partidas:", error);
+    toast.error("No se pudo cargar el historial de partidas.");
+  }
+};
+
+// Función para seleccionar y ver detalles de una partida
+const seleccionarPartida = (partida) => {
+  partidaSeleccionada.value = partida;
+  mostrarDetalles.value = true;
+};
+const cerrarDetalles = () => {
+  mostrarDetalles.value = false;
+};
+
+// Función para cargar el perfil, distinguiendo si es el propio o de un amigo
+const cargarPerfil = async () => {
+  // Convertir ambos IDs a cadena para comparar correctamente
+  const myId = String(getMyId());
+  const paramId = route.params.idUsuario
+    ? String(route.params.idUsuario)
+    : null;
+
+  if (paramId && paramId !== myId) {
+    // Se carga el perfil del amigo utilizando el endpoint POST "obtener_por_id"
+    try {
+      const response = await axios.post("/api/usuario/obtener_por_id", {
+        idUsuario: paramId,
+      });
+      if (response.status === 200 && response.data.usuario) {
+        const userData = response.data.usuario;
+        nombre.value = userData.nombre;
+        avatar.value = userData.avatar || "avatar1";
+        rolFavorito.value = userData.rolFavorito || "Sin rol favorito";
+      } else {
+        toast.error("No se encontró el perfil del usuario.");
+      }
+    } catch (error) {
+      console.error("Error al obtener el perfil del amigo:", error);
+      toast.error("Error al cargar el perfil del usuario.");
+    }
+  } else {
+    // Se muestra el perfil propio, usando la información de localStorage
+    const myData = JSON.parse(localStorage.getItem("usuario") || "{}");
+    nombre.value = myData.nombre || "";
+    avatar.value = myData.avatar || "avatar1";
+    rolFavorito.value = myData.rolFavorito || "Sin rol favorito";
+  }
+
+  // Inicializar los campos de edición solo si es el perfil propio
+  if (!paramId || paramId === myId) {
+    nuevoNombre.value = nombre.value;
+    nuevoAvatar.value = avatar.value;
+    nuevoRol.value = rolFavorito.value;
+  }
+};
+
+// Cargar perfil y el historial al montar
+onMounted(async () => {
+  await cargarPerfil();
+  const idParaHistorial =
+    route.params.idUsuario &&
+    String(route.params.idUsuario) !== String(getMyId())
+      ? route.params.idUsuario
+      : getMyId();
+  obtenerHistorialPartidas(idParaHistorial);
+});
 </script>
 
 <template>
-  <h1 class="cabecera">Perfil</h1>
-
-  <div class="perfil-container">
-    <img :src="avatarMap[avatar]" alt="Avatar" class="avatar" />
-
-    <div class="info-perfil">
-      <h2>
-        Nombre: <span>{{ nombre }}</span>
-      </h2>
-      <h3>
-        Rol Favorito: <span>{{ rolFavorito || "Sin rol favorito" }}</span>
-      </h3>
-      <button @click="abrirModal">Actualizar Perfil</button>
-      <button @click="irAAmigos" class="ver-amigos-btn">Ver mis amigos</button>
-    </div>
-  </div>
-
-  <!-- Modal de edición -->
-  <div v-if="modalAbierto" class="modal-overlay">
-    <div class="modal">
-      <h2>Editar Perfil</h2>
-
-      <form @submit.prevent="actualizarPerfil">
-        <div>
-          <label for="nuevoNombre">Nuevo Nombre:</label>
-          <input v-model="nuevoNombre" type="text" id="nuevoNombre" required />
+  <div class="perfil-page">
+    <!-- Tarjeta de información del usuario -->
+    <div class="user-info-card">
+      <div class="avatar-section">
+        <img :src="avatarMap[avatar]" alt="Avatar" class="avatar-image" />
+      </div>
+      <div class="user-details">
+        <h2 class="user-name">{{ nombre }}</h2>
+        <p class="user-role">
+          Rol Favorito: <strong>{{ rolFavorito || "Sin rol favorito" }}</strong>
+        </p>
+        <!-- Sólo se muestra el botón de actualización si es el propio perfil -->
+        <div
+          class="user-actions"
+          v-if="!route.params.idUsuario || route.params.idUsuario === getMyId()"
+        >
+          <button class="btn edit-btn" @click="modalAbierto = true">
+            Actualizar Perfil
+          </button>
+          <button class="btn friends-btn" @click="$router.push('/amigos')">
+            Ver mis amigos
+          </button>
         </div>
+      </div>
+    </div>
 
-        <div class="avatar-selection">
-          <label>Seleccionar Avatar:</label>
-          <div class="avatar-grid">
-            <div
-              v-for="(avatarUrl, avatarKey) in avatarMap"
-              :key="avatarKey"
-              class="avatar-option"
-              :class="{ selected: nuevoAvatar === avatarKey }"
-              @click="nuevoAvatar = avatarKey"
+    <!-- Sección de historial de partidas -->
+    <div class="profile-history">
+      <h2>Historial de Partidas</h2>
+      <div class="history-table-wrapper">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Modo</th>
+              <th>Resultado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="partida in partidas"
+              :key="partida.idPartida"
+              @click="seleccionarPartida(partida)"
+              style="cursor: pointer"
             >
-              <img :src="avatarUrl" :alt="avatarKey" class="thumbnail" />
+              <td>{{ new Date(partida.fecha).toLocaleDateString() }}</td>
+              <td>
+                {{
+                  partida.tipo.charAt(0).toUpperCase() + partida.tipo.slice(1)
+                }}
+              </td>
+              <td>{{ partida.resultado }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal para ver detalles de la partida -->
+    <div v-if="mostrarDetalles" class="modal-overlay details-modal">
+      <div class="modal-content details-modal-content">
+        <h3>Detalles de la Partida</h3>
+        <p>
+          <strong>Fecha completa:</strong>
+          {{ new Date(partidaSeleccionada.fecha).toLocaleString() }}
+        </p>
+        <p>
+          <strong>Modo:</strong>
+          {{
+            partidaSeleccionada.tipo.charAt(0).toUpperCase() +
+            partidaSeleccionada.tipo.slice(1)
+          }}
+        </p>
+        <p>
+          <strong>Estado:</strong>
+          {{
+            partidaSeleccionada.estado === "en_curso" ? "En curso" : "Terminada"
+          }}
+        </p>
+        <p>
+          <strong>Ganadores:</strong>
+          {{
+            partidaSeleccionada.ganadores
+              ? partidaSeleccionada.ganadores.charAt(0).toUpperCase() +
+                partidaSeleccionada.ganadores.slice(1)
+              : "Sin determinar"
+          }}
+        </p>
+        <p>
+          <strong>Rol Jugado:</strong>
+          {{
+            partidaSeleccionada.rolJugado.charAt(0).toUpperCase() +
+            partidaSeleccionada.rolJugado.slice(1)
+          }}
+        </p>
+        <button class="btn cancel-btn" @click="cerrarDetalles">Cerrar</button>
+      </div>
+    </div>
+
+    <!-- Modal de edición de perfil (solo visible en el perfil propio) -->
+    <div
+      v-if="
+        modalAbierto &&
+        (!route.params.idUsuario || route.params.idUsuario === getMyId())
+      "
+      class="modal-overlay"
+    >
+      <div class="modal-content">
+        <h3>Actualizar Perfil</h3>
+        <form @submit.prevent="actualizarPerfil" class="update-form">
+          <div class="form-group">
+            <label for="nuevoNombre">Nuevo Nombre:</label>
+            <input
+              id="nuevoNombre"
+              v-model="nuevoNombre"
+              type="text"
+              required
+            />
+          </div>
+
+          <div class="form-group avatar-selection">
+            <label>Seleccionar Avatar:</label>
+            <div class="avatar-grid">
+              <div
+                v-for="(img, key) in avatarMap"
+                :key="key"
+                class="avatar-option"
+                :class="{ selected: nuevoAvatar === key }"
+                @click="nuevoAvatar = key"
+              >
+                <img :src="img" :alt="key" class="avatar-thumbnail" />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div>
-          <label for="nuevoRol">Nuevo Rol Favorito:</label>
-          <select v-model="nuevoRol" id="nuevoRol" required>
-            <option value="bruja">Bruja</option>
-            <option value="cazador">Cazador</option>
-            <option value="vidente">Vidente</option>
-            <option value="lobo">Lobo</option>
-            <option value="aldeano">Aldeano</option>
-            <option value="Sin rol favorito">Sin rol favorito</option>
-          </select>
-        </div>
+          <div class="form-group">
+            <label for="nuevoRol">Nuevo Rol Favorito:</label>
+            <select v-model="nuevoRol" id="nuevoRol" required>
+              <option value="bruja">Bruja</option>
+              <option value="cazador">Cazador</option>
+              <option value="vidente">Vidente</option>
+              <option value="lobo">Lobo</option>
+              <option value="aldeano">Aldeano</option>
+              <option value="Sin rol favorito">Sin rol favorito</option>
+            </select>
+          </div>
 
-        <div class="modal-buttons">
-          <button type="submit">Guardar</button>
-          <button type="button" @click="cerrarModal">Cancelar</button>
-        </div>
-      </form>
+          <div class="modal-buttons">
+            <button type="submit" class="btn save-btn">Guardar</button>
+            <button
+              type="button"
+              class="btn cancel-btn"
+              @click="modalAbierto = false"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
 
-  <Volver />
+    <Volver />
+  </div>
 </template>
 
 <style scoped>
-.cabecera {
-  margin-top: 3rem;
+/* Contenedor general de la página de perfil */
+.perfil-page {
+  background-color: #181715;
+  color: #fff;
+  min-height: 100vh;
   padding: 2rem;
-  background-color: #1e1c1a;
-  padding-left: 5rem;
-}
-
-.perfil-container {
-  display: flex;
-  align-items: center;
-  text-align: left;
-  margin: 5rem auto;
-  max-width: 55%;
-  background-color: #1e1c1a;
-  padding: 3rem;
-  padding-left: 5rem;
-  border-radius: 10px;
-}
-
-.avatar {
-  width: 10rem;
-  height: 10rem;
-  border-radius: 50%;
-  margin-right: 3rem;
-}
-
-.info-perfil {
   display: flex;
   flex-direction: column;
+  gap: 2rem;
 }
 
-.info-perfil h2,
-.info-perfil h3 {
-  color: white;
+/* Tarjeta de información del usuario */
+.user-info-card {
+  background-color: #1e1c1a;
+  border-radius: 12px;
+  display: flex;
+  padding: 1.5rem;
+  align-items: center;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-.info-perfil span {
-  font-weight: bold;
+.avatar-section {
+  flex: 0 0 auto;
 }
 
-button {
+.avatar-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+}
+
+.user-details {
+  margin-left: 1.5rem;
+  flex-grow: 1;
+}
+
+.user-name {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.user-role {
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
+}
+
+.user-actions {
   margin-top: 1rem;
-  padding: 0.8rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.btn {
+  padding: 0.75rem 1.25rem;
   border: none;
-  border-radius: 5px;
-  background-color: #2e2e2e;
-  color: white;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
 }
 
-button:hover {
-  background-color: #444;
-}
-.ver-amigos-btn {
-  margin-top: 1rem;
-  padding: 0.8rem;
-  border: none;
-  border-radius: 5px;
-  background-color: #4caf50;
-  color: white;
-  cursor: pointer;
+.edit-btn {
+  background-color: #007bff;
+  color: #fff;
 }
 
-.ver-amigos-btn:hover {
-  background-color: #45a049;
+.edit-btn:hover {
+  background-color: #0056b3;
 }
 
-/* Estilos del modal */
+.friends-btn {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.friends-btn:hover {
+  background-color: #218838;
+}
+
+/* Sección de historial de partidas */
+.profile-history {
+  background-color: #1e1c1a;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.profile-history h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.history-table-wrapper {
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table th,
+.history-table td {
+  padding: 0.75rem 1rem;
+  border: 1px solid #333;
+  text-align: left;
+}
+
+.history-table th {
+  background-color: #333;
+}
+
+.history-table tr:nth-child(even) {
+  background-color: #242424;
+}
+
+.history-table tr:hover {
+  background-color: #3a3a3a;
+}
+
+/* Estilos para el modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -263,64 +483,73 @@ button:hover {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
-.modal {
-  background: #222;
+.modal-content {
+  background-color: #222;
   padding: 2rem;
   border-radius: 12px;
+  width: 90%;
   max-width: 400px;
-  width: 100%;
-  text-align: center;
-  color: white;
-  box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
+  color: #fff;
 }
 
-.modal label {
-  font-weight: bold;
-  display: block;
-  margin-bottom: 0.5rem;
+.details-modal .details-modal-content {
+  max-width: 500px;
+  width: 100%;
+  text-align: left;
 }
 
-.modal input,
-.modal select {
-  width: 100%;
-  padding: 0.8rem;
-  border: 1px solid #444;
-  background: #333;
-  color: white;
-  border-radius: 8px;
+.update-form .form-group {
   margin-bottom: 1rem;
 }
 
-/* Estilos para selección de avatar */
+.update-form label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.update-form input,
+.update-form select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background-color: #333;
+  color: #fff;
+}
+
+/* Selección de avatar en el formulario */
 .avatar-selection {
-  margin: 1rem 0;
+  margin-bottom: 1rem;
 }
 
 .avatar-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-top: 0.5rem;
+  gap: 0.5rem;
 }
 
 .avatar-option {
   border: 2px solid transparent;
   border-radius: 8px;
   cursor: pointer;
-  padding: 4px;
-  transition: all 0.2s;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.avatar-option:hover {
+  transform: scale(1.05);
 }
 
 .avatar-option.selected {
-  border-color: #4a90e2;
-  box-shadow: 0 0 8px rgba(74, 144, 226, 0.5);
+  border-color: #00ff2a;
 }
 
-.thumbnail {
+.avatar-thumbnail {
   width: 100%;
-  height: 80px;
+  height: 100%;
   object-fit: cover;
   border-radius: 4px;
 }
@@ -328,31 +557,28 @@ button:hover {
 .modal-buttons {
   display: flex;
   justify-content: space-between;
+  margin-top: 1.5rem;
 }
 
-.modal-buttons button {
-  margin-top: 1rem;
-  padding: 0.8rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+.save-btn {
+  background-color: #007bff;
+  color: #fff;
+  flex: 1;
+  margin-right: 0.5rem;
 }
 
-.modal-buttons button:first-child {
-  background-color: #1a73e8;
-  color: white;
+.save-btn:hover {
+  background-color: #0056b3;
 }
 
-.modal-buttons button:first-child:hover {
-  background-color: #1258c4;
-}
-
-.modal-buttons button:last-child {
+.cancel-btn {
   background-color: red;
-  color: white;
+  color: #fff;
+  flex: 1;
+  margin-left: 0.5rem;
 }
 
-.modal-buttons button:last-child:hover {
+.cancel-btn:hover {
   background-color: darkred;
 }
 </style>

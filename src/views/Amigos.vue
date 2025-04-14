@@ -7,6 +7,17 @@ import axios from "axios";
 import socket from "../utils/socket"; // Ajusta la ruta según tu proyecto
 import { useRouter } from "vue-router";
 
+// Importación de avatares
+import avatar1 from "../assets/avatares/imagenPerfil.webp";
+import avatar2 from "../assets/avatares/imagenPerfil2.webp";
+import avatar3 from "../assets/avatares/imagenPerfil3.webp";
+import avatar4 from "../assets/avatares/imagenPerfil4.webp";
+import avatar5 from "../assets/avatares/imagenPerfil5.webp";
+import avatar6 from "../assets/avatares/imagenPerfil6.webp";
+import avatar7 from "../assets/avatares/imagenPerfil7.webp";
+import avatar8 from "../assets/avatares/imagenPerfil8.webp";
+import defaultAvatar from "../assets/profile_icon.jpg"; // Avatar por defecto
+
 onBeforeUnmount(() => {
   socket.off("estadoAmigo");
   socket.off("estadoAmigos");
@@ -15,6 +26,18 @@ onBeforeUnmount(() => {
 });
 
 const router = useRouter();
+
+// Mapeo de avatares para amigos
+const avatarMap = {
+  avatar1,
+  avatar2,
+  avatar3,
+  avatar4,
+  avatar5,
+  avatar6,
+  avatar7,
+  avatar8,
+};
 
 // Función para obtener el ID del usuario logueado desde localStorage
 const getUserId = () => {
@@ -213,6 +236,12 @@ const unirseASala = (friendId) => {
   router.push(`/sala/${friend.sala}`);
 };
 
+// Función para visitar el perfil del amigo
+const visitFriendProfile = (friend) => {
+  // Se navega a la ruta /perfil/<idUsuario> del amigo
+  router.push(`/perfil/${friend.idUsuario}`);
+};
+
 onMounted(async () => {
   const idUsuario = getUserId();
   if (!socket.connected) {
@@ -260,6 +289,7 @@ onMounted(async () => {
   <div class="amigos-page">
     <Cabecera titulo="Juega Con Amigos" :compacto="true" />
 
+    <!-- Búsqueda de amigos -->
     <div class="friend-search">
       <input
         type="text"
@@ -271,6 +301,7 @@ onMounted(async () => {
       </button>
     </div>
 
+    <!-- Lista de amigos -->
     <div class="amigos-container">
       <div v-if="loading">Cargando amigos...</div>
       <div v-else-if="error" class="error">{{ error }}</div>
@@ -280,9 +311,10 @@ onMounted(async () => {
           :key="friend.idUsuario"
           class="friend-row"
         >
-          <div class="friend-info">
+          <!-- Al hacer clic en la información del amigo se visita su perfil -->
+          <div class="friend-info" @click="visitFriendProfile(friend)">
             <img
-              :src="friend.avatar || '../assets/profile_icon.jpg'"
+              :src="avatarMap[friend.avatar] || defaultAvatar"
               alt="Icono Amigo"
               class="friend-icon"
             />
@@ -303,6 +335,7 @@ onMounted(async () => {
               </p>
             </div>
           </div>
+
           <div class="friend-buttons">
             <button
               v-if="shouldShowJoinButton(friend)"
@@ -329,6 +362,7 @@ onMounted(async () => {
       </div>
     </div>
 
+    <!-- Modal de confirmación de eliminación -->
     <div v-if="showDeleteModal" class="modal-overlay">
       <div class="modal">
         <h3>Confirmar Eliminación</h3>

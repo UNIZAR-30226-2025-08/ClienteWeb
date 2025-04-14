@@ -297,7 +297,7 @@ const unirseRapido = () => {
             partidaSeleccionada.rolJugado.slice(1)
           }}
         </p>
-        
+
         <button class="cancel-button" @click="cerrarDetalles">Cerrar</button>
       </div>
     </div>
@@ -515,6 +515,10 @@ const unirseRapido = () => {
   border-radius: 0;
   padding: 0;
   margin-left: 20px;
+}
+
+.dark-row td {
+  padding-left: 10px; /* Ajusta el valor a la cantidad de espacio que necesites */
 }
 
 /* Fila clara (ejemplo --) */
