@@ -1,4 +1,4 @@
-// src/router/index.js (o la ruta correspondiente)
+// src/router/index.js
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Home.vue";
 import Register from "../views/Register.vue";
@@ -27,7 +27,7 @@ const routes = [
   { path: "/amigos", component: Amigos },
   { path: "/ranking", component: ranking },
   { path: "/partida/:idSala", component: Partida },
-  // Modificamos la ruta del perfil para aceptar un parámetro opcional (idUsuario)
+  // La ruta de perfil acepta un parámetro opcional
   { path: "/perfil/:idUsuario?", name: "perfil", component: Perfil },
   { path: "/sugerencias", name: "sugerencias", component: Sugerencias },
   {
@@ -42,15 +42,16 @@ const router = createRouter({
   routes,
 });
 
-// Variable global para almacenar la última ruta (desde la que venimos)
-let lastRoute = null;
+// Arreglo global para almacenar el historial de rutas visitadas
+const navigationHistory = [];
 
+// En cada navegación agregamos la ruta "from" al historial
 router.beforeEach((to, from, next) => {
-  // Almacena la ruta "from" para usarla en el botón de volver
-  lastRoute = from;
+  if (from.fullPath) {
+    navigationHistory.push(from.fullPath);
+  }
   next();
 });
 
-// Exportamos tanto router como lastRoute para poder usarlo en otros componentes
-export { router, lastRoute };
+export { router, navigationHistory };
 export default router;

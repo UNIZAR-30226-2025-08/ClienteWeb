@@ -233,6 +233,20 @@ const unirseASala = (friendId) => {
     toast.error("No se pudo obtener la sala del amigo.", { autoClose: 3000 });
     return;
   }
+
+  // Revisar si el usuario ya está en una sala
+  const currentSala = localStorage.getItem("salaActual");
+  if (currentSala) {
+    const parsedSala = JSON.parse(currentSala);
+    const userId = getUserId(); // Función que obtiene el id del usuario logueado
+    // Notificar al backend que te sales de tu sala actual
+    socket.emit("salirDeSala", { idUsuario: userId, idSala: parsedSala.id });
+    // Eliminar la sala actual del localStorage
+    localStorage.removeItem("salaActual");
+    toast.info("Has salido de tu sala actual.", { autoClose: 3000 });
+  }
+
+  // Finalmente, unirte a la sala del amigo
   router.push(`/sala/${friend.sala}`);
 };
 

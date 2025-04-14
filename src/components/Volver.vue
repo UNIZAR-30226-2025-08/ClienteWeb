@@ -6,21 +6,28 @@
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
-// Importamos lastRoute desde el router (ajusta la ruta de importación si es necesario)
-import { lastRoute } from "../router";
+import { useRouter, useRoute } from "vue-router";
+import { navigationHistory } from "../router"; // Ajusta la ruta si es necesario
 
 const router = useRouter();
+const route = useRoute();
 
 const goBack = () => {
-  // Si la última ruta almacenada existe y corresponde a una sala…
-  if (lastRoute && lastRoute.path && lastRoute.path.includes("sala")) {
-    // Forzamos la recarga completa para activar onMounted
-    window.location.href = lastRoute.fullPath;
-  } else {
-    // En cualquier otro caso, usamos la navegación interna
-    router.back();
+  // Si estamos en el perfil, buscamos en el historial una ruta que contenga "/sala"
+  if (route.name === "perfil") {
+    // Buscamos a partir del final del historial (la ruta más antigua en la pila) que contenga "/sala"
+    const salaRoute = navigationHistory
+      .slice()
+      .reverse()
+      .find((path) => path.includes("/sala"));
+    if (salaRoute) {
+      // Si se encontró una ruta de sala, usamos window.location.href para forzar la recarga
+      window.location.href = salaRoute;
+      return;
+    }
   }
+  // En cualquier otro caso, usamos la navegación interna del router
+  router.back();
 };
 </script>
 
