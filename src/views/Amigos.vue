@@ -23,6 +23,8 @@ onBeforeUnmount(() => {
   socket.off("estadoAmigos");
   socket.off("listaSalas");
   socket.off("actualizarSala");
+  socket.off("solicitudAceptada");
+  socket.off("amigoEliminado");
 });
 
 const router = useRouter();
@@ -118,6 +120,12 @@ const confirmDelete = async () => {
     friends.value = friends.value.filter(
       (friend) => friend.idUsuario !== friendToDelete.value
     );
+
+    // Emitir evento 'amigoEliminado' al usuario que fue eliminado
+    socket.emit("amigoEliminado", {
+      idUsuario: String(friendToDelete.value),
+    });
+
     showDeleteModal.value = false;
     friendToDelete.value = null;
   } catch (err) {
@@ -274,6 +282,7 @@ onMounted(async () => {
       amigo.enLinea = en_linea;
     }
   });
+
   socket.on("estadoAmigos", (estadoAmigos) => {
     estadoAmigos.forEach(({ idUsuario, en_linea }) => {
       const amigo = friends.value.find((f) => f.idUsuario === idUsuario);
@@ -287,6 +296,7 @@ onMounted(async () => {
     salas.value = salasRecibidas;
     actualizarEstadoDeAmigos();
   });
+
   socket.on("actualizarSala", (salaActualizada) => {
     const index = salas.value.findIndex((s) => s.id === salaActualizada.id);
     if (index !== -1) {
@@ -295,6 +305,27 @@ onMounted(async () => {
       salas.value.push(salaActualizada);
     }
     actualizarEstadoDeAmigos();
+  });
+
+  // Listeners para actualizar la lista de amigos
+  socket.on("solicitudAceptada", async ({ idUsuario }) => {
+    if (idUsuario === getUserId()) {
+      await fetchFriends();
+      toast.success("¡Nueva solicitud de amistad aceptada!", {
+        autoClose: 3000,
+      });
+    }
+  });
+
+  socket.on("amigoEliminado", async ({ idUsuario }) => {
+    console.log("idUsuario", idUsuario);
+    console.log("getUserId()", getUserId());
+    if (idUsuario === String(getUserId())) {
+      await fetchFriends();
+      toast.info("Un amigo te ha eliminado de su lista", {
+        autoClose: 3000,
+      });
+    }
   });
 });
 </script>

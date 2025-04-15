@@ -88,7 +88,7 @@ export default {
 
     socket.on("nuevaSolicitud", (data) => {
       console.log("Nueva solicitud de amistad:", data);
-      // Ejemplo de actualizar solicitudes o llamar al endpoint correspondiente
+      // Actualizar solicitudes o llamar al endpoint correspondiente
       this.fetchFriendRequests();
       toast.info("Nueva solicitud de amistad recibida", { autoClose: 3000 });
     });
@@ -98,6 +98,7 @@ export default {
     socket.off("estadoAmigo");
     socket.off("estadoAmigos");
     socket.off("nuevaSolicitud");
+    socket.off("solicitudAceptada");
   },
   methods: {
     acceptInvitation() {
@@ -158,6 +159,12 @@ export default {
           idEmisor: solicitud.idUsuarioEmisor,
           idReceptor: this.user.id,
         });
+
+        // Emitir evento 'solicitudAceptada' al usuario que envió la solicitud
+        socket.emit("solicitudAceptada", {
+          idUsuario: solicitud.idUsuarioEmisor,
+        });
+
         this.friendRequests = this.friendRequests.filter(
           (req) => req.idSolicitud !== solicitud.idSolicitud
         );
@@ -196,6 +203,9 @@ export default {
       this.showFeedbackModal = false;
       this.feedbackMessage = "";
       this.feedbackType = "";
+
+      // Recargar la página
+      window.location.reload();
     },
   },
 };
