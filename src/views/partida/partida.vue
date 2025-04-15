@@ -17,6 +17,7 @@
         v-else-if="currentPhase === 'alguacil_result'"
         :winner-index="alguacilWinnerIndex"
       />
+      <AlguacilEmpate v-else-if="currentPhase === 'alguacil_empate'" />
 
       <!-- Overlay de noche -->
       <NocheOverlay v-else-if="currentPhase === 'night'" :visible="true" />
@@ -111,6 +112,7 @@ import EmpiezaOverlay from "../../views/partida/Overlay/InicioPartidaOverlay.vue
 
 import AlguacilOverlay from "../../views/partida/Overlay/VotacionAlguacilOverlay.vue";
 import AlguacilResultOverlay from "../../views/partida/Overlay/ResultadoAlguacilOverlay.vue";
+import AlguacilEmpate from "../../views/partida/Overlay/AlguacilEmpate.vue";
 
 import NocheOverlay from "../../views/partida/Overlay/InicioNocheOverlay.vue";
 import VidenteOverlay from "../../views/partida/Overlay/VidenteOverlay.vue";
@@ -150,6 +152,7 @@ export default {
     EmpiezaOverlay,
     AlguacilOverlay,
     AlguacilResultOverlay,
+    AlguacilEmpate,
     NocheOverlay,
     VidenteOverlay,
     OjoCerradoOverlay,
@@ -162,7 +165,7 @@ export default {
   data() {
     return {
       // Fases posibles:
-      // 'intro', 'role', 'start', 'alguacil_announce', 'game_voting', 'alguacil_result',
+      // 'intro', 'role', 'start', 'alguacil_announce', 'game_voting', 'alguacil_result', 'alguacil_empate',
       // 'night', 'vidente_awaken', 'vidente_action', 'ojo_cerrado', 'game'
       currentPhase: "intro",
       isGameActive: false,
@@ -222,6 +225,7 @@ export default {
         "role",
         "start",
         "alguacil_announce",
+        "alguacil_empate",
         "alguacil_result",
         "night",
         "vidente_awaken",
@@ -256,7 +260,8 @@ export default {
     socket.on("empateVotacionAlguacil", (data) => {
       console.log("Empate en la votación del alguacil:", data.mensaje);
       //TODO: Nico si llega este socket Muestra mensaje de empate y se reinicia la votacion  del alguacil
-      this.flujoVotacionAlguacil();
+      this.flujoVotacionAlguacilEmpate();
+      this.timeLeft = data.tiempo || 30;
       this.isVotingPhase = true;
     });
     //4. Evento que notifica el resultado de la votación del alguacil
@@ -452,6 +457,23 @@ export default {
 
     flujoVotacionAlguacil() {
       this.currentPhase = "alguacil_announce";
+      setTimeout(() => {
+        this.currentPhase = "game_voting";
+        this.isVotingPhase = true;
+        // this.timeLeft = 25;
+        this.countdownInterval = setInterval(() => {
+          if (this.timeLeft > 0) {
+            this.timeLeft--;
+          } else {
+            clearInterval(this.countdownInterval);
+            //TODO: he quitado lo de pasar al endingvoting phase porque lo hago cuando llega el socket de que ha acabado la votacion
+          }
+        }, 1000);
+      }, 6000);
+    },
+
+    flujoVotacionAlguacilEmpate() {
+      this.currentPhase = "alguacil_empate";
       setTimeout(() => {
         this.currentPhase = "game_voting";
         this.isVotingPhase = true;

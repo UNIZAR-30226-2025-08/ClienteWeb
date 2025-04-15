@@ -57,31 +57,31 @@
   <style scoped>
   .chat-container {
     background-color: #262522;
-    width: 350px;
+    width: 18vw;          /* Aproximadamente 350px para 1920px de ancho */
     height: 80vh;
-    border-radius: 10px;
+    border-radius: 1vw;   /* Aproximadamente 10px */
     display: flex;
     flex-direction: column;
     position: fixed;
-    right: 20px;
-    bottom: 20px;
+    right: 1vw;           /* Aproximadamente 20px para 1920px */
+    bottom: 2vh;          /* Aproximadamente 20px para 1080px */
   }
   
   .chat-messages {
     flex: 1;
-    padding: 15px;
+    padding: 1.5vh 1.5vw;
     overflow-y: auto;
     color: white;
   }
   
   .message {
-    margin-bottom: 10px;
+    margin-bottom: 1.5vh;
     word-break: break-word;
   }
   
   .username {
     color: #A2D060;
-    margin-right: 8px;
+    margin-right: 0.5vw;
     font-weight: bold;
   }
   
@@ -91,16 +91,16 @@
   
   .chat-input {
     display: flex;
-    padding: 15px;
-    border-top: 1px solid #3a3a3a;
+    padding: 1.5vh 1.5vw;
+    border-top: 0.2vh solid #3a3a3a;
   }
   
   input {
     flex: 1;
-    padding: 10px;
+    padding: 1vh 1vw;
     border: none;
-    border-radius: 5px;
-    margin-right: 10px;
+    border-radius: 0.5vw;
+    margin-right: 1vw;
     background: #3a3a3a;
     color: white;
   }
@@ -109,8 +109,8 @@
     background-color: #A2D060;
     color: #262522;
     border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 1vh 2vw;
+    border-radius: 0.5vw;
     cursor: pointer;
     font-weight: bold;
   }
@@ -118,4 +118,4 @@
   .send-button:hover {
     background-color: #8fb850;
   }
-  </style>
+  </style>  
