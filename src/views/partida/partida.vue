@@ -27,6 +27,10 @@
         v-else-if="currentPhase === 'vidente_awaken'"
         :visible="true"
       />
+       <!-- NUEVO -->
+      <DespertarBruja v-else-if="currentPhase === 'despertar_bruja'" /> 
+      
+
       <OjoCerradoOverlay
         v-else-if="currentPhase === 'ojo_cerrado'"
         :visible="true"
@@ -62,6 +66,9 @@
         @select-player="selectPlayer"
       />
 
+      <BotonesBruja v-if="currentPhase === 'habilidad_bruja' && isBruja()"  /> <!-- NUEVO -->
+
+      
       <!-- Contador: se muestra en fase "game_voting" y en "vidente_action" -->
       <CountdownTimer v-if="isVotingPhase" :time-left="timeLeft" />
 
@@ -123,6 +130,10 @@ import DiscoverRoleButton from "../../views/partida/Componentes/DiscoverRoleButt
 
 import Chat from "../../views/partida/Componentes/Chat.vue";
 
+import DespertarBruja from "../../views/partida/Overlay/DespertarBruja.vue"; //NUEVO
+import BotonesBruja from "../../views/partida/Componentes/botonesBruja.vue";  // NUEVO
+
+
 // Nuevos overlays para el turno de hombres lobo
 import DespertarHombresLobo from "../../views/partida/Overlay/DespertarHombresLobo.vue";
 import FinTurnoLobos from "../../views/partida/Overlay/FinTurnoLobos.vue";
@@ -161,6 +172,8 @@ export default {
     DespertarHombresLobo,
     FinTurnoLobos,
     EstadoDurmiendo,
+    DespertarBruja, //NUEVO
+    BotonesBruja, // NUEVO
   },
   data() {
     return {
@@ -235,6 +248,7 @@ export default {
         "vidente_awaken",
         "ojo_cerrado",
         "despertar_hombres_lobo",
+        "despertar_bruja", //NUEVO
         "estado_durmiendo",
         "fin_turno_lobos",
       ].includes(this.currentPhase);
@@ -289,7 +303,7 @@ export default {
       console.log("Procesando en cola: turnoHombresLobos", event.data);
       this.handleTurnoHombresLobo(data);
       this.currentPeriod = "NOCHE";
-      this.timeLeft = event.data.tiempo || 30;
+      //this.timeLeft = data.tiempo || 30;
     });
 
     //8. Evento que envía el resultado de los votos de la noche a cada jugador que corresponda
@@ -310,9 +324,17 @@ export default {
     //10. Evento para activar la habilidad de la bruja
     socket.on("habilidadBruja", (data) => {
       console.log("Habilidad de la bruja activada:", data.mensaje);
-      this.currentPhase = //TODO: Desarrollar Bruja;
-        this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
-      // Muestra en la interfaz de la bruja la acción para usar la poción (curar o matar)
+      this.currentPhase = "despertar_bruja" //NUEVO
+      setTimeout(() => {
+        if (this.isBruja()) {
+          this.currentPhase = "habilidad_bruja"; // TODO: que se vea el juego pero con los botones de habilidad nuevos de la bruja
+          this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
+        } else {
+          this.currentPhase = "estado_durmiendo"; // Cambia a la fase correspondiente para los demás jugadores
+        }
+      }, 3000);
+      this.timeLeft = data.tiempo || 30; 
+      
     });
 
     //11. Escuchar evento para pasar al día
@@ -479,6 +501,10 @@ export default {
     // Retorna true si el jugador actual es la Vidente
     isVidente() {
       return this.chosenRole && this.chosenRole.nombre === "Vidente";
+    },
+    //NUEVO
+    isBruja() {
+      return this.chosenRole && this.chosenRole.nombre === "Bruja";
     },
 
     // Devuelve true si el jugador es un Hombre Lobo
