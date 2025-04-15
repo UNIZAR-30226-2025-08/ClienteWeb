@@ -1,9 +1,11 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { toast } from "vue3-toastify";
 import Volver from "../components/Volver.vue";
+import Cabecera from "../components/Cabecera.vue";
+import socket from "../utils/socket";
 
 // Importación de avatares
 import avatar1 from "../assets/avatares/imagenPerfil.webp";
@@ -45,10 +47,10 @@ const nuevoRol = ref("");
 const errorMensaje = ref("");
 const modalAbierto = ref(false);
 
-// Variables para el historial de partidas (se usan en ambos casos)
-const partidas = ref([]);
-const partidaSeleccionada = ref(null);
-const mostrarDetalles = ref(false);
+// Variables para el historial de partidas
+const partidas = ref([]); // Lista de partidas
+const partidaSeleccionada = ref(null); // Partida seleccionada para mostrar detalles
+const mostrarDetalles = ref(false); // Controla la visibilidad del modal de detalles
 
 // Función para actualizar el perfil (solo para el perfil propio)
 const actualizarPerfil = async () => {
@@ -107,11 +109,17 @@ const obtenerHistorialPartidas = async (userId) => {
   try {
     const response = await axios.get(`/api/juega/usuario/${userId}`);
     partidas.value = response.data.map((partida) => {
-      const resultado =
+      let resultado;
+      if (partida.ganadores === "empate") {
+        resultado = "Empate";
+      } else if (
         (partida.rolJugado === "lobo" && partida.ganadores === "lobos") ||
         (partida.rolJugado !== "lobo" && partida.ganadores === "aldeanos")
-          ? "Ganada"
-          : "Perdida";
+      ) {
+        resultado = "Ganada";
+      } else {
+        resultado = "Perdida";
+      }
       return { ...partida, resultado };
     });
   } catch (error) {
@@ -180,171 +188,193 @@ onMounted(async () => {
       ? route.params.idUsuario
       : getMyId();
   obtenerHistorialPartidas(idParaHistorial);
+
+  // Manejo de errores
+  socket.on("error", (mensaje) => {
+    toast.error(mensaje);
+  });
+});
+
+onUnmounted(() => {
+  // Limpiar eventos al desmontar el componente
+  socket.off("error");
 });
 </script>
 
 <template>
-  <div class="perfil-page">
-    <!-- Tarjeta de información del usuario -->
-    <div class="user-info-card">
-      <div class="avatar-section">
-        <img :src="avatarMap[avatar]" alt="Avatar" class="avatar-image" />
-      </div>
-      <div class="user-details">
-        <h2 class="user-name">{{ nombre }}</h2>
-        <p class="user-role">
-          Rol Favorito: <strong>{{ rolFavorito || "Sin rol favorito" }}</strong>
-        </p>
-        <!-- Sólo se muestra el botón de actualización si es el propio perfil -->
-        <div
-          class="user-actions"
-          v-if="!route.params.idUsuario || route.params.idUsuario === getMyId()"
-        >
-          <button class="btn edit-btn" @click="modalAbierto = true">
-            Actualizar Perfil
-          </button>
-          <button class="btn friends-btn" @click="$router.push('/amigos')">
-            Ver mis amigos
-          </button>
+  <div class="perfil-container">
+    <!-- Cabecera oculta para notificaciones -->
+    <div style="display: none">
+      <Cabecera :titulo="'Perfil'" :esAdmin="esAdmin" />
+    </div>
+
+    <div class="perfil-page">
+      <!-- Tarjeta de información del usuario -->
+      <div class="user-info-card">
+        <div class="avatar-section">
+          <img :src="avatarMap[avatar]" alt="Avatar" class="avatar-image" />
         </div>
-      </div>
-    </div>
-
-    <!-- Sección de historial de partidas -->
-    <div class="profile-history">
-      <h2>Historial de Partidas</h2>
-      <div class="history-table-wrapper">
-        <table class="history-table">
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Modo</th>
-              <th>Resultado</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="partida in partidas"
-              :key="partida.idPartida"
-              @click="seleccionarPartida(partida)"
-              style="cursor: pointer"
-            >
-              <td>{{ new Date(partida.fecha).toLocaleDateString() }}</td>
-              <td>
-                {{
-                  partida.tipo.charAt(0).toUpperCase() + partida.tipo.slice(1)
-                }}
-              </td>
-              <td>{{ partida.resultado }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Modal para ver detalles de la partida -->
-    <div v-if="mostrarDetalles" class="modal-overlay details-modal">
-      <div class="modal-content details-modal-content">
-        <h3>Detalles de la Partida</h3>
-        <p>
-          <strong>Fecha completa:</strong>
-          {{ new Date(partidaSeleccionada.fecha).toLocaleString() }}
-        </p>
-        <p>
-          <strong>Modo:</strong>
-          {{
-            partidaSeleccionada.tipo.charAt(0).toUpperCase() +
-            partidaSeleccionada.tipo.slice(1)
-          }}
-        </p>
-        <p>
-          <strong>Estado:</strong>
-          {{
-            partidaSeleccionada.estado === "en_curso" ? "En curso" : "Terminada"
-          }}
-        </p>
-        <p>
-          <strong>Ganadores:</strong>
-          {{
-            partidaSeleccionada.ganadores
-              ? partidaSeleccionada.ganadores.charAt(0).toUpperCase() +
-                partidaSeleccionada.ganadores.slice(1)
-              : "Sin determinar"
-          }}
-        </p>
-        <p>
-          <strong>Rol Jugado:</strong>
-          {{
-            partidaSeleccionada.rolJugado.charAt(0).toUpperCase() +
-            partidaSeleccionada.rolJugado.slice(1)
-          }}
-        </p>
-        <button class="btn cancel-btn" @click="cerrarDetalles">Cerrar</button>
-      </div>
-    </div>
-
-    <!-- Modal de edición de perfil (solo visible en el perfil propio) -->
-    <div
-      v-if="
-        modalAbierto &&
-        (!route.params.idUsuario || route.params.idUsuario === getMyId())
-      "
-      class="modal-overlay"
-    >
-      <div class="modal-content">
-        <h3>Actualizar Perfil</h3>
-        <form @submit.prevent="actualizarPerfil" class="update-form">
-          <div class="form-group">
-            <label for="nuevoNombre">Nuevo Nombre:</label>
-            <input
-              id="nuevoNombre"
-              v-model="nuevoNombre"
-              type="text"
-              required
-            />
-          </div>
-
-          <div class="form-group avatar-selection">
-            <label>Seleccionar Avatar:</label>
-            <div class="avatar-grid">
-              <div
-                v-for="(img, key) in avatarMap"
-                :key="key"
-                class="avatar-option"
-                :class="{ selected: nuevoAvatar === key }"
-                @click="nuevoAvatar = key"
-              >
-                <img :src="img" :alt="key" class="avatar-thumbnail" />
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="nuevoRol">Nuevo Rol Favorito:</label>
-            <select v-model="nuevoRol" id="nuevoRol" required>
-              <option value="bruja">Bruja</option>
-              <option value="cazador">Cazador</option>
-              <option value="vidente">Vidente</option>
-              <option value="lobo">Lobo</option>
-              <option value="aldeano">Aldeano</option>
-            </select>
-          </div>
-
-          <div class="modal-buttons">
-            <button type="submit" class="btn save-btn">Guardar</button>
-            <button
-              type="button"
-              class="btn cancel-btn"
-              @click="modalAbierto = false"
-            >
-              Cancelar
+        <div class="user-details">
+          <h2 class="user-name">{{ nombre }}</h2>
+          <p class="user-role">
+            Rol Favorito:
+            <strong>{{ rolFavorito || "Sin rol favorito" }}</strong>
+          </p>
+          <!-- Sólo se muestra el botón de actualización si es el propio perfil -->
+          <div
+            class="user-actions"
+            v-if="
+              !route.params.idUsuario || route.params.idUsuario === getMyId()
+            "
+          >
+            <button class="btn edit-btn" @click="modalAbierto = true">
+              Actualizar Perfil
+            </button>
+            <button class="btn friends-btn" @click="$router.push('/amigos')">
+              Ver mis amigos
             </button>
           </div>
-        </form>
+        </div>
       </div>
-    </div>
 
-    <Volver />
+      <!-- Sección de historial de partidas -->
+      <div class="profile-history">
+        <h2>Historial de Partidas</h2>
+        <div class="history-table-wrapper">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Modo</th>
+                <th>Resultado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="partida in partidas"
+                :key="partida.idPartida"
+                @click="seleccionarPartida(partida)"
+                style="cursor: pointer"
+              >
+                <td>{{ new Date(partida.fecha).toLocaleDateString() }}</td>
+                <td>
+                  {{
+                    partida.tipo.charAt(0).toUpperCase() + partida.tipo.slice(1)
+                  }}
+                </td>
+                <td>{{ partida.resultado }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Modal para ver detalles de la partida -->
+      <div v-if="mostrarDetalles" class="modal-overlay details-modal">
+        <div class="modal-content details-modal-content">
+          <h3>Detalles de la Partida</h3>
+          <p>
+            <strong>Fecha completa:</strong>
+            {{ new Date(partidaSeleccionada.fecha).toLocaleString() }}
+          </p>
+          <p>
+            <strong>Modo:</strong>
+            {{
+              partidaSeleccionada.tipo.charAt(0).toUpperCase() +
+              partidaSeleccionada.tipo.slice(1)
+            }}
+          </p>
+          <p>
+            <strong>Estado:</strong>
+            {{
+              partidaSeleccionada.estado === "en_curso"
+                ? "En curso"
+                : "Terminada"
+            }}
+          </p>
+          <p>
+            <strong>Ganadores:</strong>
+            {{
+              partidaSeleccionada.ganadores
+                ? partidaSeleccionada.ganadores.charAt(0).toUpperCase() +
+                  partidaSeleccionada.ganadores.slice(1)
+                : "Sin determinar"
+            }}
+          </p>
+          <p>
+            <strong>Rol Jugado:</strong>
+            {{
+              partidaSeleccionada.rolJugado.charAt(0).toUpperCase() +
+              partidaSeleccionada.rolJugado.slice(1)
+            }}
+          </p>
+          <button class="btn cancel-btn" @click="cerrarDetalles">Cerrar</button>
+        </div>
+      </div>
+
+      <!-- Modal de edición de perfil (solo visible en el perfil propio) -->
+      <div
+        v-if="
+          modalAbierto &&
+          (!route.params.idUsuario || route.params.idUsuario === getMyId())
+        "
+        class="modal-overlay"
+      >
+        <div class="modal-content">
+          <h3>Actualizar Perfil</h3>
+          <form @submit.prevent="actualizarPerfil" class="update-form">
+            <div class="form-group">
+              <label for="nuevoNombre">Nuevo Nombre:</label>
+              <input
+                id="nuevoNombre"
+                v-model="nuevoNombre"
+                type="text"
+                required
+              />
+            </div>
+
+            <div class="form-group avatar-selection">
+              <label>Seleccionar Avatar:</label>
+              <div class="avatar-grid">
+                <div
+                  v-for="(img, key) in avatarMap"
+                  :key="key"
+                  class="avatar-option"
+                  :class="{ selected: nuevoAvatar === key }"
+                  @click="nuevoAvatar = key"
+                >
+                  <img :src="img" :alt="key" class="avatar-thumbnail" />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="nuevoRol">Nuevo Rol Favorito:</label>
+              <select v-model="nuevoRol" id="nuevoRol" required>
+                <option value="bruja">Bruja</option>
+                <option value="cazador">Cazador</option>
+                <option value="vidente">Vidente</option>
+                <option value="lobo">Lobo</option>
+                <option value="aldeano">Aldeano</option>
+              </select>
+            </div>
+
+            <div class="modal-buttons">
+              <button type="submit" class="btn save-btn">Guardar</button>
+              <button
+                type="button"
+                class="btn cancel-btn"
+                @click="modalAbierto = false"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <Volver />
+    </div>
   </div>
 </template>
 

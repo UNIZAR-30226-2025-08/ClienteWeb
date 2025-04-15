@@ -29,11 +29,17 @@ const obtenerHistorialPartidas = async () => {
 
     const response = await axios.get(`/api/juega/usuario/${usuario.id}`);
     partidas.value = response.data.map((partida) => {
-      const resultado =
+      let resultado;
+      if (partida.ganadores === "empate") {
+        resultado = "Empate";
+      } else if (
         (partida.rolJugado === "lobo" && partida.ganadores === "lobos") ||
         (partida.rolJugado !== "lobo" && partida.ganadores === "aldeanos")
-          ? "Ganada"
-          : "Perdida";
+      ) {
+        resultado = "Ganada";
+      } else {
+        resultado = "Perdida";
+      }
       return { ...partida, resultado };
     });
   } catch (error) {
@@ -126,7 +132,7 @@ function confirmExit() {
 
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   if (usuario?.id) {
-    // 🔥 Avisamos manualmente al backend antes de cerrar el socket
+    // Avisamos manualmente al backend antes de cerrar el socket
     socket.emit("desconectarUsuario", { idUsuario: usuario.id });
   }
 
