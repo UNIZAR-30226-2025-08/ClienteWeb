@@ -271,7 +271,7 @@ export default {
       this.endVotingPhase(); // Finaliza la votación y muestra el resultado
       this.isVotingPhase = false; // Desactivar la fase de votación
     });
-
+    
     //5. Escuchar evento para el comienzo de la noche
     socket.on("nocheComienza", (data) => {
       console.log("La noche ha comenzado", data);
@@ -286,7 +286,7 @@ export default {
       this.currentPeriod = "NOCHE"; // Cambiar a NOCHE si es necesario(Desconexion jugador? Preguntar a Oscar como lo quiere hacer)
       this.timeLeft = data.tiempo || 15; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
     });
-
+    
     //7. Escuchar evento para el turno de los hombres lobo
     socket.on("turnoHombresLobos", (data) => {
       console.log("Turno de hombres lobos:", data.mensaje);
@@ -498,6 +498,7 @@ export default {
       const winners = this.players.filter((p) => p.votes === maxVotes); //TODO: Esto no sé muy bien que es //TODO: Esto no sé muy bien que es
       // this.alguacilWinnerIndex = winners[0]?.id || null; //TODO: Lo he quitado porque lo asignamos en el socket
       this.currentPhase = "alguacil_result";
+      
     },
 
     /**
@@ -699,6 +700,12 @@ export default {
   filter: brightness(0.4);
 }
 
+/* En vote-message convertimos:
+   - 1.25rem ≈ 20px → ≈2vh (si usamos la altura: 20/1080×100 ≈1.85vh, redondeamos a 2vh)
+   - 2.5rem ≈ 40px → ≈2vw (40/1920×100 ≈2.08vw)
+   - 0.625rem ≈ 10px → ≈0.5vw
+   - 1.5rem ≈ 24px → ≈1.3vw
+   - 1.25rem de box-shadow ≈ 20px → ≈1vw */
 .vote-message {
   position: absolute;
   top: 50%;
@@ -706,21 +713,25 @@ export default {
   transform: translate(-50%, -50%);
   background-color: #262522;
   color: white;
-  padding: 1.25rem 2.5rem;
-  border-radius: 0.625rem;
-  font-size: 1.5rem;
+  padding: 2vh 2vw;
+  border-radius: 0.5vw;
+  font-size: 1.3vw;
   z-index: 1000;
-  box-shadow: 0 0 1.25rem rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 1vw rgba(0, 0, 0, 0.5);
 }
 
-/* Opcional: estilos para el contenedor de los botones de la vidente */
+/* Para .vidente-buttons:
+   - 42rem ≈ 42*16 = 672px → 672/1080×100 ≈ 62vh
+   - 5rem ≈ 80px → 80/1920×100 ≈ 4vw (aproximadamente)
+   - gap: 1rem ≈ 16px → ≈1vw */
 .vidente-buttons {
   position: absolute;
-  top: 42rem; /* Ajusta según necesites */
-  right: 5rem; /* Ajusta según tu layout */
+  top: 62vh;
+  right: 4vw;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1vw;
   z-index: 9999;
 }
 </style>
+
