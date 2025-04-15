@@ -212,6 +212,10 @@ export default {
       hasDiscoveredRole: false,
 
       idPartida: null, // NUEVO: Propiedad para almacenar el ID de la partida
+      
+      // Propiedades para la cola de eventos
+      eventQueue: [],
+      isProcessing: false,
     };
   },
   computed: {
@@ -264,35 +268,25 @@ export default {
       this.timeLeft = data.tiempo || 30;
       this.isVotingPhase = true;
     });
-    //4. Evento que notifica el resultado de la votación del alguacil
-    socket.on("alguacilElegido", (data) => {
-      console.log("Alguacil elegido:", data.mensaje);
-      this.alguacilWinnerIndex = Number(data.alguacil);
-      this.endVotingPhase(); // Finaliza la votación y muestra el resultado
-      this.isVotingPhase = false; // Desactivar la fase de votación
-    });
     
-    //5. Escuchar evento para el comienzo de la noche
-    socket.on("nocheComienza", (data) => {
-      console.log("La noche ha comenzado", data);
-      this.currentPhase = "night";
-      this.currentPeriod = "NOCHE";
+    // 4. Evento: resultado de votación del alguacil
+    socket.on("alguacilElegido", (data) => {
+      this.addEventToQueue({ type: "alguacilElegido", data });
     });
 
-    //6. Escuchar evento para la habilidad de la vidente
-    socket.on("habilidadVidente", (data) => {
-      console.log("Habilidad de la vidente activada:", data.mensaje);
-      this.handleHabilidadVidente();
-      this.currentPeriod = "NOCHE"; // Cambiar a NOCHE si es necesario(Desconexion jugador? Preguntar a Oscar como lo quiere hacer)
-      this.timeLeft = data.tiempo || 15; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
+    // 5. Evento: comienzo de la noche
+    socket.on("nocheComienza", (data) => {
+      this.addEventToQueue({ type: "nocheComienza", data });
     });
-    
-    //7. Escuchar evento para el turno de los hombres lobo
+
+    // 6. Evento: habilidad de la vidente
+    socket.on("habilidadVidente", (data) => {
+      this.addEventToQueue({ type: "habilidadVidente", data });
+    });
+
+    // 7. Evento: turno de los hombres lobo
     socket.on("turnoHombresLobos", (data) => {
-      console.log("Turno de hombres lobos:", data.mensaje);
-      this.handleTurnoHombresLobo(data);
-      this.currentPeriod = "NOCHE"; // Cambiar a NOCHE si es necesario
-      this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
+      this.addEventToQueue({ type: "turnoHombresLobos", data });
     });
 
     //8. Evento que envía el resultado de los votos de la noche a cada jugador que corresponda
@@ -421,6 +415,61 @@ export default {
     clearInterval(this.countdownInterval);
   },
   methods: {
+   // Función auxiliar: pausa la ejecución
+    sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    },
+
+    // Agrega un evento a la cola y, si no se está procesando, comienza a procesarla
+    addEventToQueue(event) {
+      this.eventQueue.push(event);
+      if (!this.isProcessing) {
+        this.processQueue();
+      }
+    },
+
+    // Procesa cada evento en cola con una espera de 5 segundos entre cada uno
+    async processQueue() {
+      this.isProcessing = true;
+      while (this.eventQueue.length > 0) {
+        const event = this.eventQueue.shift();
+        this.processSocketEvent(event);
+        await this.sleep(5000); // Espera 5 segundos
+      }
+      this.isProcessing = false;
+    },
+
+    // Procesa el evento en base a su tipo
+    processSocketEvent(event) {
+      switch (event.type) {
+        case "alguacilElegido":
+          console.log("Procesando en cola: alguacilElegido", event.data);
+          this.alguacilWinnerIndex = Number(event.data.alguacil);
+          this.endVotingPhase();
+          this.isVotingPhase = false;
+          break;
+        case "nocheComienza":
+          console.log("Procesando en cola: nocheComienza", event.data);
+          this.currentPhase = "night";
+          this.currentPeriod = "NOCHE";
+          break;
+        case "habilidadVidente":
+          console.log("Procesando en cola: habilidadVidente", event.data);
+          this.handleHabilidadVidente();
+          this.currentPeriod = "NOCHE";
+          this.timeLeft = event.data.tiempo || 15;
+          break;
+        case "turnoHombresLobos":
+          console.log("Procesando en cola: turnoHombresLobos", event.data);
+          this.handleTurnoHombresLobo(event.data);
+          this.currentPeriod = "NOCHE";
+          this.timeLeft = event.data.tiempo || 30;
+          break;
+        default:
+          console.warn("Evento desconocido en cola", event);
+      }
+    },
+
     addMessage(message) {
       this.chatMessages.push(message); // Agregar mensaje al array de mensajes
     },
