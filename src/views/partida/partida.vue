@@ -286,7 +286,10 @@ export default {
 
     // 7. Evento: turno de los hombres lobo
     socket.on("turnoHombresLobos", (data) => {
-      this.addEventToQueue({ type: "turnoHombresLobos", data });
+      console.log("Procesando en cola: turnoHombresLobos", event.data);
+      this.handleTurnoHombresLobo(data);
+      this.currentPeriod = "NOCHE";
+      this.timeLeft = event.data.tiempo || 30;
     });
 
     //8. Evento que envía el resultado de los votos de la noche a cada jugador que corresponda
@@ -458,12 +461,6 @@ export default {
           this.handleHabilidadVidente();
           this.currentPeriod = "NOCHE";
           this.timeLeft = event.data.tiempo || 15;
-          break;
-        case "turnoHombresLobos":
-          console.log("Procesando en cola: turnoHombresLobos", event.data);
-          this.handleTurnoHombresLobo(event.data);
-          this.currentPeriod = "NOCHE";
-          this.timeLeft = event.data.tiempo || 30;
           break;
         default:
           console.warn("Evento desconocido en cola", event);
