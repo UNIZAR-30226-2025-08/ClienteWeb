@@ -327,7 +327,6 @@ onMounted(async () => {
               <option value="vidente">Vidente</option>
               <option value="lobo">Lobo</option>
               <option value="aldeano">Aldeano</option>
-              <option value="Sin rol favorito">Sin rol favorito</option>
             </select>
           </div>
 
