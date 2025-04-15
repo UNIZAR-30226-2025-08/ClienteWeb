@@ -1,216 +1,3 @@
-<script>
-import avatar1 from "../assets/avatares/imagenPerfil.webp";
-import avatar2 from "../assets/avatares/imagenPerfil2.webp";
-import avatar3 from "../assets/avatares/imagenPerfil3.webp";
-import avatar4 from "../assets/avatares/imagenPerfil4.webp";
-import avatar5 from "../assets/avatares/imagenPerfil5.webp";
-import avatar6 from "../assets/avatares/imagenPerfil6.webp";
-import avatar7 from "../assets/avatares/imagenPerfil7.webp";
-import avatar8 from "../assets/avatares/imagenPerfil8.webp";
-import defaultAvatar from "../assets/profile_icon.jpg"; // Asegúrate de tener esta imagen
-import axios from "axios";
-import { ref, onMounted, onUnmounted, computed } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { toast } from "vue3-toastify";
-
-const route = useRoute();
-const router = useRouter();
-import socket from "../utils/socket"; // Usa la ruta real según tu estructura
-
-export default {
-  name: "Cabecera",
-  props: {
-    titulo: {
-      type: String,
-      default: "Mi Aplicación",
-    },
-    compacto: {
-      type: Boolean,
-      default: false,
-    },
-    esAdmin: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      avatarMap: {
-        avatar1: avatar1,
-        avatar2: avatar2,
-        avatar3: avatar3,
-        avatar4: avatar4,
-        avatar5: avatar5,
-        avatar6: avatar6,
-        avatar7: avatar7,
-        avatar8: avatar8,
-      },
-      user: {},
-      showNotifications: false,
-      friendRequests: [],
-      loadingRequests: false,
-      errorRequests: null,
-      showFeedbackModal: false,
-      feedbackMessage: "",
-      feedbackType: "",
-      toast: null,
-      showToast: false,
-      showInvitationModal: false,
-      invitationData: null,
-    };
-  },
-  created() {
-    const storedUser = localStorage.getItem("usuario");
-    if (storedUser) {
-      this.user = JSON.parse(storedUser);
-      if (!this.user.avatar) {
-        this.user.avatar = "avatar1";
-      }
-    } else {
-      this.user = {
-        nombre: "NombreCuenta",
-        avatar: "avatar1",
-        rolFavorito: "Sin rol favorito",
-      };
-    }
-  },
-  mounted() {
-    socket.on("invitacionSala", (data) => {
-      console.log("Invitación recibida:", data);
-      // Utiliza 'this.' para asignar a las propiedades definidas en data()
-      this.invitationData = data;
-      this.showInvitationModal = true;
-    });
-
-    if (!socket.connected) {
-      socket.connect();
-    }
-
-    socket.on("nuevaSolicitud", (data) => {
-      console.log("Nueva solicitud de amistad:", data);
-      // Actualizar solicitudes o llamar al endpoint correspondiente
-      this.fetchFriendRequests();
-      toast.info("Nueva solicitud de amistad recibida", { autoClose: 3000 });
-    });
-  },
-  beforeUnmount() {
-    socket.off("invitacionSala");
-    socket.off("estadoAmigo");
-    socket.off("estadoAmigos");
-    socket.off("nuevaSolicitud");
-    socket.off("solicitudAceptada");
-  },
-  methods: {
-    acceptInvitation() {
-      const usuario = JSON.parse(localStorage.getItem("usuario"));
-      socket.emit("unirseSala", {
-        idSala: this.invitationData.idSala,
-        usuario,
-        // Si la sala es privada, agrega la contraseña si fuera necesaria:
-        contrasena: null,
-        codigoInvitacion: this.invitationData.codigoInvitacion,
-      });
-      this.showInvitationModal = false;
-      toast.success("Te has unido a la sala");
-      window.location.href = `/sala/${this.invitationData.idSala}`;
-    },
-    rejectInvitation() {
-      socket.emit("invitacionRechazada", {
-        idAmigo: JSON.parse(localStorage.getItem("usuario")).id,
-      });
-      this.showInvitationModal = false;
-      toast.info("Invitación rechazada");
-    },
-    irAlPerfil() {
-      this.$router.push({
-        name: "perfil",
-        query: {
-          nombre: this.user.nombre,
-          avatar: this.user.avatar || "",
-          rolFavorito: this.user.rolFavorito || "Sin rol favorito",
-        },
-      });
-    },
-    toggleNotifications() {
-      this.showNotifications = !this.showNotifications;
-      if (this.showNotifications) {
-        this.fetchFriendRequests();
-      }
-    },
-    async fetchFriendRequests() {
-      this.loadingRequests = true;
-      this.errorRequests = null;
-      try {
-        // Se asume que el endpoint GET /api/solicitud/listar/:idUsuario devuelve { solicitudes: [...] }
-        const response = await axios.get(
-          `/api/solicitud/listar/${this.user.id}`
-        );
-        this.friendRequests = response.data.solicitudes || [];
-      } catch (err) {
-        console.error("Error al obtener solicitudes de amistad:", err);
-        this.errorRequests = "Error al obtener solicitudes de amistad.";
-      } finally {
-        this.loadingRequests = false;
-      }
-    },
-    async acceptRequest(solicitud) {
-      try {
-        await axios.post("/api/solicitud/aceptar", {
-          idEmisor: solicitud.idUsuarioEmisor,
-          idReceptor: this.user.id,
-        });
-
-        // Emitir evento 'solicitudAceptada' al usuario que envió la solicitud
-        socket.emit("solicitudAceptada", {
-          idUsuario: solicitud.idUsuarioEmisor,
-        });
-
-        this.friendRequests = this.friendRequests.filter(
-          (req) => req.idSolicitud !== solicitud.idSolicitud
-        );
-        this.feedbackMessage = "¡Solicitud aceptada! Tienes un nuevo amigo.";
-        this.feedbackType = "success";
-        this.showFeedbackModal = true;
-      } catch (err) {
-        console.error("Error al aceptar solicitud:", err);
-        this.feedbackMessage =
-          "Error al aceptar la solicitud. Inténtalo nuevamente.";
-        this.feedbackType = "error";
-        this.showFeedbackModal = true;
-      }
-    },
-    async rejectRequest(solicitud) {
-      try {
-        await axios.post("/api/solicitud/rechazar", {
-          idEmisor: solicitud.idUsuarioEmisor,
-          idReceptor: this.user.id,
-        });
-        this.friendRequests = this.friendRequests.filter(
-          (req) => req.idSolicitud !== solicitud.idSolicitud
-        );
-        this.feedbackMessage = "Solicitud rechazada.";
-        this.feedbackType = "success";
-        this.showFeedbackModal = true;
-      } catch (err) {
-        console.error("Error al rechazar solicitud:", err);
-        this.feedbackMessage =
-          "Error al rechazar la solicitud. Inténtalo nuevamente.";
-        this.feedbackType = "error";
-        this.showFeedbackModal = true;
-      }
-    },
-    closeFeedbackModal() {
-      this.showFeedbackModal = false;
-      this.feedbackMessage = "";
-      this.feedbackType = "";
-
-      // Recargar la página
-      window.location.reload();
-    },
-  },
-};
-</script>
-
 <template>
   <header class="cabecera">
     <link
@@ -224,17 +11,12 @@ export default {
       <!-- Perfil + notificaciones a la derecha -->
       <div class="perfil-notificaciones">
         <span v-if="esAdmin" class="admin-label">Admin</span>
-        <div
-          class="profile"
-          :class="{ compacto: compacto }"
-          @click="irAlPerfil"
-        >
+        <div class="profile" :class="{ compacto }" @click="irAlPerfil">
           <img
             :src="avatarMap[user.avatar] || defaultAvatar"
             alt="User Icon"
             class="user-icon"
           />
-
           <div class="profile-info">
             <span class="user-name">{{ user.nombre || "NombreCuenta" }}</span>
             <span class="Rol">
@@ -302,26 +84,234 @@ export default {
         <button class="blue-button" @click="closeFeedbackModal">Cerrar</button>
       </div>
     </div>
-  </header>
 
-  <!-- Modal de invitación a sala -->
-  <div v-if="showInvitationModal" class="invitation-modal">
-    <div class="modal-content">
-      <h2>Invitación a Sala</h2>
-      <p>
-        Has sido invitado a unirte a la sala
-        <strong>{{ invitationData?.idSala }}</strong
-        >.
-      </p>
-      <p>Invitación de: {{ invitationData?.idInvitador }}</p>
-      <p>Código: {{ invitationData?.codigoInvitacion }}</p>
-      <div class="modal-buttons">
-        <button class="green-button" @click="acceptInvitation">Aceptar</button>
-        <button class="red-button" @click="rejectInvitation">Rechazar</button>
+    <!-- Modal de invitación a sala -->
+    <div v-if="showInvitationModal" class="invitation-modal">
+      <div class="modal-content">
+        <h2>Invitación a Sala</h2>
+        <p>
+          Has sido invitado a unirte a la sala
+          <strong>{{ invitationData?.idSala }}</strong
+          >.
+        </p>
+        <p>Invitación de: {{ invitationData?.idInvitador }}</p>
+        <p>Código: {{ invitationData?.codigoInvitacion }}</p>
+        <div class="modal-buttons">
+          <button class="green-button" @click="acceptInvitation">
+            Aceptar
+          </button>
+          <button class="red-button" @click="rejectInvitation">Rechazar</button>
+        </div>
       </div>
     </div>
-  </div>
+  </header>
 </template>
+
+<script setup>
+import { ref, onMounted, onUnmounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import axios from "axios";
+import { toast } from "vue3-toastify";
+import socket from "../utils/socket";
+
+import avatar1 from "../assets/avatares/imagenPerfil.webp";
+import avatar2 from "../assets/avatares/imagenPerfil2.webp";
+import avatar3 from "../assets/avatares/imagenPerfil3.webp";
+import avatar4 from "../assets/avatares/imagenPerfil4.webp";
+import avatar5 from "../assets/avatares/imagenPerfil5.webp";
+import avatar6 from "../assets/avatares/imagenPerfil6.webp";
+import avatar7 from "../assets/avatares/imagenPerfil7.webp";
+import avatar8 from "../assets/avatares/imagenPerfil8.webp";
+import defaultAvatar from "../assets/profile_icon.jpg";
+
+// Define las props con defineProps
+const props = defineProps({
+  titulo: { type: String, default: "Mi Aplicación" },
+  compacto: { type: Boolean, default: false },
+  esAdmin: { type: Boolean, default: false },
+});
+
+// Variables reactivas
+const avatarMap = {
+  avatar1,
+  avatar2,
+  avatar3,
+  avatar4,
+  avatar5,
+  avatar6,
+  avatar7,
+  avatar8,
+};
+const user = ref({});
+const showNotifications = ref(false);
+const friendRequests = ref([]);
+const loadingRequests = ref(false);
+const errorRequests = ref(null);
+const showFeedbackModal = ref(false);
+const feedbackMessage = ref("");
+const feedbackType = ref("");
+const showInvitationModal = ref(false);
+const invitationData = ref(null);
+
+// Para poder usar las rutas dentro del setup()
+const route = useRoute();
+const router = useRouter();
+
+// Bandera para evitar actualizaciones tras desmontaje
+const isMounted = ref(true);
+
+// Funciones/métodos
+const fetchFriendRequests = async () => {
+  loadingRequests.value = true;
+  errorRequests.value = null;
+  try {
+    const response = await axios.get(`/api/solicitud/listar/${user.value.id}`);
+    friendRequests.value = response.data.solicitudes || [];
+  } catch (err) {
+    console.error("Error al obtener solicitudes de amistad:", err);
+    errorRequests.value = "Error al obtener solicitudes de amistad.";
+  } finally {
+    loadingRequests.value = false;
+  }
+};
+
+const acceptInvitation = () => {
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  socket.emit("unirseSala", {
+    idSala: invitationData.value.idSala,
+    usuario,
+    contrasena: null,
+    codigoInvitacion: invitationData.value.codigoInvitacion,
+  });
+  showInvitationModal.value = false;
+  toast.success("Te has unido a la sala");
+  window.location.href = `/sala/${invitationData.value.idSala}`;
+};
+
+const rejectInvitation = () => {
+  socket.emit("invitacionRechazada", { idAmigo: user.value.id });
+  showInvitationModal.value = false;
+  toast.info("Invitación rechazada");
+};
+
+const irAlPerfil = () => {
+  router.push({
+    name: "perfil",
+    query: {
+      nombre: user.value.nombre,
+      avatar: user.value.avatar || "",
+      rolFavorito: user.value.rolFavorito || "Sin rol favorito",
+    },
+  });
+};
+
+const toggleNotifications = () => {
+  showNotifications.value = !showNotifications.value;
+  if (showNotifications.value) {
+    fetchFriendRequests();
+  }
+};
+
+const acceptRequest = async (solicitud) => {
+  try {
+    await axios.post("/api/solicitud/aceptar", {
+      idEmisor: solicitud.idUsuarioEmisor,
+      idReceptor: user.value.id,
+    });
+    socket.emit("solicitudAceptada", { idUsuario: solicitud.idUsuarioEmisor });
+    friendRequests.value = friendRequests.value.filter(
+      (req) => req.idSolicitud !== solicitud.idSolicitud
+    );
+    feedbackMessage.value = "¡Solicitud aceptada! Tienes un nuevo amigo.";
+    feedbackType.value = "success";
+    showFeedbackModal.value = true;
+  } catch (err) {
+    console.error("Error al aceptar solicitud:", err);
+    feedbackMessage.value =
+      "Error al aceptar la solicitud. Inténtalo nuevamente.";
+    feedbackType.value = "error";
+    showFeedbackModal.value = true;
+  }
+};
+
+const rejectRequest = async (solicitud) => {
+  try {
+    await axios.post("/api/solicitud/rechazar", {
+      idEmisor: solicitud.idUsuarioEmisor,
+      idReceptor: user.value.id,
+    });
+    friendRequests.value = friendRequests.value.filter(
+      (req) => req.idSolicitud !== solicitud.idSolicitud
+    );
+    feedbackMessage.value = "Solicitud rechazada.";
+    feedbackType.value = "success";
+    showFeedbackModal.value = true;
+  } catch (err) {
+    console.error("Error al rechazar solicitud:", err);
+    feedbackMessage.value =
+      "Error al rechazar la solicitud. Inténtalo nuevamente.";
+    feedbackType.value = "error";
+    showFeedbackModal.value = true;
+  }
+};
+
+const closeFeedbackModal = () => {
+  showFeedbackModal.value = false;
+  feedbackMessage.value = "";
+  feedbackType.value = "";
+  // Opcional: recargar o actualizar lo que necesites
+  window.location.reload();
+};
+
+// Inicialización de usuario a partir de localStorage
+const initUser = () => {
+  const storedUser = localStorage.getItem("usuario");
+  if (storedUser) {
+    user.value = JSON.parse(storedUser);
+    if (!user.value.avatar) {
+      user.value.avatar = "avatar1";
+    }
+  } else {
+    user.value = {
+      nombre: "NombreCuenta",
+      avatar: "avatar1",
+      rolFavorito: "Sin rol favorito",
+    };
+  }
+};
+
+initUser();
+
+onMounted(() => {
+  // Socket events
+  socket.on("invitacionSala", (data) => {
+    if (isMounted.value) {
+      console.log("Invitación recibida:", data);
+      invitationData.value = data;
+      showInvitationModal.value = true;
+    }
+  });
+
+  if (!socket.connected) {
+    socket.connect();
+  }
+
+  socket.on("nuevaSolicitud", (data) => {
+    if (isMounted.value) {
+      console.log("Nueva solicitud de amistad:", data);
+      fetchFriendRequests();
+      toast.info("Nueva solicitud de amistad recibida", { autoClose: 3000 });
+    }
+  });
+});
+
+onUnmounted(() => {
+  isMounted.value = false;
+  socket.off("invitacionSala");
+  socket.off("nuevaSolicitud");
+  // Otros off según sea necesario
+});
+</script>
 
 <style scoped>
 /* CABECERA */
@@ -336,15 +326,15 @@ export default {
 .contenido {
   margin: 0 auto;
   display: flex;
-  justify-content: flex-start; /* Asegura que todo se alinee a la izquierda */
+  justify-content: flex-start;
   align-items: center;
-  width: 98%; /* Asegura que ocupe todo el ancho disponible */
+  width: 98%;
 }
 .contenido h1 {
   margin: 0;
   padding: 0;
   white-space: nowrap;
-  flex-grow: 1; /* Asegura que el título ocupe todo el espacio disponible */
+  flex-grow: 1;
 }
 
 /* PERFIL Y NOTIFICACIONES */
@@ -386,7 +376,7 @@ export default {
   color: #ccc;
 }
 .admin-label {
-  background-color: #e74c3c; /* Color de fondo (por ejemplo, rojo) */
+  background-color: #e74c3c;
   color: #fff;
   font-size: 0.8rem;
   padding: 2px 6px;
@@ -425,7 +415,6 @@ export default {
   padding: 3px 6px;
   font-size: 0.7rem;
 }
-
 /* DESPLEGABLE */
 .notifications-dropdown {
   position: absolute;
@@ -483,7 +472,6 @@ export default {
 .red-button:hover {
   transform: scale(1.05);
 }
-
 /* MODAL DE FEEDBACK */
 .feedback-modal-overlay {
   position: fixed;
@@ -529,7 +517,7 @@ export default {
 .feedback-modal button:hover {
   transform: scale(1.05);
 }
-
+/* MODAL DE INVITACIÓN */
 .invitation-modal {
   position: fixed;
   top: 0;
@@ -542,7 +530,6 @@ export default {
   justify-content: center;
   z-index: 1000;
 }
-
 .modal-content {
   background-color: #262522;
   padding: 20px;
@@ -551,13 +538,11 @@ export default {
   width: 90%;
   max-width: 400px;
 }
-
 .modal-buttons {
   margin-top: 20px;
   display: flex;
   justify-content: space-around;
 }
-
 .green-button {
   background-color: #a2d060;
   border: none;
@@ -566,7 +551,6 @@ export default {
   border-radius: 4px;
   cursor: pointer;
 }
-
 .red-button {
   background-color: #e74c3c;
   border: none;

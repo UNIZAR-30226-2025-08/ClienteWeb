@@ -17,12 +17,17 @@
         />
       </div>
 
-      <!-- Etiqueta con el nombre del jugador, fuera del contenedor de imagen -->
+      <!-- Etiqueta con el nombre del jugador -->
       <span class="player-label">{{ player.nombre }}</span>
 
       <!-- Visualización de los votos (Palitos) -->
       <div class="votes-bar">
-        <div v-for="n in player.votes" :key="n" class="vote-stick"></div>
+        <!-- Convertimos player.votes a número y, si no es un número válido, se usa 0 -->
+        <div
+          v-for="n in Number(player.votes) || 0"
+          :key="n"
+          class="vote-stick"
+        ></div>
       </div>
     </div>
   </div>
@@ -54,17 +59,12 @@ export default {
       this.$emit("select-player", playerId);
     },
     getPlayerPositionStyle(index, totalPlayers) {
-      // Calcula el ángulo para este jugador
       const angle = (360 / totalPlayers) * index;
-      // Define dos radios: uno horizontal (más grande) y uno vertical (más pequeño)
-      const radiusX = 350; // Radio para eje X (más ancho)
-      const radiusY = 300; // Radio para eje Y (más alto)
-      // Convierte ángulo a radianes
+      const radiusX = 350; // Radio para eje X
+      const radiusY = 300; // Radio para eje Y
       const rad = (angle * Math.PI) / 180;
-      // Calcula coordenadas (x, y) usando los radios respectivos
       const x = radiusX * Math.cos(rad);
       const y = radiusY * Math.sin(rad);
-
       return {
         transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
       };
@@ -85,7 +85,6 @@ export default {
 
 .player-icon {
   position: absolute;
-  /* 5.625rem ≈ 90px, 90/1920*100 ≈ 4.7vw */
   width: 4.7vw;
   display: flex;
   flex-direction: column;
@@ -109,7 +108,6 @@ export default {
 .player-label {
   margin-top: 0.5vw;
   color: #000;
-  /* 1.2rem ≈ 19px, ~1vw */
   font-size: 1vw;
   font-weight: bold;
   white-space: nowrap;
@@ -123,7 +121,6 @@ export default {
 }
 
 .vote-stick {
-  /* 0.25rem ≈ 4px → 4/1920*100 ≈ 0.2vw; 1rem ≈ 16px → 16/1920*100 ≈ 0.83vw */
   width: 0.2vw;
   height: 0.8vw;
   background-color: #33ff00;
