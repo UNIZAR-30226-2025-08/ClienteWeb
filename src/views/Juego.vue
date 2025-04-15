@@ -18,6 +18,11 @@ const partidas = ref([]); // Lista de partidas
 const partidaSeleccionada = ref(null); // Partida seleccionada para mostrar detalles
 const mostrarDetalles = ref(false); // Controla la visibilidad del modal de detalles
 
+// Función para obtener el ID del usuario logueado desde localStorage
+const getUserId = () => {
+  return JSON.parse(localStorage.getItem("usuario")).id;
+};
+
 // Función para obtener el historial de partidas
 const obtenerHistorialPartidas = async () => {
   try {
@@ -82,6 +87,8 @@ onMounted(() => {
     toast.success("Conexión exitosa, bienvenido!", { autoClose: 3000 });
     localStorage.removeItem("loginSuccess");
   }
+  const idUsuario = getUserId();
+  socket.emit("registrarUsuario", { idUsuario });
   verificarAdministrador(); // Llamamos a la función de verificación al montar el componente
 
   obtenerHistorialPartidas(); // Cargar el historial de partidas al montar el componente
