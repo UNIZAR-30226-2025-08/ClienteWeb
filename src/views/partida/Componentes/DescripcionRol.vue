@@ -27,37 +27,40 @@
   <style scoped>
   .role-info-panel {
     position: absolute;
-    bottom: 1.25rem;         /*20px;*/
-    left: 1.25rem;         /*20px;*/
+    /* 20px en vertical: 20/1080≈1.85vh, 20px en horizontal: 20/1920≈1.04vw */
+    bottom: 2vh;
+    left: 1vw;
     background-color: #262522;
     color: #fff;
-    padding: 1.25rem;         /*20px;*/;
-    border-radius: 0.625rem;         /*10px;*/
-    width: 26.25rem;         /*420px;*/
-    height: 18.75rem;         /*300px;*/
+    /* Usamos 1vw de padding (aprox. 20px) */
+    padding: 1vw;
+    border-radius: 0.5vw; /* 10px aproximados */
+    /* 420px ≈ 420/1920*100 ≈ 22vw, 300px ≈ 300/1080*100 ≈ 27.8vh */
+    width: 22vw;
+    height: 28vh;
     box-sizing: border-box;
     overflow: auto;
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;         /*10px;*/
+    gap: 0.5vw;
   }
   
   .top-row {
     display: flex;
     align-items: center;
-    gap: 0.9375rem;
+    gap: 0.8vw;
   }
   
   .role-info-image {
-    width: 3.75rem;
-    height: 3.75rem;
+    width: 3vw;      /* 60px ≈ 3.1vw */
+    height: 3vw;
     object-fit: cover;
-    border-radius: 0.3125rem;
+    border-radius: 0.3vw; /* Aproximadamente 5px-6px */
   }
   
   .role-info-title {
     margin: 0;
-    font-size: 2rem;
+    font-size: 1.7vw;  /* 32px ≈ 1.67vw */
     color: #fff;
     font-family: serif;
     text-align: left;
@@ -65,10 +68,11 @@
   
   .role-description {
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.9vw;  /* 16px ≈ 0.83vw, redondeamos a 0.9vw */
     line-height: 1.4;
     color: #eee;
     font-family: sans-serif;
     text-align: justify;
   }
   </style>
+  

@@ -74,64 +74,59 @@ export default {
 </script>
 
 <style scoped>
-/* Contenedor que define la "zona" del círculo */
 .players-circle {
-  position: absolute; /* o relative, según tu necesidad */
-  top: 54%; /* centrado vertical */
-  left: 50%; /* centrado horizontal */
-  width: 0px;
-  height: 0px;
+  position: absolute;
+  top: 54%;
+  left: 50%;
+  width: 0;
+  height: 0;
   transform: translate(-50%, -50%);
 }
 
-/* Cada "jugador" se ubica en posición absoluta dentro del contenedor */
-/* Contenedor del círculo completo */
 .player-icon {
   position: absolute;
-  width: 5.625rem;
-  /* Altura suficiente para el avatar + label (puedes ajustar) */
-  /* Por ejemplo: */
+  /* 5.625rem ≈ 90px, 90/1920*100 ≈ 4.7vw */
+  width: 4.7vw;
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
 }
 
-/* Contenedor exclusivo del avatar */
 .avatar-wrapper {
-  width: 5.625rem;
-  height: 5.625rem;
+  width: 4.7vw;
+  height: 4.7vw;
   border-radius: 50%;
-  overflow: hidden; /* Recorta la imagen al contorno circular */
+  overflow: hidden;
 }
 
-/* Imagen del jugador ocupa todo el contenedor */
 .player-image {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Se asegura de que la imagen llene el contenedor sin deformarse */
+  object-fit: cover;
 }
 
-/* Etiqueta del jugador: se posiciona debajo del avatar */
 .player-label {
-  margin-top: 0.5rem;
+  margin-top: 0.5vw;
   color: #000;
-  font-size: 1.2rem; /* Aumenta este valor para mayor tamaño */
-  font-weight: bold; /* Engrosa el texto */
+  /* 1.2rem ≈ 19px, ~1vw */
+  font-size: 1vw;
+  font-weight: bold;
   white-space: nowrap;
 }
-/* Visualización de los votos */
+
 .votes-bar {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 0.5rem;
+  margin-top: 0.5vw;
 }
 
 .vote-stick {
-  width: 0.25rem;
-  height: 1rem;
+  /* 0.25rem ≈ 4px → 4/1920*100 ≈ 0.2vw; 1rem ≈ 16px → 16/1920*100 ≈ 0.83vw */
+  width: 0.2vw;
+  height: 0.8vw;
   background-color: #33ff00;
-  margin: 0.25rem;
+  margin: 0.2vw;
 }
 </style>

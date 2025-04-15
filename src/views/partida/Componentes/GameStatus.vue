@@ -64,7 +64,8 @@ export default {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 0.625rem 1.25rem;
+  /* 10px ≈ 0.5vw, 20px ≈ 1vw (usando la anchura) */
+  padding: 0.5vw 1vw;
   position: absolute;
   top: 0;
   left: 0;
@@ -74,12 +75,14 @@ export default {
 .section {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
+  gap: 0.5vw;
   background-color: #262522;
   color: white;
-  padding: 0.9375rem 1.875rem;
-  border-radius: 0.625rem;
-  min-width: 11.25rem;
+  /* 15px y 30px aprox.: */
+  padding: 0.8vw 1.6vw;
+  border-radius: 0.5vw;
+  /* 180px ≈ 9.4vw */
+  min-width: 9.5vw;
   max-width: 30%;
   flex-shrink: 0;
 }
@@ -91,16 +94,18 @@ export default {
 }
 
 .icon {
-  width: 2.5rem;
-  height: 2.5rem;
+  /* 40px ≈ 2.1vw */
+  width: 2.1vw;
+  height: 2.1vw;
 }
 
 .status-text {
   display: flex;
   flex-direction: column;
-  font-size: 1rem;
+  font-size: 0.9vw;  /* ~16px */
   white-space: nowrap;
   font-weight: bold;
   text-align: center;
 }
 </style>
+

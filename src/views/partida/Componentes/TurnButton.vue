@@ -30,17 +30,20 @@
   .turn-button {
     background-color: #262522;
     color: #fff;
-    font-size: 1rem;
-    padding: 0.75rem 1.875rem;
-    border: 0.125rem solid #fff;
-    border-radius: 0.5rem;
+    /* 1rem ~ 16px -> 0.83vw */
+    font-size: 0.9vw;
+    /* 0.75rem ≈ 12px → 0.63vw, 1.875rem ≈ 30px → 1.56vw */
+    padding: 0.65vw 1.6vw;
+    /* 0.125rem ≈ 2px → 0.1vw */
+    border: 0.1vw solid #fff;
+    border-radius: 0.5vw;
     cursor: pointer;
     transition: all 0.2s;
     font-family: sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.5vw;
     width: 15%;
     text-align: center;
   }
@@ -50,8 +53,9 @@
   }
   
   .candado-icon {
-    width: 1.25rem;
-    height: 1.25rem;
+    /* 1.25rem ≈ 20px → 1vw */
+    width: 1vw;
+    height: 1vw;
   }
   
   .turn-button.active {
@@ -63,5 +67,5 @@
     opacity: 0.6;
     cursor: not-allowed;
   }
-  </style>
+  </style>  
   

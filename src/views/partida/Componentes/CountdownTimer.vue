@@ -21,13 +21,15 @@
   <style scoped>
   .countdown-container {
     position: absolute;
-    left: 3.75rem;           /*60px;*/
-    top: 9.375rem;           /*150px;*/
+    /* 60px ≈ (60/1920)*100 ≈ 3.1vw, 150px ≈ (150/1080)*100 ≈ 13.9vh */
+    left: 3.2vw;
+    top: 14vh;
   }
   
   .countdown-circle {
-    width: 6.25rem;         /*100px;*/
-    height: 6.25rem;         /*100px;*/
+    /* 100px ≈ (100/1920)*100 ≈ 5.2vw */
+    width: 5.2vw;
+    height: 5.2vw;
     background-color: #262522;
     border-radius: 50%;
     display: flex;
@@ -37,8 +39,10 @@
   
   .countdown-text {
     color: #fff;
-    font-size: 2rem;
+    /* 32px ≈ (32/1920)*100 ≈ 1.67vw */
+    font-size: 1.7vw;
     font-weight: bold;
     font-family: sans-serif;
   }
   </style>
+  
