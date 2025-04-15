@@ -151,11 +151,16 @@ const shouldShowInviteButton = (friend) => {
 };
 
 // Función que devuelve verdadero si se debe mostrar el botón de UNIRSE.
-// Se muestra si el amigo está en una sala y esa sala es distinta a la tuya
+// Se muestra si el amigo está en una sala pública y esa sala es distinta a la tuya
 // (o si tú no estás en una sala).
 const shouldShowJoinButton = (friend) => {
   const salaActual = getSalaActual();
   if (!friend.enSala) return false;
+
+  // Buscar la sala del amigo en la lista de salas
+  const salaAmigo = salas.value.find((s) => s.id === friend.sala);
+  if (!salaAmigo || salaAmigo.tipo !== "publica") return false; // No mostrar si la sala es privada o no existe
+
   if (!salaActual) return true;
   return friend.sala !== salaActual.id;
 };
