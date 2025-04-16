@@ -36,9 +36,8 @@
         v-else-if="currentPhase === 'vidente_awaken'"
         :visible="true"
       />
-       <!-- NUEVO -->
-      <DespertarBruja v-else-if="currentPhase === 'despertar_bruja'" /> 
-      
+      <!-- NUEVO -->
+      <DespertarBruja v-else-if="currentPhase === 'despertar_bruja'" />
 
       <OjoCerradoOverlay
         v-else-if="currentPhase === 'ojo_cerrado'"
@@ -75,9 +74,9 @@
         @select-player="selectPlayer"
       />
 
-      <BotonesBruja v-if="currentPhase === 'habilidad_bruja' && isBruja()"  /> <!-- NUEVO -->
+      <BotonesBruja v-if="currentPhase === 'habilidad_bruja' && isBruja()" />
+      <!-- NUEVO -->
 
-      
       <!-- Contador: se muestra en fase "game_voting" y en "vidente_action" -->
       <CountdownTimer v-if="isVotingPhase" :time-left="timeLeft" />
 
@@ -140,8 +139,7 @@ import DiscoverRoleButton from "../../views/partida/Componentes/DiscoverRoleButt
 import Chat from "../../views/partida/Componentes/Chat.vue";
 
 import DespertarBruja from "../../views/partida/Overlay/DespertarBruja.vue"; //NUEVO
-import BotonesBruja from "../../views/partida/Componentes/botonesBruja.vue";  // NUEVO
-
+import BotonesBruja from "../../views/partida/Componentes/botonesBruja.vue"; // NUEVO
 
 // Nuevos overlays para el turno de hombres lobo
 import DespertarHombresLobo from "../../views/partida/Overlay/DespertarHombresLobo.vue";
@@ -234,7 +232,7 @@ export default {
       hasDiscoveredRole: false,
 
       idPartida: null, // NUEVO: Propiedad para almacenar el ID de la partida
-      
+
       // Propiedades para la cola de eventos
       eventQueue: [],
       isProcessing: false,
@@ -297,7 +295,7 @@ export default {
       this.timeLeft = data.tiempo || 30;
       this.isVotingPhase = true;
     });
-    
+
     // 4. Evento: resultado de votación del alguacil
     socket.on("alguacilElegido", (data) => {
       this.addEventToQueue({ type: "alguacilElegido", data });
@@ -320,7 +318,7 @@ export default {
       // Mostrar el modal con la información recibida y esperar antes de cerrar
       this.showRevelationModal(`${data.mensaje}`);
     });
-    
+
     // 7. Evento: turno de los hombres lobo
     socket.on("turnoHombresLobos", (data) => {
       console.log("Procesando en cola: turnoHombresLobos", event.data);
@@ -347,7 +345,7 @@ export default {
     //10. Evento para activar la habilidad de la bruja
     socket.on("habilidadBruja", (data) => {
       console.log("Habilidad de la bruja activada:", data.mensaje);
-      this.currentPhase = "despertar_bruja" //NUEVO
+      this.currentPhase = "despertar_bruja"; //NUEVO
       setTimeout(() => {
         if (this.isBruja()) {
           this.currentPhase = "habilidad_bruja"; // TODO: que se vea el juego pero con los botones de habilidad nuevos de la bruja
@@ -356,8 +354,7 @@ export default {
           this.currentPhase = "estado_durmiendo"; // Cambia a la fase correspondiente para los demás jugadores
         }
       }, 3000);
-      this.timeLeft = data.tiempo || 30; 
-      
+      this.timeLeft = data.tiempo || 30;
     });
 
     //11. Escuchar evento para pasar al día
@@ -463,7 +460,7 @@ export default {
     clearInterval(this.countdownInterval);
   },
   methods: {
-   // Función auxiliar: pausa la ejecución
+    // Función auxiliar: pausa la ejecución
     sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
@@ -593,7 +590,6 @@ export default {
       const winners = this.players.filter((p) => p.votes === maxVotes); //TODO: Esto no sé muy bien que es //TODO: Esto no sé muy bien que es
       // this.alguacilWinnerIndex = winners[0]?.id || null; //TODO: Lo he quitado porque lo asignamos en el socket
       this.currentPhase = "alguacil_result";
-      
     },
 
     /**
@@ -760,7 +756,6 @@ export default {
       this.players.forEach((p) => (p.votes = 0));
     },
 
-
     getRandomRole() {
       const validRoles = roles.filter(
         (role) => role.nombre.toLowerCase() !== "alguacil"
@@ -821,7 +816,6 @@ export default {
   z-index: 9999;
 }
 
-
 /* Estilos para el modal de Vidente revelación */
 .modal-overlay {
   position: fixed;
@@ -845,4 +839,3 @@ export default {
   max-width: 80%;
 }
 </style>
-

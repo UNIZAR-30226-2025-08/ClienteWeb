@@ -174,6 +174,7 @@ const initUser = () => {
 initUser();
 
 onMounted(() => {
+  toggleNotifications(); // Cargar solicitudes al montar el componente
   // Socket events
   socket.on("invitacionSala", (data) => {
     if (isMounted.value) {
