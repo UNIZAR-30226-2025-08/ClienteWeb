@@ -749,7 +749,7 @@ export default {
         // Permite la selección de un jugador. Se utiliza una variable de control separada según la fase.
     selectPlayer(playerId) {
       // Si no estamos en fase de votación o en la fase de vidente, no se permite seleccionar
-      if (!this.isVotingPhase && this.currentPhase !== "vidente_action" ) {
+      if (!this.isVotingPhase && this.currentPhase !== "vidente_action" && this.currentPhase !== "habilidad_bruja") {
         return;
       }
       // En la fase de votación del alguacil, verifica si ya se ha votado
@@ -760,7 +760,6 @@ export default {
       if (this.currentPhase === "vidente_action" && this.hasVidenteActed) {
         return;
       }
-      // TODO: Se debe de hacer un if para ver en la fase de la bruja, verificar si ya ha usado habilidades.
 
       // Alterna la selección del jugador
       this.selectedPlayerIndex =
