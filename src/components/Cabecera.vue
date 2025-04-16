@@ -1,112 +1,3 @@
-<template>
-  <header class="cabecera">
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-    />
-    <div class="contenido">
-      <!-- Título a la izquierda -->
-      <h1>{{ titulo }}</h1>
-
-      <!-- Perfil + notificaciones a la derecha -->
-      <div class="perfil-notificaciones">
-        <span v-if="esAdmin" class="admin-label">Admin</span>
-        <div class="profile" :class="{ compacto }" @click="irAlPerfil">
-          <img
-            :src="avatarMap[user.avatar] || defaultAvatar"
-            alt="User Icon"
-            class="user-icon"
-          />
-          <div class="profile-info">
-            <span class="user-name">{{ user.nombre || "NombreCuenta" }}</span>
-            <span class="Rol">
-              Rol favorito: {{ user.rolFavorito || "Sin rol favorito" }}
-            </span>
-          </div>
-        </div>
-        <div class="notifications">
-          <button class="notification-button" @click="toggleNotifications">
-            <img
-              src="../assets/noti_icon.png"
-              alt="Notificaciones"
-              class="notification-icon"
-            />
-            <span class="badge" v-if="friendRequests.length > 0">
-              {{ friendRequests.length }}
-            </span>
-          </button>
-          <!-- Desplegable de notificaciones -->
-          <div class="notifications-dropdown" v-if="showNotifications">
-            <div v-if="loadingRequests">Cargando solicitudes...</div>
-            <div v-else-if="errorRequests" class="error">
-              {{ errorRequests }}
-            </div>
-            <div v-else>
-              <template v-if="friendRequests.length > 0">
-                <div
-                  v-for="solicitud in friendRequests"
-                  :key="solicitud.idSolicitud"
-                  class="notification-item"
-                >
-                  <p>
-                    Solicitud de amistad de
-                    <strong>{{ solicitud.nombreEmisor }}</strong>
-                  </p>
-                  <div class="request-buttons">
-                    <button
-                      class="green-button"
-                      @click="acceptRequest(solicitud)"
-                    >
-                      Aceptar
-                    </button>
-                    <button
-                      class="red-button"
-                      @click="rejectRequest(solicitud)"
-                    >
-                      Rechazar
-                    </button>
-                  </div>
-                </div>
-              </template>
-              <template v-else>
-                <p>No hay solicitudes de amistad.</p>
-              </template>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal de feedback -->
-    <div v-if="showFeedbackModal" class="feedback-modal-overlay">
-      <div class="feedback-modal">
-        <p :class="feedbackType">{{ feedbackMessage }}</p>
-        <button class="blue-button" @click="closeFeedbackModal">Cerrar</button>
-      </div>
-    </div>
-
-    <!-- Modal de invitación a sala -->
-    <div v-if="showInvitationModal" class="invitation-modal">
-      <div class="modal-content">
-        <h2>Invitación a Sala</h2>
-        <p>
-          Has sido invitado a unirte a la sala
-          <strong>{{ invitationData?.idSala }}</strong
-          >.
-        </p>
-        <p>Invitación de: {{ invitationData?.idInvitador }}</p>
-        <p>Código: {{ invitationData?.codigoInvitacion }}</p>
-        <div class="modal-buttons">
-          <button class="green-button" @click="acceptInvitation">
-            Aceptar
-          </button>
-          <button class="red-button" @click="rejectInvitation">Rechazar</button>
-        </div>
-      </div>
-    </div>
-  </header>
-</template>
-
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -312,6 +203,115 @@ onUnmounted(() => {
   // Otros off según sea necesario
 });
 </script>
+
+<template>
+  <header class="cabecera">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <div class="contenido">
+      <!-- Título a la izquierda -->
+      <h1>{{ titulo }}</h1>
+
+      <!-- Perfil + notificaciones a la derecha -->
+      <div class="perfil-notificaciones">
+        <span v-if="esAdmin" class="admin-label">Admin</span>
+        <div class="profile" :class="{ compacto }" @click="irAlPerfil">
+          <img
+            :src="avatarMap[user.avatar] || defaultAvatar"
+            alt="User Icon"
+            class="user-icon"
+          />
+          <div class="profile-info">
+            <span class="user-name">{{ user.nombre || "NombreCuenta" }}</span>
+            <span class="Rol">
+              Rol favorito: {{ user.rolFavorito || "Sin rol favorito" }}
+            </span>
+          </div>
+        </div>
+        <div class="notifications">
+          <button class="notification-button" @click="toggleNotifications">
+            <img
+              src="../assets/noti_icon.png"
+              alt="Notificaciones"
+              class="notification-icon"
+            />
+            <span class="badge" v-if="friendRequests.length > 0">
+              {{ friendRequests.length }}
+            </span>
+          </button>
+          <!-- Desplegable de notificaciones -->
+          <div class="notifications-dropdown" v-if="showNotifications">
+            <div v-if="loadingRequests">Cargando solicitudes...</div>
+            <div v-else-if="errorRequests" class="error">
+              {{ errorRequests }}
+            </div>
+            <div v-else>
+              <template v-if="friendRequests.length > 0">
+                <div
+                  v-for="solicitud in friendRequests"
+                  :key="solicitud.idSolicitud"
+                  class="notification-item"
+                >
+                  <p>
+                    Solicitud de amistad de
+                    <strong>{{ solicitud.nombreEmisor }}</strong>
+                  </p>
+                  <div class="request-buttons">
+                    <button
+                      class="green-button"
+                      @click="acceptRequest(solicitud)"
+                    >
+                      Aceptar
+                    </button>
+                    <button
+                      class="red-button"
+                      @click="rejectRequest(solicitud)"
+                    >
+                      Rechazar
+                    </button>
+                  </div>
+                </div>
+              </template>
+              <template v-else>
+                <p>No hay solicitudes de amistad.</p>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de feedback -->
+    <div v-if="showFeedbackModal" class="feedback-modal-overlay">
+      <div class="feedback-modal">
+        <p :class="feedbackType">{{ feedbackMessage }}</p>
+        <button class="blue-button" @click="closeFeedbackModal">Cerrar</button>
+      </div>
+    </div>
+
+    <!-- Modal de invitación a sala -->
+    <div v-if="showInvitationModal" class="invitation-modal">
+      <div class="modal-content">
+        <h2>Invitación a Sala</h2>
+        <p>
+          Has sido invitado a unirte a la sala
+          <strong>{{ invitationData?.idSala }}</strong
+          >.
+        </p>
+        <p>Invitación de: {{ invitationData?.idInvitador }}</p>
+        <p>Código: {{ invitationData?.codigoInvitacion }}</p>
+        <div class="modal-buttons">
+          <button class="green-button" @click="acceptInvitation">
+            Aceptar
+          </button>
+          <button class="red-button" @click="rejectInvitation">Rechazar</button>
+        </div>
+      </div>
+    </div>
+  </header>
+</template>
 
 <style scoped>
 /* CABECERA */
