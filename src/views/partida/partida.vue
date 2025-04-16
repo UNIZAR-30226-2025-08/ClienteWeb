@@ -58,6 +58,11 @@
       />
       <EstadoDurmiendo v-else-if="currentPhase === 'estado_durmiendo'" />
       <FinTurnoLobos v-else-if="currentPhase === 'fin_turno_lobos'" />
+
+      <MuertesDuranteNocheOverlay 
+        v-else-if="currentPhase === 'recuento_muertes'" 
+        :victimas="victimas" 
+      />
     </template>
 
     <!-- Cuando no es fase overlay se muestra el contenido principal -->
@@ -168,6 +173,8 @@ import DespertarHombresLobo from "../../views/partida/Overlay/DespertarHombresLo
 import FinTurnoLobos from "../../views/partida/Overlay/FinTurnoLobos.vue";
 import EstadoDurmiendo from "./Overlay/EstadoDurmiendo.vue";
 
+import MuertesDuranteNocheOverlay from "./Overlay/MuertesDuranteNocheOverlay.vue";
+
 import avatar1 from "../../assets/avatares/imagenPerfil.webp";
 import avatar2 from "../../assets/avatares/imagenPerfil2.webp";
 import avatar3 from "../../assets/avatares/imagenPerfil3.webp";
@@ -207,6 +214,7 @@ export default {
     BotonBrujaMuerte,
     PocionMuerteUsadaOverlay,
     PocimaVidaUsadaOverlay,
+    MuertesDuranteNocheOverlay,
   },
   data() {
     return {
@@ -276,6 +284,8 @@ export default {
 
       pocionVidaMessage: "",
       pocionVidaUsada: false,
+
+      victimas: [] 
     };
   },
   computed: {
@@ -299,7 +309,8 @@ export default {
         "estado_durmiendo",
         "fin_turno_lobos",
         "pocion_muerte_usada",
-        "pocion_vida_usada"
+        "pocion_vida_usada",
+        "recuento_muertes"
       ].includes(this.currentPhase);
     },
   },
@@ -398,9 +409,24 @@ export default {
     //11. Escuchar evento para pasar al día
     socket.on("diaComienza", (data) => {
       console.log("El día ha comenzado", data);
-      this.currentPhase = "game";
-      this.currentPeriod = "DÍA";
-      this.timeLeft = data.tiempo || 60; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
+
+      if (data.victimas && data.victimas.length > 0) {
+        this.victimas = data.victimas;
+        // Cambia a la fase para mostrar el overlay con el resumen de la noche
+        this.currentPhase = "dia_comienza";
+        // Después de 5 segundos, vuelve a la fase de juego y asigna el tiempo del día
+        setTimeout(() => {
+          this.currentPhase = "game";
+          this.currentPeriod = "DÍA";
+          this.timeLeft = data.tiempo || 60;
+        }, 5000);
+      } else {
+        // Si no hay víctimas para mostrar, simplemente inicia la fase de juego
+        this.currentPhase = "game";
+        this.currentPeriod = "DÍA";
+        this.timeLeft = data.tiempo || 60;
+      }
+      
     });
 
     //12. Evento que notifica un empate en la votación del día y reinicia la votación
