@@ -4,6 +4,15 @@
     class="partida-container"
     :class="{ 'modo-noche': currentPeriod === 'NOCHE' }"
   >
+    <!-- Modal para mostrar la revelación de la vidente -->
+    <div v-if="isModalVisible" class="modal-overlay" @click="closeModal">
+      <div class="modal-content" @click.stop>
+        <h3>Revelación de la Vidente</h3>
+        <p>{{ revelationMessage }}</p>
+        <button @click="closeModal">Cerrar</button>
+      </div>
+    </div>
+
     <!-- Si la fase actual es tratada como overlay, se muestran sólo los overlays -->
     <template v-if="isOverlayActive">
       <!-- Overlays iniciales -->
@@ -229,6 +238,12 @@ export default {
       // Propiedades para la cola de eventos
       eventQueue: [],
       isProcessing: false,
+
+      //*****MODAL VIDENTE */
+      messageInput: "",
+      isModalVisible: false,
+      revelationMessage: "",
+      //**********************//
     };
   },
   computed: {
@@ -298,6 +313,14 @@ export default {
       this.addEventToQueue({ type: "habilidadVidente", data });
     });
 
+    // Evento que recibes para saber rol del jugador antes de los lobos
+    // Listener para el resultado de la acción de la vidente (revelación)
+    socket.on("visionJugador", (data) => {
+      console.log("Resultado de la revelación de la vidente:", data.mensaje);
+      // Mostrar el modal con la información recibida y esperar antes de cerrar
+      this.showRevelationModal(`${data.mensaje}`);
+    });
+    
     // 7. Evento: turno de los hombres lobo
     socket.on("turnoHombresLobos", (data) => {
       console.log("Procesando en cola: turnoHombresLobos", event.data);
@@ -601,49 +624,6 @@ export default {
       }, 6000);
     },
 
-    /**
-     * Encapsula TODO el proceso de la noche:
-     * 1) Se muestra el overlay "night" y se activa el modo NOCHE.
-     * 2) Se muestra el overlay "vidente_awaken" para TODOS.
-     * 3) Luego:
-     *    - Si el jugador es la Vidente, se cambia a la fase "vidente_action" (contenido principal) y se inicia un countdown de 40 s,
-     *      mostrando además los botones "Pasar turno" y "Descubrir rol".
-     *    - Si no es la Vidente, se muestra el overlay "ojo_cerrado" durante 40 s.
-     * 4) Al finalizar, se vuelve a la fase "game" y se reinicia el estado.
-     */
-    startNightSequence() {
-      // 1) Mostrar overlay de noche y activar modo NOCHE
-      this.currentPhase = "night";
-      this.currentPeriod = "NOCHE";
-      setTimeout(() => {
-        // 2) Mostrar overlay "vidente_awaken" para TODOS
-        this.currentPhase = "vidente_awaken";
-        setTimeout(() => {
-          // 3) Diferenciar según el rol:
-          if (this.isVidente()) {
-            // Si es la Vidente, pasar a "vidente_action" y mostrar el contador de 40 s
-            this.currentPhase = "vidente_action";
-            // Inicializamos las propiedades para los botones
-            this.hasPassedTurn = false;
-            this.hasDiscoveredRole = false;
-            this.isVotingPhase = true; // Para mostrar el CountdownTimer
-            this.timeLeft = 40;
-            this.startCountdown(() => {
-              // Si se agota el tiempo sin acción, finalizamos la acción de la vidente
-              this.finishVidenteAction();
-            });
-          } else {
-            // Si no es la Vidente, se muestra el overlay "ojo_cerrado" durante 40 s
-            this.currentPhase = "ojo_cerrado";
-            setTimeout(() => {
-              this.resetVotingState();
-              this.currentPhase = "game";
-            }, 40000);
-          }
-        }, 6000);
-      }, 6000);
-    },
-
     finishVidenteAction() {
       this.isVotingPhase = false;
       this.resetVotingState();
@@ -686,10 +666,37 @@ export default {
 
     handleDiscoverRole() {
       if (!this.hasDiscoveredRole && !this.hasPassedTurn) {
-        this.hasDiscoveredRole = true;
-        // Aquí podrías agregar lógica para revelar el rol de algún jugador
-        this.finishVidenteAction();
+        if (this.selectedPlayerIndex) {
+          socket.emit("videnteRevela", {
+            idPartida: this.idPartida,
+            idJugador: this.getMyId(),
+            idObjetivo: this.selectedPlayerIndex,
+          });
+          this.hasDiscoveredRole = true;
+          this.selectedPlayerIndex = null;
+          // No se cierra la fase inmediatamente, esperamos la respuesta del backend.
+        } else {
+          alert("Por favor, selecciona un jugador para descubrir su rol.");
+        }
       }
+    },
+
+    // Método para mostrar el modal con la revelación
+    showRevelationModal(message) {
+      this.revelationMessage = message;
+      this.isModalVisible = true;
+      // Deja el modal visible por 7 segundos
+      setTimeout(() => {
+        this.closeModal();
+        if (this.currentPhase === "vidente_action") {
+          this.finishVidenteAction();
+        }
+      }, 7000);
+    },
+
+    closeModal() {
+      this.isModalVisible = false;
+      this.revelationMessage = "";
     },
 
     showVotesProgressively() {
@@ -704,8 +711,13 @@ export default {
       }, 500);
     },
 
+    // Permite la selección incluso en fase "vidente_action"
     selectPlayer(playerId) {
-      if (!this.isVotingPhase || this.hasVoted) return;
+      if (
+        (!this.isVotingPhase && this.currentPhase !== "vidente_action") ||
+        this.hasVoted
+      )
+        return;
       // Si el jugador ya está seleccionado, lo deselecciona; de lo contrario, asigna el ID del jugador seleccionado
       this.selectedPlayerIndex =
         this.selectedPlayerIndex === playerId ? null : playerId;
@@ -743,8 +755,11 @@ export default {
       this.hasVoted = false;
       this.revealVotes = false;
       this.revealIndex = 0;
+      this.hasDiscoveredRole = false;
+      this.hasPassedTurn = false;
       this.players.forEach((p) => (p.votes = 0));
     },
+
 
     getRandomRole() {
       const validRoles = roles.filter(
@@ -804,6 +819,30 @@ export default {
   flex-direction: column;
   gap: 1vw;
   z-index: 9999;
+}
+
+
+/* Estilos para el modal de Vidente revelación */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: #fff;
+  color: #333;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 80%;
 }
 </style>
 
