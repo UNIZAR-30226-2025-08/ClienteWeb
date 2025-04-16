@@ -38,6 +38,11 @@
       />
        <!-- NUEVO -->
       <DespertarBruja v-else-if="currentPhase === 'despertar_bruja'" /> 
+
+      <PocionMuerteUsadaOverlay 
+        v-else-if="currentPhase === 'pocion_muerte_usada'" 
+        :text="pocionMuerteMessage" 
+      />
       
       <OjoCerradoOverlay
         v-else-if="currentPhase === 'ojo_cerrado'"
@@ -149,6 +154,7 @@ import DespertarBruja from "../../views/partida/Overlay/DespertarBruja.vue"; //N
 
 import BotonBrujaVida from "./Componentes/botonBrujaVida.vue";
 import BotonBrujaMuerte from "./Componentes/botonBrujaMuerte.vue";
+import PocionMuerteUsadaOverlay from "./Overlay/PocionMuerteUsada.vue";
 
 
 // Nuevos overlays para el turno de hombres lobo
@@ -193,6 +199,7 @@ export default {
     //BotonesBruja, // NUEVO
     BotonBrujaVida,
     BotonBrujaMuerte,
+    PocionMuerteUsadaOverlay,
   },
   data() {
     return {
@@ -256,6 +263,9 @@ export default {
       isModalVisible: false,
       revelationMessage: "",
       //**********************//
+
+      pocionMuerteMessage: "",
+      pocionMuerteUsada: false,
     };
   },
   computed: {
@@ -278,6 +288,7 @@ export default {
         "despertar_bruja", //NUEVO
         "estado_durmiendo",
         "fin_turno_lobos",
+        "pocion_muerte_usada"
       ].includes(this.currentPhase);
     },
   },
@@ -695,9 +706,20 @@ export default {
         idObjetivo: this.selectedPlayerIndex  // ID del jugador objetivo seleccionado
       });
       
-      // Opcional: limpiar la selección o deshabilitar el botón para evitar múltiples usos
-      this.selectedPlayerIndex = null;
       console.log("Se ha enviado la solicitud para usar la Poción de Muerte.");
+
+      if(this.pocionMuerteUsada == false){
+        this.pocionMuerteMessage = `Has decidido usar la pocima de muerte con el jugador ${this.selectedPlayerIndex}`;
+        this.currentPhase = "pocion_muerte_usada"
+        this.pocionMuerteUsada = true;
+        this.selectedPlayerIndex = null;
+        setTimeout(() => {
+          this.currentPhase = "habilidad_bruja"
+        },3000);
+      }
+      else{
+        alert("Esta pocima ya ha sido usada");
+      }
     },
 
     handleDiscoverRole() {
