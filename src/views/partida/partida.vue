@@ -814,9 +814,9 @@ export default {
 .vidente-buttons {
   position: absolute;
   top: 62vh;
-  right: 4vw;
+  left: 4vw;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 1vw;
   z-index: 9999;
 }

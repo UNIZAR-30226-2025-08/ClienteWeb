@@ -126,4 +126,11 @@ export default {
   background-color: #33ff00;
   margin: 0.2vw;
 }
+
+.player-icon.selected .avatar-wrapper {
+  outline: 0.3vw solid yellow;  /* o un valor en px si prefieres */
+  outline-offset: -0.3vw;       /* hace que el contorno quede "pegado" al borde */
+  border-radius: 50%;           /* mantiene la forma circular */
+}
+
 </style>
