@@ -20,12 +20,27 @@ const goBack = () => {
       .slice()
       .reverse()
       .find((path) => path.includes("/sala"));
+    console.log("Perfil");
     if (salaRoute) {
       // Si se encontró una ruta de sala, usamos window.location.href para forzar la recarga
       window.location.href = salaRoute;
       return;
     }
   }
+  if (route.name === "amigos") {
+    // Si estamos en la página de amigos, buscamos en el historial una ruta que contenga "/sala"
+    console.log("Amigos");
+    const salaRoute = navigationHistory
+      .slice()
+      .reverse()
+      .find((path) => path.includes("/sala"));
+    if (salaRoute) {
+      // Si se encontró una ruta de sala, usamos window.location.href para forzar la recarga
+      window.location.href = salaRoute;
+      return;
+    }
+  }
+  console.log("Volviendo");
   // En cualquier otro caso, usamos la navegación interna del router
   router.back();
 };

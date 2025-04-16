@@ -24,7 +24,7 @@ const routes = [
   { path: "/reglas", component: Reglas },
   { path: "/servidores", component: Servidores },
   { path: "/sala/:idSala", component: Sala }, // Ruta dinámica para la sala
-  { path: "/amigos", component: Amigos },
+  { path: "/amigos", name: "amigos", component: Amigos },
   { path: "/ranking", component: ranking },
   { path: "/partida/:idSala", component: Partida },
   // La ruta de perfil acepta un parámetro opcional
