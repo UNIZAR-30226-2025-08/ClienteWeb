@@ -36,8 +36,9 @@
         v-else-if="currentPhase === 'vidente_awaken'"
         :visible="true"
       />
-      <!-- NUEVO -->
-      <DespertarBruja v-else-if="currentPhase === 'despertar_bruja'" />
+       <!-- NUEVO -->
+      <DespertarBruja v-else-if="currentPhase === 'despertar_bruja'" /> 
+      
 
       <OjoCerradoOverlay
         v-else-if="currentPhase === 'ojo_cerrado'"
@@ -74,9 +75,15 @@
         @select-player="selectPlayer"
       />
 
-      <BotonesBruja v-if="currentPhase === 'habilidad_bruja' && isBruja()" />
-      <!-- NUEVO -->
-
+      <!-- Nuevo bloque para la acción de la bruja (fase "habilidad_bruja") -->
+      <div
+        v-if="currentPhase === 'habilidad_bruja' && isBruja()"
+        class="bruja-buttons"
+      >
+        <BotonBrujaVida @usar-pocima-vida="manejarPocimaVida" />
+        <BotonBrujaMuerte @usar-pocima-muerte="manejarPocimaMuerte" />
+      </div>
+      
       <!-- Contador: se muestra en fase "game_voting" y en "vidente_action" -->
       <CountdownTimer v-if="isVotingPhase" :time-left="timeLeft" />
 
@@ -139,7 +146,12 @@ import DiscoverRoleButton from "../../views/partida/Componentes/DiscoverRoleButt
 import Chat from "../../views/partida/Componentes/Chat.vue";
 
 import DespertarBruja from "../../views/partida/Overlay/DespertarBruja.vue"; //NUEVO
-import BotonesBruja from "../../views/partida/Componentes/botonesBruja.vue"; // NUEVO
+//import BotonesBruja from "../../views/partida/Componentes/botonesBruja.vue";  // NUEVO
+
+import BotonBrujaVida from "../../views/partida/Componentes/BotonBrujaVida.vue";
+import BotonBrujaMuerte from "../../views/partida/Componentes/BotonBrujaMuerte.vue";
+
+
 
 // Nuevos overlays para el turno de hombres lobo
 import DespertarHombresLobo from "../../views/partida/Overlay/DespertarHombresLobo.vue";
@@ -180,7 +192,9 @@ export default {
     FinTurnoLobos,
     EstadoDurmiendo,
     DespertarBruja, //NUEVO
-    BotonesBruja, // NUEVO
+    //BotonesBruja, // NUEVO
+    BotonBrujaVida,
+    BotonBrujaMuerte,
   },
   data() {
     return {
@@ -232,7 +246,7 @@ export default {
       hasDiscoveredRole: false,
 
       idPartida: null, // NUEVO: Propiedad para almacenar el ID de la partida
-
+      
       // Propiedades para la cola de eventos
       eventQueue: [],
       isProcessing: false,
@@ -295,7 +309,7 @@ export default {
       this.timeLeft = data.tiempo || 30;
       this.isVotingPhase = true;
     });
-
+    
     // 4. Evento: resultado de votación del alguacil
     socket.on("alguacilElegido", (data) => {
       this.addEventToQueue({ type: "alguacilElegido", data });
@@ -318,7 +332,7 @@ export default {
       // Mostrar el modal con la información recibida y esperar antes de cerrar
       this.showRevelationModal(`${data.mensaje}`);
     });
-
+    
     // 7. Evento: turno de los hombres lobo
     socket.on("turnoHombresLobos", (data) => {
       console.log("Procesando en cola: turnoHombresLobos", event.data);
@@ -345,7 +359,7 @@ export default {
     //10. Evento para activar la habilidad de la bruja
     socket.on("habilidadBruja", (data) => {
       console.log("Habilidad de la bruja activada:", data.mensaje);
-      this.currentPhase = "despertar_bruja"; //NUEVO
+      this.currentPhase = "despertar_bruja" //NUEVO
       setTimeout(() => {
         if (this.isBruja()) {
           this.currentPhase = "habilidad_bruja"; // TODO: que se vea el juego pero con los botones de habilidad nuevos de la bruja
@@ -354,7 +368,8 @@ export default {
           this.currentPhase = "estado_durmiendo"; // Cambia a la fase correspondiente para los demás jugadores
         }
       }, 3000);
-      this.timeLeft = data.tiempo || 30;
+      this.timeLeft = data.tiempo || 30; 
+      
     });
 
     //11. Escuchar evento para pasar al día
@@ -460,7 +475,7 @@ export default {
     clearInterval(this.countdownInterval);
   },
   methods: {
-    // Función auxiliar: pausa la ejecución
+   // Función auxiliar: pausa la ejecución
     sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
@@ -590,6 +605,7 @@ export default {
       const winners = this.players.filter((p) => p.votes === maxVotes); //TODO: Esto no sé muy bien que es //TODO: Esto no sé muy bien que es
       // this.alguacilWinnerIndex = winners[0]?.id || null; //TODO: Lo he quitado porque lo asignamos en el socket
       this.currentPhase = "alguacil_result";
+      
     },
 
     /**
@@ -660,6 +676,31 @@ export default {
       }
     },
 
+    manejarPocimaVida() {
+      console.log("Se activó la Poción de Vida");
+      // Aquí implementa la lógica que desees para la acción de la pócima de vida.
+    },
+
+    manejarPocimaMuerte() {
+      // Verifica que se haya seleccionado un jugador objetivo
+      if (!this.selectedPlayerIndex) {
+        alert("Por favor, selecciona un jugador objetivo para usar la Poción de Muerte.");
+        return;
+      }
+      
+      // Emite el evento "usaPocionBruja" al backend con los datos necesarios
+      socket.emit("usaPocionBruja", {
+        idPartida: this.idPartida,       // ID de la partida actual
+        idJugador: this.getMyId(),       // ID del jugador actual (la bruja)
+        tipo: "matar",                   // Indica que se usa la opción "matar" (poción de muerte)
+        idObjetivo: this.selectedPlayerIndex  // ID del jugador objetivo seleccionado
+      });
+      
+      // Opcional: limpiar la selección o deshabilitar el botón para evitar múltiples usos
+      this.selectedPlayerIndex = null;
+      console.log("Se ha enviado la solicitud para usar la Poción de Muerte.");
+    },
+
     handleDiscoverRole() {
       if (!this.hasDiscoveredRole && !this.hasPassedTurn) {
         if (this.selectedPlayerIndex) {
@@ -710,7 +751,7 @@ export default {
     // Permite la selección incluso en fase "vidente_action"
     selectPlayer(playerId) {
       if (
-        (!this.isVotingPhase && this.currentPhase !== "vidente_action") ||
+        (!this.isVotingPhase && this.currentPhase !== "vidente_action" && this.currentPhase !== "habilidad_bruja") ||
         this.hasVoted
       )
         return;
@@ -755,6 +796,7 @@ export default {
       this.hasPassedTurn = false;
       this.players.forEach((p) => (p.votes = 0));
     },
+
 
     getRandomRole() {
       const validRoles = roles.filter(
@@ -815,6 +857,17 @@ export default {
   gap: 1vw;
   z-index: 9999;
 }
+
+.bruja-buttons {
+  position: absolute;
+  top: 62vh;
+  left: 4vw;
+  display: flex;
+  flex-direction: row;
+  gap: 1vw;
+  z-index: 9999;
+}
+
 
 /* Estilos para el modal de Vidente revelación */
 .modal-overlay {
