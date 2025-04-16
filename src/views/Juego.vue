@@ -584,12 +584,10 @@ const unirseRapido = () => {
 /* BOTONES DE ACCIÓN ABAJO */
 /* ----------------------- */
 .actions {
-  position: absolute;
-  bottom: 15%; /* Ajusta según la altura deseada */
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   gap: 10%;
+  margin-top: 0px; /* para dejar un espacio encima de los botones */
+  margin-bottom: 50px;
 }
 
 .action-button {
@@ -694,7 +692,7 @@ const unirseRapido = () => {
   border-radius: 8px; /* Opcional: bordes redondeados */
 }
 .history-table-container {
-  max-height: 500px; /* Altura máxima del contenido de la tabla */
+  max-height: 450px; /* Altura máxima del contenido de la tabla */
   overflow-y: auto; /* Habilitar desplazamiento vertical */
 }
 /* Estilos para el modal */
