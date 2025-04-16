@@ -148,7 +148,7 @@ import DespertarBruja from "../../views/partida/Overlay/DespertarBruja.vue"; //N
 //import BotonesBruja from "../../views/partida/Componentes/botonesBruja.vue";  // NUEVO
 
 import BotonBrujaVida from "./Componentes/BotonBrujaVida.vue";
-import BotonBrujaMuerte from "./Componentes/BotonBrujaMuerte.vue";
+import BotonBrujaMuerte from "../../views/partida/Componentes/BotonBrujaMuerte.vue";
 
 
 // Nuevos overlays para el turno de hombres lobo
