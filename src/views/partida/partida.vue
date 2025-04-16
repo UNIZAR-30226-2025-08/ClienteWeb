@@ -39,7 +39,6 @@
        <!-- NUEVO -->
       <DespertarBruja v-else-if="currentPhase === 'despertar_bruja'" /> 
       
-
       <OjoCerradoOverlay
         v-else-if="currentPhase === 'ojo_cerrado'"
         :visible="true"
@@ -91,7 +90,7 @@
       <VoteButton
         v-if="isVotingPhase"
         :selected-player-index="selectedPlayerIndex"
-        :has-voted="hasVoted"
+        :has-voted="hasVotedAlguacil"
         @vote="voteForPlayer"
       />
 
@@ -100,15 +99,15 @@
         v-if="currentPhase === 'vidente_action' && isVidente()"
         class="vidente-buttons"
       >
-        <TurnButton :has-passed="hasPassedTurn" @pass="handlePassTurn" />
+        <TurnButton :has-passed="hasVidenteActed" @pass="handlePassTurn" />
         <DiscoverRoleButton
-          :has-discovered="hasDiscoveredRole"
+          :has-discovered="hasVidenteActed"
           @discover="handleDiscoverRole"
         />
       </div>
 
       <!-- Mensaje cuando ya has votado -->
-      <div v-if="hasVoted && isVotingPhase" class="vote-message">
+      <div v-if="hasVotedAlguacil && isVotingPhase" class="vote-message">
         Has votado al <strong>Jugador {{ selectedPlayerIndex }}</strong>
       </div>
 
@@ -224,7 +223,10 @@ export default {
       },
       defaultAvatar: defaultAvatar,
       selectedPlayerIndex: null,
-      hasVoted: false,
+      // Variable para el voto del alguacil
+      hasVotedAlguacil: false,
+      // Nueva variable de control para la acción de la vidente
+      hasVidenteActed: false,
       revealVotes: false,
       revealIndex: 0,
 
@@ -243,7 +245,6 @@ export default {
 
       // Nuevas propiedades para la acción de la Vidente
       hasPassedTurn: false,
-      hasDiscoveredRole: false,
 
       idPartida: null, // NUEVO: Propiedad para almacenar el ID de la partida
       
@@ -312,6 +313,7 @@ export default {
     
     // 4. Evento: resultado de votación del alguacil
     socket.on("alguacilElegido", (data) => {
+      console.log("Recibo el aguacil elegido");
       this.addEventToQueue({ type: "alguacilElegido", data });
     });
 
@@ -338,7 +340,6 @@ export default {
       console.log("Procesando en cola: turnoHombresLobos", event.data);
       this.handleTurnoHombresLobo(data);
       this.currentPeriod = "NOCHE";
-      //this.timeLeft = data.tiempo || 30;
     });
 
     //8. Evento que envía el resultado de los votos de la noche a cada jugador que corresponda
@@ -361,6 +362,7 @@ export default {
       console.log("Habilidad de la bruja activada:", data.mensaje);
       this.currentPhase = "despertar_bruja" //NUEVO
       setTimeout(() => {
+        if (this.currentPeriod === "DÍA") return; // Se debería de quitar pero es necesario la funcionalidad de no recibir sockets de roles que no existan en la partida
         if (this.isBruja()) {
           this.currentPhase = "habilidad_bruja"; // TODO: que se vea el juego pero con los botones de habilidad nuevos de la bruja
           this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
@@ -601,11 +603,7 @@ export default {
       this.isVotingPhase = false;
       this.revealVotes = true;
       this.showVotesProgressively();
-      const maxVotes = Math.max(...this.players.map((p) => p.votes)); //TODO: Esto no sé muy bien que es supongo que lo podemos quitar ya
-      const winners = this.players.filter((p) => p.votes === maxVotes); //TODO: Esto no sé muy bien que es //TODO: Esto no sé muy bien que es
-      // this.alguacilWinnerIndex = winners[0]?.id || null; //TODO: Lo he quitado porque lo asignamos en el socket
       this.currentPhase = "alguacil_result";
-      
     },
 
     /**
@@ -628,13 +626,16 @@ export default {
       this.currentPhase = "vidente_awaken";
       setTimeout(() => {
         if (this.isVidente()) {
-          this.currentPhase = "vidente_action"; // Cambia a la fase correspondiente
-          this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
+          // Resetea la variable de control para la vidente al entrar en esta fase
+          this.hasVidenteActed = false;
+          this.currentPhase = "vidente_action";
+          this.timeLeft = 30;
         } else {
-          this.currentPhase = "ojo_cerrado"; // Cambia a la fase correspondiente para los demás jugadores
+          this.currentPhase = "ojo_cerrado";
         }
       }, 6000);
     },
+
 
     finishVidenteAction() {
       this.isVotingPhase = false;
@@ -669,9 +670,8 @@ export default {
     },
 
     handlePassTurn() {
-      if (!this.hasPassedTurn && !this.hasDiscoveredRole) {
-        this.hasPassedTurn = true;
-        // Puedes agregar lógica extra aquí si es necesario
+      if (!this.hasVidenteActed) {
+        this.hasVidenteActed = true;
         this.finishVidenteAction();
       }
     },
@@ -702,27 +702,26 @@ export default {
     },
 
     handleDiscoverRole() {
-      if (!this.hasDiscoveredRole && !this.hasPassedTurn) {
+      if (!this.hasVidenteActed) {
         if (this.selectedPlayerIndex) {
           socket.emit("videnteRevela", {
             idPartida: this.idPartida,
             idJugador: this.getMyId(),
             idObjetivo: this.selectedPlayerIndex,
           });
-          this.hasDiscoveredRole = true;
+          this.hasVidenteActed = true;
           this.selectedPlayerIndex = null;
-          // No se cierra la fase inmediatamente, esperamos la respuesta del backend.
+          // Se espera respuesta del backend para continuar
         } else {
           alert("Por favor, selecciona un jugador para descubrir su rol.");
         }
       }
     },
 
-    // Método para mostrar el modal con la revelación
+    // Muestra el modal de la revelación de la vidente
     showRevelationModal(message) {
       this.revelationMessage = message;
       this.isModalVisible = true;
-      // Deja el modal visible por 7 segundos
       setTimeout(() => {
         this.closeModal();
         if (this.currentPhase === "vidente_action") {
@@ -748,14 +747,23 @@ export default {
       }, 500);
     },
 
-    // Permite la selección incluso en fase "vidente_action"
+        // Permite la selección de un jugador. Se utiliza una variable de control separada según la fase.
     selectPlayer(playerId) {
-      if (
-        (!this.isVotingPhase && this.currentPhase !== "vidente_action" && this.currentPhase !== "habilidad_bruja") ||
-        this.hasVoted
-      )
+      // Si no estamos en fase de votación o en la fase de vidente, no se permite seleccionar
+      if (!this.isVotingPhase && this.currentPhase !== "vidente_action" ) {
         return;
-      // Si el jugador ya está seleccionado, lo deselecciona; de lo contrario, asigna el ID del jugador seleccionado
+      }
+      // En la fase de votación del alguacil, verifica si ya se ha votado
+      if (this.currentPhase === "game_voting" && this.hasVotedAlguacil) {
+        return;
+      }
+      // En la fase de acción de la vidente, verifica si ya se ha actuado
+      if (this.currentPhase === "vidente_action" && this.hasVidenteActed) {
+        return;
+      }
+      // TODO: Se debe de hacer un if para ver en la fase de la bruja, verificar si ya ha usado habilidades.
+
+      // Alterna la selección del jugador
       this.selectedPlayerIndex =
         this.selectedPlayerIndex === playerId ? null : playerId;
     },
@@ -789,10 +797,11 @@ export default {
 
     resetVotingState() {
       this.selectedPlayerIndex = null;
-      this.hasVoted = false;
+      this.hasVotedAlguacil = false;
+      this.hasVidenteActed = false;
+      //Meter reseteo de si ha participado la bruja
       this.revealVotes = false;
       this.revealIndex = 0;
-      this.hasDiscoveredRole = false;
       this.hasPassedTurn = false;
       this.players.forEach((p) => (p.votes = 0));
     },
