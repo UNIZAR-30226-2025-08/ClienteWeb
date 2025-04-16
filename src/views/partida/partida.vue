@@ -147,8 +147,9 @@ import Chat from "../../views/partida/Componentes/Chat.vue";
 import DespertarBruja from "../../views/partida/Overlay/DespertarBruja.vue"; //NUEVO
 //import BotonesBruja from "../../views/partida/Componentes/botonesBruja.vue";  // NUEVO
 
-import BotonBrujaVida from "../../views/partida/Componentes/BotonBrujaVida.vue";
-import BotonBrujaMuerte from "../../views/partida/Componentes/BotonBrujaMuerte.vue";
+import BotonBrujaVida from "./Componentes/BotonBrujaVida.vue";
+import BotonBrujaMuerte from "./Componentes/BotonBrujaMuerte.vue";
+
 
 // Nuevos overlays para el turno de hombres lobo
 import DespertarHombresLobo from "../../views/partida/Overlay/DespertarHombresLobo.vue";
