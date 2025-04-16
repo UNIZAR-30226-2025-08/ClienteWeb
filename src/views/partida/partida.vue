@@ -150,8 +150,6 @@ import DespertarBruja from "../../views/partida/Overlay/DespertarBruja.vue"; //N
 import BotonBrujaVida from "../../views/partida/Componentes/BotonBrujaVida.vue";
 import BotonBrujaMuerte from "../../views/partida/Componentes/BotonBrujaMuerte.vue";
 
-
-
 // Nuevos overlays para el turno de hombres lobo
 import DespertarHombresLobo from "../../views/partida/Overlay/DespertarHombresLobo.vue";
 import FinTurnoLobos from "../../views/partida/Overlay/FinTurnoLobos.vue";
@@ -508,7 +506,7 @@ export default {
           console.log("Procesando en cola: alguacilElegido", event.data);
           this.alguacilWinnerIndex = Number(event.data.alguacil);
           this.endVotingPhase();
-          this.isVotingPhase = false;
+          this.hasVotedAlguacil = true;
           break;
         case "nocheComienza":
           console.log("Procesando en cola: nocheComienza", event.data);
@@ -770,8 +768,7 @@ export default {
 
     //Método modificado para emitir la votación al servidor
     voteForPlayer() {
-      if (this.selectedPlayerIndex && !this.hasVoted) {
-        // Buscar el jugador objetivo por su ID
+      if (this.selectedPlayerIndex && !this.hasVotedAlguacil) {
         const jugadorObjetivo = this.players.find(
           (player) => player.id === this.selectedPlayerIndex
         );
@@ -779,19 +776,16 @@ export default {
           console.error("El jugador seleccionado no tiene un ID definido");
           return;
         }
-        // Incrementar el contador de votos del jugador seleccionado
         jugadorObjetivo.votes++;
         console.log(
           `Jugador ${this.getMyId()} votó por el jugador ${jugadorObjetivo.id}`
         );
-        // Emitir el evento "votar" al servidor con los datos necesarios
         socket.emit("votarAlguacil", {
           idPartida: this.idPartida,
-          idJugador: this.getMyId(), // Asegurarse de que sea número
-          idObjetivo: jugadorObjetivo.id.toString(), // Convertir el id del jugador votado a número
+          idJugador: this.getMyId(),
+          idObjetivo: jugadorObjetivo.id.toString(),
         });
-
-        this.hasVoted = true;
+        this.hasVotedAlguacil = true;
       }
     },
 
