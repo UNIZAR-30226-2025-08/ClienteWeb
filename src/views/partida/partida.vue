@@ -43,6 +43,11 @@
         v-else-if="currentPhase === 'pocion_muerte_usada'" 
         :text="pocionMuerteMessage" 
       />
+
+      <PocimaVidaUsadaOverlay 
+        v-else-if="currentPhase === 'pocion_vida_usada'" 
+        :text="pocionVidaMessage" 
+      />
       
       <OjoCerradoOverlay
         v-else-if="currentPhase === 'ojo_cerrado'"
@@ -155,6 +160,7 @@ import DespertarBruja from "../../views/partida/Overlay/DespertarBruja.vue"; //N
 import BotonBrujaVida from "./Componentes/botonBrujaVida.vue";
 import BotonBrujaMuerte from "./Componentes/botonBrujaMuerte.vue";
 import PocionMuerteUsadaOverlay from "./Overlay/PocionMuerteUsada.vue";
+import PocimaVidaUsadaOverlay from "./Overlay/PocimaVidaUsada.vue"
 
 
 // Nuevos overlays para el turno de hombres lobo
@@ -200,6 +206,7 @@ export default {
     BotonBrujaVida,
     BotonBrujaMuerte,
     PocionMuerteUsadaOverlay,
+    PocimaVidaUsadaOverlay,
   },
   data() {
     return {
@@ -266,6 +273,9 @@ export default {
 
       pocionMuerteMessage: "",
       pocionMuerteUsada: false,
+
+      pocionVidaMessage: "",
+      pocionVidaUsada: false,
     };
   },
   computed: {
@@ -288,7 +298,8 @@ export default {
         "despertar_bruja", //NUEVO
         "estado_durmiendo",
         "fin_turno_lobos",
-        "pocion_muerte_usada"
+        "pocion_muerte_usada",
+        "pocion_vida_usada"
       ].includes(this.currentPhase);
     },
   },
@@ -687,9 +698,48 @@ export default {
     },
 
     manejarPocimaVida() {
-      console.log("Se activó la Poción de Vida");
-      // Aquí implementa la lógica que desees para la acción de la pócima de vida.
+      // Verifica que se haya seleccionado un jugador objetivo
+      if (!this.selectedPlayerIndex) {
+        alert("Por favor, selecciona un jugador para usar la Poción de Vida.");
+        return;
+      }
+      
+      // Busca en el array de jugadores el jugador seleccionado
+      const jugadorSeleccionado = this.players.find(
+        (player) => player.id === this.selectedPlayerIndex
+      );
+      if (!jugadorSeleccionado) {
+        alert("El jugador seleccionado no existe.");
+        return;
+      }
+      
+      // Emite el evento "usaPocionBruja" con tipo "curar"
+      socket.emit("usaPocionBruja", {
+        idPartida: this.idPartida,       // ID de la partida actual
+        idJugador: this.getMyId(),       // ID de la bruja
+        tipo: "curar",                   // Tipo de acción: curar (poción de vida)
+        idObjetivo: this.selectedPlayerIndex  // ID del jugador seleccionado
+      });
+      
+      console.log("Se ha enviado la solicitud para usar la Poción de Vida.");
+      
+      if (this.pocionVidaUsada === false) {
+        // Asigna el mensaje a mostrar en el overlay
+        this.pocionVidaMessage = `Has decidido usar la pócima de vida con el jugador ${this.selectedPlayerIndex}`;
+        // Cambia la fase para mostrar el overlay correspondiente
+        this.currentPhase = "pocion_vida_usada";
+        this.pocionVidaUsada = true;
+        // Limpia la selección
+        this.selectedPlayerIndex = null;
+        // Después de 3 segundos se regresa a la fase de habilidad de bruja
+        setTimeout(() => {
+          this.currentPhase = "habilidad_bruja";
+        }, 3000);
+      } else {
+        alert("La pócima de vida ya ha sido usada");
+      }
     },
+
 
     manejarPocimaMuerte() {
       // Verifica que se haya seleccionado un jugador objetivo
