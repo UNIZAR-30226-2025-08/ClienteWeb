@@ -141,7 +141,6 @@
 </template>
 
 <script>
-import { io } from "socket.io-client";
 import socket from "../../utils/socket";
 
 import { roles } from "../../assets/data/roles.js";
@@ -377,15 +376,29 @@ export default {
 
     // 7. Evento: turno de los hombres lobo
     socket.on("turnoHombresLobos", (data) => {
-      this.addEventToQueue({ type: "turnoHombresLobos", data });
-      console.log("Procesando en cola: turnoHombresLobos", event.data);
-      //this.handleTurnoHombresLobo(data);
-      //this.currentPeriod = "NOCHE";
+      // espera los 5s que quieras antes de encolar
+      setTimeout(() => {
+        this.addEventToQueue({ type: "turnoHombresLobos", data });
+      }, 5000);
     });
 
     //8. Evento que envía el resultado de los votos de la noche a cada jugador que corresponda
     socket.on("resultadoVotosNoche", (data) => {
-      console.log("Resultado votos de noche:", data.mensaje);
+      console.log(data);
+      // 1) Cancelamos la fase de votación
+      this.isVotingPhase = false;
+      // 2) Mostramos al instante el overlay de "fin_turno_lobos"
+      this.currentPhase = "fin_turno_lobos";
+      // 3) Tras la duración del overlay (6s), pasamos a la fase de bruja (si existe) o al juego
+      setTimeout(() => {
+        if (this.isBruja()) {
+          // si eres bruja, despertamos su overlay
+          this.currentPhase = "despertar_bruja";
+        } else {
+          // si no, volvemos al juego
+          this.currentPhase = "game";
+        }
+      }, 6000);
     });
 
     //9. Evento que notifica a la bruja con el mensaje y la víctima elegida por los lobos (Si la bruja existe)
@@ -407,23 +420,18 @@ export default {
     //11. Escuchar evento para pasar al día
     socket.on("diaComienza", (data) => {
       console.log("El día ha comenzado", data);
+      // guardo víctimas (array de {id,nombre,rol})
+      this.victimas = data.victimas || [];
 
-      if (data.victimas && data.victimas.length > 0) {
-        this.victimas = data.victimas;
-        // Cambia a la fase para mostrar el overlay con el resumen de la noche
-        this.currentPhase = "dia_comienza";
-        // Después de 5 segundos, vuelve a la fase de juego y asigna el tiempo del día
-        setTimeout(() => {
-          this.currentPhase = "game";
-          this.currentPeriod = "DÍA";
-          this.timeLeft = data.tiempo || 60;
-        }, 5000);
-      } else {
-        // Si no hay víctimas para mostrar, simplemente inicia la fase de juego
+      // muestro overlay de recuento_muertes
+      this.currentPhase = "recuento_muertes";
+
+      // y tras 5s paso a la fase de juego de día
+      setTimeout(() => {
         this.currentPhase = "game";
         this.currentPeriod = "DÍA";
         this.timeLeft = data.tiempo || 60;
-      }
+      }, 5000);
     });
 
     //12. Evento que notifica un empate en la votación del día y reinicia la votación
@@ -503,6 +511,22 @@ export default {
     socket.on("error", (mensajeError) => {
       console.error("Error recibido del servidor:", mensajeError);
     });
+    socket.on("mensajeChat", ({ nombre, mensaje, timestamp }) => {
+      this.chatMessages.push({
+        username: nombre,
+        content: mensaje,
+        time: timestamp,
+      });
+    });
+
+    socket.on("mensajePrivado", ({ nombre, mensaje, timestamp }) => {
+      // si quieres diferenciar el chat de lobos
+      this.chatMessages.push({
+        username: `${nombre} (lobo)`,
+        content: mensaje,
+        time: timestamp,
+      });
+    });
   },
   beforeUnmount() {
     socket.off("iniciarVotacionAlguacil");
@@ -576,19 +600,25 @@ export default {
             if (this.currentPeriod === "DÍA") return; // Se debería de quitar pero es necesario la funcionalidad de no recibir sockets de roles que no existan en la partida
             if (this.isBruja()) {
               this.currentPhase = "habilidad_bruja"; // TODO: que se vea el juego pero con los botones de habilidad nuevos de la bruja
-              this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
+              this.timeLeft = event.data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
             } else {
               this.currentPhase = "estado_durmiendo"; // Cambia a la fase correspondiente para los demás jugadores
             }
           }, 3000);
-          this.timeLeft = data.tiempo || 30;
+          this.timeLeft = event.data.tiempo || 30;
         default:
           console.warn("Evento desconocido en cola", event);
       }
     },
 
     addMessage(message) {
-      this.chatMessages.push(message); // Agregar mensaje al array de mensajes
+      // Envía al servidor
+      socket.emit("enviarMensaje", {
+        idPartida: this.idPartida,
+        idJugador: this.getMyId(),
+        mensaje: message.content,
+      });
+      // No empujes aquí: lo recibirás de vuelta por socket.on('mensajeChat') más abajo
     },
 
     getMyId() {
@@ -705,30 +735,22 @@ export default {
 
     handleTurnoHombresLobo(data) {
       console.log("Turno de hombres lobos:", data.mensaje);
-      // 1. Mostrar overlay de despertar (3 segundos)
+      // 1) Mostrar despertar
       this.currentPhase = "despertar_hombres_lobo";
       this.currentPeriod = "NOCHE";
+
       setTimeout(() => {
-        // 2. Durante los siguientes 24 segundos:
+        // 2) Abrir votación si eres lobo o "durmiendo" si no lo eres
         if (this.isLobo()) {
-          // Si es lobo, se muestra la sala (contenido principal)
           this.LoboHavotado = false;
           this.currentPhase = "game_voting";
           this.isVotingPhase = true;
         } else {
-          // Si no es lobo, se muestra el overlay de estado durmiendo
           this.currentPhase = "estado_durmiendo";
         }
-        // Esperar 24 segundos en este estado
-        setTimeout(() => {
-          // 3. Mostrar overlay de fin del turno de lobos
-          this.currentPhase = "fin_turno_lobos";
-          setTimeout(() => {
-            // Finalizado el overlay de fin, volver a la sala para todos
-            this.currentPhase = "game";
-          }, 6000); // Duración del overlay FinTurnoLobos (6 segundos)
-        }, 24000);
-      }, 3000);
+        // **Ya no esperes N segundos** ni programes aquí el fin de turno:
+        // el socket.on('resultadoVotosNoche') lo manejará en cuanto llegue.
+      }, 6000);
     },
 
     handlePassTurn() {
@@ -839,7 +861,7 @@ export default {
         if (this.currentPhase === "vidente_action") {
           this.finishVidenteAction();
         }
-      }, 7000);
+      }, 5000);
     },
 
     closeModal() {
