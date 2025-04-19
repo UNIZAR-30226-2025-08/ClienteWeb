@@ -24,7 +24,7 @@
       <AlguacilOverlay v-else-if="currentPhase === 'alguacil_announce'" />
       <AlguacilResultOverlay
         v-else-if="currentPhase === 'alguacil_result'"
-        :winner-index="alguacilWinnerIndex"
+        :winnerName="AlguacilWinnerName"
       />
       <AlguacilEmpate v-else-if="currentPhase === 'alguacil_empate'" />
 
@@ -266,6 +266,7 @@ export default {
       // Datos de rol y estado del juego
       chosenRole: {},
       alguacilWinnerIndex: null,
+      AlguacilWinnerName: null,
       aliveVillagers: 5,
       totalVillagers: 6,
       aliveWolves: 2,
@@ -327,11 +328,7 @@ export default {
       const p = this.players.find((p) => p.id === this.selectedPlayerIndex);
       return p ? p.nombre : "—";
     },
-    //Encontrar NOmbre a partir de ID
-    FindPlayerNameById(id) {
-      const name = this.players.find((player) => player.id === id);
-      return name.nombre;
-    },
+
     // NUEVO: IDs de jugadores muertos
     deadPlayerIds() {
       return this.players
@@ -446,11 +443,10 @@ export default {
         .filter((id) => !Number.isNaN(id));
       console.log("IDs de víctimas:", victimaIds);
 
-      this.victimasNombres = victimaIds.map(
-        (id) =>
-          this.players.find((player) => player.id === id)?.nombre ||
-          "Desconocido"
-      );
+      this.victimasNombres = victimaIds.map((id) => {
+        const p = this.players.find((player) => player.id === id);
+        return p ? p.nombre : "Desconocido";
+      });
 
       victimaIds.forEach((id) => {
         const p = this.players.find((player) => player.id === id);
@@ -591,6 +587,10 @@ export default {
     sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
+    findPlayerNameById(id) {
+      const p = this.players.find((player) => player.id === id);
+      return p ? p.nombre : "Desconocido";
+    },
 
     // Agrega un evento a la cola y, si no se está procesando, comienza a procesarla
     addEventToQueue(event) {
@@ -617,6 +617,9 @@ export default {
         case "alguacilElegido":
           console.log("Procesando en cola: alguacilElegido", event.data);
           this.alguacilWinnerIndex = Number(event.data.alguacil);
+          this.AlguacilWinnerName = this.findPlayerNameById(
+            this.alguacilWinnerIndex
+          );
           this.endVotingPhase();
           this.hasVotedAlguacil = true;
           break;
