@@ -64,6 +64,54 @@ const loadingSearch = ref(false);
 // Variable reactiva para la lista de salas (en tiempo real)
 const salas = ref([]);
 
+// Buscar sugerencias de nombres de usuarios
+const searchSuggestions = ref([]);
+
+// Variable para almacenar el usuario seleccionado
+const selectedUserId = ref(null);
+
+// Función para seleccionar un usuario
+const selectUser = async (userName) => {
+  searchName.value = userName;
+  selectedUserId.value = null;
+  searchSuggestions.value = []; // Limpiar sugerencias al seleccionar
+  try {
+    // Obtener el ID del usuario usando el nombre
+    const response = await axios.post("/api/usuario/obtener_por_nombre", {
+      nombre: userName,
+    });
+    if (response.data.usuario) {
+      selectedUserId.value = response.data.usuario.idUsuario;
+    } else {
+      toast.error("Usuario no encontrado", { autoClose: 3000 });
+    }
+  } catch (err) {
+    console.error("Error al obtener ID del usuario:", err);
+    toast.error("Error al obtener datos del usuario", { autoClose: 3000 });
+  }
+};
+
+const fetchUserSuggestions = async () => {
+  if (!searchName.value.trim()) {
+    searchError.value = "Por favor, ingresa un nombre.";
+    return;
+  }
+  loadingSearch.value = true;
+  searchError.value = null;
+  searchSuccess.value = "";
+  try {
+    const response = await axios.post("/api/usuario/buscar_por_nombre", {
+      nombre: searchName.value,
+    });
+    searchSuggestions.value = response.data.usuarios || [];
+  } catch (err) {
+    console.error("Error al buscar sugerencias de usuario:", err);
+    searchError.value = "Error al buscar sugerencias de usuario.";
+  } finally {
+    loadingSearch.value = false;
+  }
+};
+
 // Función para actualizar el estado de cada amigo, asignando las propiedades
 // friend.enSala (true/false) y friend.sala (el id de la sala en la que se encuentre)
 const actualizarEstadoDeAmigos = () => {
@@ -183,31 +231,39 @@ const invitarASala = (friendId) => {
   toast.success("Invitación enviada correctamente", { autoClose: 3000 });
 };
 
+// Función para agregar un amigo
 const addFriend = async () => {
   if (!searchName.value.trim()) {
     searchError.value = "Por favor, ingresa un nombre.";
     return;
   }
+  const userId = getUserId();
   loadingSearch.value = true;
   searchError.value = null;
   searchSuccess.value = "";
   try {
-    const response = await axios.post("/api/usuario/obtener_por_nombre", {
-      nombre: searchName.value,
-    });
-    if (!response.data.usuario) {
-      searchError.value = "Usuario no encontrado.";
-      return;
+    let friendId = selectedUserId.value;
+
+    // Si aún no tenemos el ID, buscarlo
+    if (!friendId) {
+      const response = await axios.post("/api/usuario/obtener_por_nombre", {
+        nombre: searchName.value,
+      });
+      if (!response.data.usuario) {
+        searchError.value = "Usuario no encontrado.";
+        return;
+      }
+      friendId = response.data.usuario.idUsuario;
     }
-    const foundUser = response.data.usuario;
-    const userId = getUserId();
+
+    // Enviar la solicitud de amistad usando el ID obtenido
     const sendResponse = await axios.post("/api/solicitud/enviar", {
       idEmisor: userId,
-      idReceptor: foundUser.idUsuario,
+      idReceptor: friendId,
     });
     socket.emit("solicitudAmistad", {
       idEmisor: userId,
-      idReceptor: foundUser.idUsuario,
+      idReceptor: friendId,
     });
     await fetchFriends();
     searchName.value = "";
@@ -216,10 +272,12 @@ const addFriend = async () => {
       searchSuccess.value = sendResponse.data.mensaje;
     } else {
       toast.success(
-        `Solicitud de amistad enviada correctamente a ${foundUser.nombre}`,
+        `Solicitud de amistad enviada correctamente a ${searchName.value}`,
         { autoClose: 3000 }
       );
-      searchSuccess.value = `Solicitud de amistad enviada correctamente a ${foundUser.nombre}`;
+      searchSuccess.value = `Solicitud de amistad enviada correctamente a ${searchName.value}`;
+      searchName.value = "";
+      selectedUserId.value = null;
     }
   } catch (err) {
     console.error("Error al agregar amigo:", err.response);
@@ -345,11 +403,31 @@ onMounted(async () => {
         type="text"
         v-model="searchName"
         placeholder="Buscar usuario por nombre..."
+        @input="fetchUserSuggestions"
       />
       <button class="blue-button" @click="addFriend" :disabled="loadingSearch">
         Agregar
       </button>
     </div>
+    
+    <!-- Sugerencias -->
+    <ul
+      v-if="searchSuggestions.length && searchName"
+      class="suggestions-list"
+    >
+      <li
+        v-for="suggestion in searchSuggestions"
+        :key="suggestion.nombre"
+        class="suggestion-item"
+      >
+        <button
+          @click="selectUser(suggestion.nombre)"
+          class="suggestion-button"
+        >
+          {{ suggestion.nombre }}
+        </button>
+      </li>
+    </ul>
 
     <!-- Lista de amigos -->
     <div class="amigos-container">

@@ -176,6 +176,7 @@
 }
 
 .friend-search {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -207,4 +208,49 @@
 .blue-button:hover {
   transform: scale(1.05);
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos para la lista de sugerencias de usuario */
+.suggestions-list {
+  list-style: none;
+  padding: 0;
+  background: #1f1e1c;
+  border: 1px solid #262522;
+  max-height: 200px;
+  overflow-y: auto;
+  border-radius: 8px;
+  width: calc(100% - 40px); /* 40px para compensar el margen de los lados */
+  margin: 0 20px;
+  margin-bottom: 20px;
+}
+
+.suggestion-item {
+  padding: 15px;
+  border-bottom: 1px solid #262522;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-button {
+  background: none;
+  border: none;
+  color: #a2d060;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  padding: 15px;
+  font-size: 16px;
+  margin: -15px;
+  display: block;
+}
+
+.suggestion-button:hover {
+  background-color: #352a39;
+  width: calc(100% + 30px);
+  margin: -15px;
 }
