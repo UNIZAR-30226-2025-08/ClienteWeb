@@ -8,19 +8,22 @@
       :style="getPlayerPositionStyle(index, players.length)"
       @click="onPlayerClick(player.id)"
     >
-      <!-- Contenedor exclusivo para la imagen con overflow hidden -->
+      <!-- Avatar + overlay de calavera -->
       <div class="avatar-wrapper">
         <img
           :src="avatarMap[player.avatar] || defaultAvatar"
           alt="Avatar Jugador"
           class="player-image"
         />
+        <div v-if="deadPlayers.includes(player.id)" class="skull-overlay">
+          💀
+        </div>
       </div>
 
-      <!-- Etiqueta con el nombre del jugador, fuera del contenedor de imagen -->
+      <!-- Nombre del jugador -->
       <span class="player-label">{{ player.nombre }}</span>
 
-      <!-- Visualización de los votos (Palitos) -->
+      <!-- Palitos de voto -->
       <div class="votes-bar">
         <div v-for="n in player.votes" :key="n" class="vote-stick"></div>
       </div>
@@ -29,13 +32,18 @@
 </template>
 
 <script>
-import defaultAvatar from "../../../assets/profile_icon.jpg"; // Imagen por defecto
+import defaultAvatar from "../../../assets/profile_icon.jpg";
+
 export default {
   name: "PlayersCircle",
   props: {
     players: {
       type: Array,
       required: true,
+    },
+    deadPlayers: {
+      type: Array,
+      default: () => [],
     },
     selectedPlayerIndex: {
       type: Number,
@@ -55,16 +63,11 @@ export default {
       this.$emit("select-player", playerId);
     },
     getPlayerPositionStyle(index, totalPlayers) {
-      // Calcula el ángulo para este jugador
       const angle = (360 / totalPlayers) * index;
-      // Radio (distancia desde el centro)
-      const radius = 200; // Ajusta según tu diseño
-      // Convierte ángulo a radianes
+      const radius = 200;
       const rad = (angle * Math.PI) / 180;
-      // Calcula coordenadas (x, y)
       const x = radius * Math.cos(rad);
       const y = radius * Math.sin(rad);
-
       return {
         transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
       };
@@ -74,37 +77,44 @@ export default {
 </script>
 
 <style scoped>
-/* Contenedor que define la "zona" del círculo */
 .players-circle {
-  position: absolute; /* o relative, según tu necesidad */
-  top: 50%; /* centrado vertical */
-  left: 50%; /* centrado horizontal */
-  width: 500px; /* ajusta el ancho que quieras */
-  height: 500px; /* ajusta la altura que quieras */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 500px;
+  height: 500px;
   transform: translate(-50%, -50%);
-  /* Puedes agregar un borde o background para debug
-    border: 2px dashed red;
-    */
 }
 
-/* Cada "jugador" se ubica en posición absoluta dentro del contenedor */
 .player-icon {
   position: absolute;
-  width: 64px; /* ajusta el tamaño del icono */
+  width: 64px;
   height: 64px;
   cursor: pointer;
 }
 
-/* Imagen del jugador */
+.avatar-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 .player-image {
   width: 100%;
   height: 100%;
 }
 
-/* Etiqueta del jugador (ej: "Jugador 1") */
+.skull-overlay {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 1.5rem;
+  pointer-events: none;
+}
+
 .player-label {
   position: absolute;
-  top: 100%; /* justo debajo de la imagen */
+  top: 100%;
   left: 50%;
   transform: translateX(-50%);
   color: #fff;
@@ -112,7 +122,21 @@ export default {
   white-space: nowrap;
 }
 
-/* Si quieres destacar el jugador seleccionado */
+.votes-bar {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+}
+
+.vote-stick {
+  width: 4px;
+  height: 12px;
+  background: #ffeb3b;
+  margin: 0 1px;
+}
+
 .selected {
   outline: 2px solid yellow;
   border-radius: 50%;

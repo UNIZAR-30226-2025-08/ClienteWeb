@@ -80,6 +80,7 @@
       <!-- Círculo de jugadores -->
       <PlayersCircle
         :players="players"
+        :dead-players="deadPlayerIds"
         :selected-player-index="selectedPlayerIndex"
         :avatarMap="avatarMap"
         :defaultAvatar="defaultAvatar"
@@ -321,6 +322,12 @@ export default {
         "recuento_muertes",
       ].includes(this.currentPhase);
     },
+    // NUEVO: IDs de jugadores muertos
+    deadPlayerIds() {
+      return this.players
+        .filter((player) => player.estaVivo === false)
+        .map((player) => player.id);
+    },
   },
   mounted() {
     //Todos los sockets de escucha para eventos del backend
@@ -339,7 +346,7 @@ export default {
     socket.on("iniciarVotacionAlguacil", (data) => {
       console.log("Votación del alguacil iniciada", data);
       this.flujoVotacionAlguacil();
-      this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
+      this.timeLeft = 25; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
       this.isVotingPhase = true;
     });
     //3. Evento que notifica en caso de empate en la votación del alguacil
@@ -420,8 +427,23 @@ export default {
     //11. Escuchar evento para pasar al día
     socket.on("diaComienza", (data) => {
       console.log("El día ha comenzado", data);
-      // guardo víctimas (array de {id,nombre,rol})
+
       this.victimas = data.victimas || [];
+
+      // Extraemos un array de IDs como Number
+      const victimaIds = this.victimas
+        .map((v) => Number(v))
+        .filter((id) => !Number.isNaN(id));
+      console.log("IDs de víctimas:", victimaIds);
+
+      victimaIds.forEach((id) => {
+        const p = this.players.find((player) => player.id === id);
+        if (p) {
+          p.estaVivo = false;
+        }
+      });
+
+      console.log("Jugadores tras la actualización de víctimas:", this.players);
 
       // muestro overlay de recuento_muertes
       this.currentPhase = "recuento_muertes";
