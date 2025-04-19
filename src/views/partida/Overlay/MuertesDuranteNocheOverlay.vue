@@ -1,12 +1,15 @@
-<!-- Archivo: ./Overlay/DiaComienzaOverlay.vue -->
+<!-- Archivo: ./Overlay/MuertesDuranteNocheOverlay.vue -->
 <template>
   <div class="overlay fadeInOut">
     <div class="overlay-content">
       <h1>Resumen de la Noche</h1>
       <ul>
-        <li v-for="victima in victimas" :key="victima.id">
-          {{ victimas }} ha muerto durante la noche. Causa:
-          {{ victima.rolResponsable }}.
+        <li
+          v-for="(victima, index) in victimas"
+          :key="index"
+          class="victim-text"
+        >
+          🗡️🩸 {{ victima }} ha muerto durante la noche.
         </li>
       </ul>
     </div>
@@ -19,7 +22,7 @@ export default {
   props: {
     victimas: {
       type: Array,
-      // default: () => [],
+      default: () => [],
     },
   },
 };
@@ -41,6 +44,11 @@ export default {
 .overlay-content {
   color: white;
   text-align: center;
+}
+/* Aumentamos el tamaño de las líneas de víctima */
+.victim-text {
+  font-size: 2rem; /* Ajusta a tu gusto */
+  margin: 0.5em 0;
 }
 .fadeInOut {
   animation: fadeInOut 5s forwards;

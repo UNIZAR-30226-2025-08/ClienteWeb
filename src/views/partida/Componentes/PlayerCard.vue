@@ -15,6 +15,7 @@
           alt="Avatar Jugador"
           class="player-image"
         />
+        <div v-if="player.nombre == MiPlayerNombre" class="self-icon">👑</div>
         <div v-if="deadPlayers.includes(player.id)" class="skull-overlay">
           💀
         </div>
@@ -23,9 +24,13 @@
       <!-- Etiqueta con el nombre del jugador -->
       <span
         class="player-label"
-        :class="{ dead: deadPlayers.includes(player.id) }"
+        :class="{
+          dead: deadPlayers.includes(player.id),
+          self: player.nombre == MiPlayerNombre,
+        }"
       >
         {{ player.nombre }}
+        {{ console.log(MiPlayerNombre) }}
       </span>
 
       <!-- Visualización de los votos (Palitos) -->
@@ -49,6 +54,12 @@ export default {
       type: Array,
       required: true,
     },
+    //Quien es el jugador que maneja el cliente.
+    MiPlayerNombre: {
+      type: String,
+      required: true,
+    },
+
     deadPlayers: {
       type: Array,
       default: () => [],
@@ -126,6 +137,18 @@ export default {
 
 .player-label.dead {
   color: #888;
+}
+.player-label.self {
+  color: black; /* por ejemplo, azul vivo */
+  font-weight: bold; /* opcional */
+}
+.self-icon {
+  position: absolute;
+  top: -1.8vw;
+  right: -1.2vw;
+  font-size: 2.2vw;
+  pointer-events: none;
+  text-shadow: 0 0 0.2vw rgba(0, 0, 0, 0.7);
 }
 
 .player-label.dead::after {

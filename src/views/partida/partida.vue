@@ -80,6 +80,7 @@
       <!-- Círculo de jugadores -->
       <PlayersCircle
         :players="players"
+        :MiPlayerNombre="MiNombre"
         :deadPlayers="deadPlayerIds"
         :selected-player-index="selectedPlayerIndex"
         :avatarMap="avatarMap"
@@ -233,7 +234,7 @@ export default {
       isGameActive: false,
       isVotingPhase: false,
       LoboHavotado: false,
-
+      MiId: null,
       // Variables del temporizador
       timeLeft: 60,
       countdownInterval: null,
@@ -324,6 +325,10 @@ export default {
         "recuento_muertes",
       ].includes(this.currentPhase);
     },
+
+    MiNombre() {
+      return this.findPlayerNameById(this.MiId);
+    },
     votedPlayerName() {
       const p = this.players.find((p) => p.id === this.selectedPlayerIndex);
       return p ? p.nombre : "—";
@@ -337,11 +342,10 @@ export default {
     },
   },
   mounted() {
+    this.MiId = this.getMyId();
     //Todos los sockets de escucha para eventos del backend
     //Los he dejado numerados en el orden que seguiran más omenos, luego se repetiran los eventos
-
     this.startGameFlow();
-
     // 1. Evento de espera inicial para comenzar la partida
     socket.on("esperaInicial", (data) => {
       console.log("Esperando para iniciar la partida:", data.mensaje);
