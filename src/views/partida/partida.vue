@@ -80,7 +80,7 @@
       <!-- Círculo de jugadores -->
       <PlayersCircle
         :players="players"
-        :dead-players="deadPlayerIds"
+        :deadPlayers="deadPlayerIds"
         :selected-player-index="selectedPlayerIndex"
         :avatarMap="avatarMap"
         :defaultAvatar="defaultAvatar"

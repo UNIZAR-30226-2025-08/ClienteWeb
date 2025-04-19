@@ -102,10 +102,9 @@ export default {
 .status-text {
   display: flex;
   flex-direction: column;
-  font-size: 0.9vw;  /* ~16px */
+  font-size: 0.9vw; /* ~16px */
   white-space: nowrap;
   font-weight: bold;
   text-align: center;
 }
 </style>
-
