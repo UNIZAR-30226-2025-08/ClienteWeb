@@ -61,7 +61,7 @@
 
       <MuertesDuranteNocheOverlay
         v-else-if="currentPhase === 'recuento_muertes'"
-        :victimas="victimas"
+        :victimas="victimasNombres"
       />
     </template>
 
@@ -133,7 +133,7 @@
         v-if="(hasVotedAlguacil || LoboHavotado) && isVotingPhase"
         class="vote-message"
       >
-        Has votado al <strong>Jugador {{ selectedPlayerIndex }}</strong>
+        Has votado a <strong>{{ votedPlayerName }}</strong>
       </div>
 
       <Chat :messages="chatMessages" @new-message="addMessage" />
@@ -295,6 +295,7 @@ export default {
       pocionVidaUsada: false,
 
       victimas: [],
+      victimasNombres: [],
     };
   },
   computed: {
@@ -321,6 +322,15 @@ export default {
         "pocion_vida_usada",
         "recuento_muertes",
       ].includes(this.currentPhase);
+    },
+    votedPlayerName() {
+      const p = this.players.find((p) => p.id === this.selectedPlayerIndex);
+      return p ? p.nombre : "—";
+    },
+    //Encontrar NOmbre a partir de ID
+    FindPlayerNameById(id) {
+      const name = this.players.find((player) => player.id === id);
+      return name.nombre;
     },
     // NUEVO: IDs de jugadores muertos
     deadPlayerIds() {
@@ -435,6 +445,12 @@ export default {
         .map((v) => Number(v))
         .filter((id) => !Number.isNaN(id));
       console.log("IDs de víctimas:", victimaIds);
+
+      this.victimasNombres = victimaIds.map(
+        (id) =>
+          this.players.find((player) => player.id === id)?.nombre ||
+          "Desconocido"
+      );
 
       victimaIds.forEach((id) => {
         const p = this.players.find((player) => player.id === id);
