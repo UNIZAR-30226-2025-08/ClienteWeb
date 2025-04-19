@@ -440,6 +440,10 @@ export default {
         const p = this.players.find((player) => player.id === id);
         if (p) {
           p.estaVivo = false;
+          this.aliveVillagers--;
+          if (p.rol === "Hombre lobo") {
+            this.aliveWolves--;
+          }
         }
       });
 
