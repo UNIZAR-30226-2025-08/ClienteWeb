@@ -15,10 +15,18 @@
           alt="Avatar Jugador"
           class="player-image"
         />
+        <div v-if="deadPlayers.includes(player.id)" class="skull-overlay">
+          💀
+        </div>
       </div>
 
       <!-- Etiqueta con el nombre del jugador -->
-      <span class="player-label">{{ player.nombre }}</span>
+      <span
+        class="player-label"
+        :class="{ dead: deadPlayers.includes(player.id) }"
+      >
+        {{ player.nombre }}
+      </span>
 
       <!-- Visualización de los votos (Palitos) -->
       <div class="votes-bar">
@@ -40,6 +48,10 @@ export default {
     players: {
       type: Array,
       required: true,
+    },
+    deadPlayers: {
+      type: Array,
+      default: () => [],
     },
     selectedPlayerIndex: {
       type: Number,
@@ -106,11 +118,33 @@ export default {
 }
 
 .player-label {
-  margin-top: 0.5vw;
-  color: #000;
-  font-size: 1vw;
-  font-weight: bold;
-  white-space: nowrap;
+  position: relative;
+  display: inline-block;
+  transition: color 0.3s;
+  color: black;
+}
+
+.player-label.dead {
+  color: #888;
+}
+
+.player-label.dead::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 3px;
+  background: #f00; /* color de la línea */
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: strike 1.5s forwards;
+}
+
+@keyframes strike {
+  to {
+    transform: scaleX(1);
+  }
 }
 
 .votes-bar {
@@ -125,6 +159,14 @@ export default {
   height: 0.8vw;
   background-color: #33ff00;
   margin: 0.2vw;
+}
+.skull-overlay {
+  position: absolute;
+  top: 0vw;
+  right: 0.2vw;
+  font-size: 3vw;
+  pointer-events: none;
+  z-index: 5;
 }
 
 .player-icon.selected .avatar-wrapper {
