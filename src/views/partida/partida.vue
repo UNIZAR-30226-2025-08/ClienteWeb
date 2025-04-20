@@ -63,6 +63,15 @@
         v-else-if="currentPhase === 'recuento_muertes'"
         :victimas="victimasNombres"
       />
+      <LinchazoOverlay
+        v-else-if="currentPhase === 'recuento_linchazo'"
+        :victimas="victimasNombres"
+      />
+      <EmpateDiaOverlay v-else-if="currentPhase === 'empate_dia'" />
+      <EmpateSegundoDiaOverlay
+        v-else-if="currentPhase === 'empate_dia_segundo'"
+      />
+      <VotacionesDiaOverlay v-else-if="currentPhase === 'votaciones_dia'" />
     </template>
 
     <!-- Cuando no es fase overlay se muestra el contenido principal -->
@@ -183,6 +192,10 @@ import FinTurnoLobos from "../../views/partida/Overlay/FinTurnoLobos.vue";
 import EstadoDurmiendo from "./Overlay/EstadoDurmiendo.vue";
 
 import MuertesDuranteNocheOverlay from "./Overlay/MuertesDuranteNocheOverlay.vue";
+import VotacionesDiaOverlay from "../../views/partida/Overlay/VotacionesDiaOverlay.vue";
+import LinchazoOverlay from "./Overlay/LinchazoOverlay.vue";
+import EmpateDiaOverlay from "../../views/partida/Overlay/EmpateDiaOverlay.vue";
+import EmpateSegundoDiaOverlay from "../../views/partida/Overlay/EmpateSegundoDiaOverlay.vue";
 
 import avatar1 from "../../assets/avatares/imagenPerfil.webp";
 import avatar2 from "../../assets/avatares/imagenPerfil2.webp";
@@ -224,6 +237,10 @@ export default {
     PocionMuerteUsadaOverlay,
     PocimaVidaUsadaOverlay,
     MuertesDuranteNocheOverlay,
+    VotacionesDiaOverlay,
+    LinchazoOverlay,
+    EmpateDiaOverlay,
+    EmpateSegundoDiaOverlay,
   },
   data() {
     return {
@@ -233,6 +250,7 @@ export default {
       currentPhase: "intro",
       isGameActive: false,
       isVotingPhase: false,
+      isLynchPhase: false,
       LoboHavotado: false,
       MiId: null,
       // Variables del temporizador
@@ -323,6 +341,10 @@ export default {
         "pocion_muerte_usada",
         "pocion_vida_usada",
         "recuento_muertes",
+        "recuento_linchazo",
+        "empate_dia",
+        "empate_dia_segundo",
+        "votaciones_dia",
       ].includes(this.currentPhase);
     },
 
@@ -439,62 +461,69 @@ export default {
     socket.on("diaComienza", (data) => {
       console.log("El día ha comenzado", data);
 
+      // — Tu lógica existente para marcar víctimas —
       this.victimas = data.victimas || [];
-
-      // Extraemos un array de IDs como Number
       const victimaIds = this.victimas
         .map((v) => Number(v))
-        .filter((id) => !Number.isNaN(id));
-      console.log("IDs de víctimas:", victimaIds);
-
+        .filter((id) => !isNaN(id));
       this.victimasNombres = victimaIds.map((id) => {
-        const p = this.players.find((player) => player.id === id);
+        const p = this.players.find((pl) => pl.id === id);
         return p ? p.nombre : "Desconocido";
       });
-
       victimaIds.forEach((id) => {
-        const p = this.players.find((player) => player.id === id);
+        const p = this.players.find((pl) => pl.id === id);
         if (p) {
           p.estaVivo = false;
           this.aliveVillagers--;
-          if (p.rol === "Hombre lobo") {
-            this.aliveWolves--;
-          }
+          if (p.rol === "Hombre lobo") this.aliveWolves--;
         }
       });
 
-      console.log("Jugadores tras la actualización de víctimas:", this.players);
-
-      // muestro overlay de recuento_muertes
+      // 1) Overlay de recuento de muertes
       this.currentPhase = "recuento_muertes";
 
-      // y tras 5s paso a la fase de juego de día
+      // 2) Tras 5 s arrancas el día (charla libre)
       setTimeout(() => {
-        this.currentPhase = "game";
+        this.currentPhase = "game"; // Vuelves a la vista principal
         this.currentPeriod = "DÍA";
         this.timeLeft = data.tiempo || 60;
-      }, 5000);
+
+        // 3) Espera 30 s de charla libre…
+        setTimeout(() => {
+          // 4) Muestras overlay de votaciones de día
+          this.currentPhase = "votaciones_dia";
+
+          // 5) Tras unos segundos (o instantáneo), habilita la votación
+          setTimeout(() => {
+            this.isVotingPhase = true;
+            this.isLynchPhase = true; // activamos linchamiento
+            this.hasVotedAlguacil = false; // reseteamos para usarlo como “hasVotedLynch”
+            this.timeLeft = data.tiempo || 60;
+            this.currentPhase = "game"; // o 'game_voting'
+          }, 5000);
+        }, 15000); // 15 s de charla previa
+      }, 5000); // 5 s de recuento de muertes
     });
 
     //12. Evento que notifica un empate en la votación del día y reinicia la votación
     socket.on("empateVotacionDia", (data) => {
-      console.log("Primer empate en la votación diaria:", data.mensaje);
-      // Muestra mensaje de empate y, si es necesario, resetea la UI para permitir una segunda votación
+      this.addEventToQueue({ type: "empateDia", data });
     });
 
     //13. Evento que notifica el segundo empate en la votación del día (ningún jugador es eliminado)
     socket.on("segundoEmpateVotacionDia", (data) => {
-      console.log("Segundo empate en la votación diaria:", data.mensaje);
-      // Muestra mensaje de segundo empate y actualiza la UI para no eliminar a ningún jugador
+      this.addEventToQueue({ type: "empateSegundoDia", data });
     });
 
     //14. Evento que envía el resultado de la votación del día (quién será eliminado)
     socket.on("resultadoVotosDia", (data) => {
-      console.log("Resultado votación de día:", data.mensaje);
-      if (data.jugadorAEliminar) {
-        console.log("Jugador a eliminar:", data.jugadorAEliminar);
-      }
-      // Actualiza la UI para mostrar el resultado de la votación y la acción correspondiente (por ejemplo, marcar como eliminado al jugador)
+      console.log(
+        "Resultado votación de día:",
+        data.mensaje,
+        "Víctima:",
+        data.jugadorAEliminar
+      );
+      this.addEventToQueue({ type: "resultadoVotosDia", data });
     });
 
     // Escuchar la finalización de la partida
@@ -616,7 +645,7 @@ export default {
     },
 
     // Procesa el evento en base a su tipo
-    processSocketEvent(event) {
+    async processSocketEvent(event) {
       switch (event.type) {
         case "alguacilElegido":
           console.log("Procesando en cola: alguacilElegido", event.data);
@@ -655,6 +684,48 @@ export default {
             }
           }, 3000);
           this.timeLeft = event.data.tiempo || 30;
+          break;
+        case "resultadoVotosDia":
+          // 1) Actualizar víctimas
+          const eliminadoId = Number(event.data.jugadorAEliminar);
+          this.victimas = [eliminadoId];
+          this.victimasNombres = this.victimas.map(
+            (id) =>
+              (this.players.find((pl) => pl.id === id) || {}).nombre ||
+              "Desconocido"
+          );
+          // 2) Mostrar overlay de muertes (puedes reutilizar el de noche)
+          this.currentPhase = "recuento_linchazo";
+          // 3) Marcar al jugador como muerto en tu estado
+          this.players = this.players.map((pl) =>
+            pl.id === eliminadoId ? { ...pl, estaVivo: false } : pl
+          );
+          this.aliveVillagers--;
+          // 4) Tras X segundos, volver al ciclo normal (día->noche)
+          setTimeout(() => {
+            this.currentPhase = "game";
+            this.currentPeriod = "NOCHE";
+            // reinicia banderas si hace falta
+            this.resetVotingState();
+          }, 5000);
+          break;
+        case "empateDia":
+          this.currentPhase = "empate_dia";
+          // esperar que termine la animación
+          await this.sleep(5000);
+          // reiniciar votación de día
+          this.currentPhase = "game";
+          this.isVotingPhase = true;
+          this.isLynchPhase = true;
+          break;
+        case "empateSegundoDia":
+          this.currentPhase = "empate_dia_segundo";
+          await this.sleep(5000);
+          // ya no repetimos voto
+          this.currentPhase = "game";
+          this.isVotingPhase = false;
+          this.isLynchPhase = false;
+          break;
         default:
           console.warn("Evento desconocido en cola", event);
       }
@@ -956,35 +1027,43 @@ export default {
 
     //Método modificado para emitir la votación al servidor
     voteForPlayer() {
-      if (this.selectedPlayerIndex && !this.hasVotedAlguacil) {
-        const jugadorObjetivo = this.players.find(
-          (player) => player.id === this.selectedPlayerIndex
-        );
-        if (!jugadorObjetivo || !jugadorObjetivo.id) {
-          console.error("El jugador seleccionado no tiene un ID definido");
-          return;
-        }
-        jugadorObjetivo.votes++;
-        console.log(
-          `Jugador ${this.getMyId()} votó por el jugador ${jugadorObjetivo.id}`
-        );
-        if (this.currentPeriod == "NOCHE") {
-          socket.emit("votar", {
-            idPartida: this.idPartida,
-            idJugador: this.getMyId(),
-            idObjetivo: jugadorObjetivo.id.toString(),
-          });
-          this.LoboHavotado = true;
-        }
-        if (this.currentPeriod == "DÍA") {
-          socket.emit("votarAlguacil", {
-            idPartida: this.idPartida,
-            idJugador: this.getMyId(),
-            idObjetivo: jugadorObjetivo.id.toString(),
-          });
-          this.hasVotedAlguacil = true;
-        }
+      if (!this.selectedPlayerIndex) return;
+
+      const objetivo = this.selectedPlayerIndex.toString();
+
+      // — VOTO DE HOMBRES LOBO (noche) —
+      if (this.currentPeriod === "NOCHE") {
+        if (this.LoboHavotado) return;
+        socket.emit("votar", {
+          idPartida: this.idPartida,
+          idJugador: this.getMyId(),
+          idObjetivo: objetivo,
+        });
+        this.LoboHavotado = true;
+        return;
       }
+
+      // — VOTO DE DÍA —
+      if (this.hasVotedAlguacil) return;
+
+      if (this.isLynchPhase) {
+        // linchamiento usa el mismo canal 'votar'
+        socket.emit("votar", {
+          idPartida: this.idPartida,
+          idJugador: this.getMyId(),
+          idObjetivo: objetivo,
+        });
+        this.isLynchPhase = false; // lo consumimos
+      } else {
+        // primera votación: alguacil
+        socket.emit("votarAlguacil", {
+          idPartida: this.idPartida,
+          idJugador: this.getMyId(),
+          idObjetivo: objetivo,
+        });
+      }
+
+      this.hasVotedAlguacil = true; // deshabilita el botón en DÍA
     },
 
     resetVotingState() {
