@@ -72,6 +72,11 @@
         v-else-if="currentPhase === 'empate_dia_segundo'"
       />
       <VotacionesDiaOverlay v-else-if="currentPhase === 'votaciones_dia'" />
+      <MuertoOverlay
+        v-else-if="currentPhase === 'death'"
+        @continue="handleContinueViewing"
+        @exit="$router.push('../juego')"
+      />
     </template>
 
     <!-- Cuando no es fase overlay se muestra el contenido principal -->
@@ -102,7 +107,7 @@
 
       <!-- Nuevo bloque para la acción de la bruja (fase "habilidad_bruja") -->
       <div
-        v-if="currentPhase === 'habilidad_bruja' && isBruja()"
+        v-if="!isSpectator && currentPhase === 'habilidad_bruja' && isBruja()"
         class="bruja-buttons"
       >
         <BotonBrujaVida @usar-pocima-vida="manejarPocimaVida" />
@@ -110,17 +115,20 @@
       </div>
 
       <!-- Contador: se muestra en fase "game_voting" y en "vidente_action" -->
-      <CountdownTimer v-if="isVotingPhase" :time-left="timeLeft" />
+      <CountdownTimer
+        v-if="!isSpectator && isVotingPhase"
+        :time-left="timeLeft"
+      />
 
       <!-- Botón de voto se muestra solo en fase de votación (y para quienes NO son la Vidente) -->
       <VoteButton
-        v-if="isVotingPhase && currentPeriod === 'DÍA'"
+        v-if="!isSpectator && isVotingPhase && currentPeriod === 'DÍA'"
         :selected-player-index="selectedPlayerIndex"
         :has-voted="hasVotedAlguacil"
         @vote="voteForPlayer"
       />
       <VoteButton
-        v-else-if="isVotingPhase && currentPeriod === 'NOCHE'"
+        v-else-if="!isSpectator && isVotingPhase && currentPeriod === 'NOCHE'"
         :selected-player-index="selectedPlayerIndex"
         :has-voted="LoboHavotado"
         @vote="voteForPlayer"
@@ -128,7 +136,7 @@
 
       <!-- Nuevo bloque para la acción de la Vidente (fase "vidente_action") -->
       <div
-        v-if="currentPhase === 'vidente_action' && isVidente()"
+        v-if="!isSpectator && currentPhase === 'vidente_action' && isVidente()"
         class="vidente-buttons"
       >
         <TurnButton :has-passed="hasVidenteActed" @pass="handlePassTurn" />
@@ -140,13 +148,19 @@
 
       <!-- Mensaje cuando ya has votado -->
       <div
-        v-if="(hasVotedAlguacil || LoboHavotado) && isVotingPhase"
+        v-if="
+          (hasVotedAlguacil || LoboHavotado) && isVotingPhase && !isSpectator
+        "
         class="vote-message"
       >
         Has votado a <strong>{{ votedPlayerName }}</strong>
       </div>
 
-      <Chat :messages="chatMessages" @new-message="addMessage" />
+      <Chat
+        :messages="chatMessages"
+        @new-message="addMessage"
+        :disabled="isSpectator"
+      />
     </template>
   </div>
 </template>
@@ -196,6 +210,7 @@ import VotacionesDiaOverlay from "../../views/partida/Overlay/VotacionesDiaOverl
 import LinchazoOverlay from "./Overlay/LinchazoOverlay.vue";
 import EmpateDiaOverlay from "../../views/partida/Overlay/EmpateDiaOverlay.vue";
 import EmpateSegundoDiaOverlay from "../../views/partida/Overlay/EmpateSegundoDiaOverlay.vue";
+import MuertoOverlay from "../../views/partida/Overlay/MuertoOverlay.vue";
 
 import avatar1 from "../../assets/avatares/imagenPerfil.webp";
 import avatar2 from "../../assets/avatares/imagenPerfil2.webp";
@@ -241,6 +256,7 @@ export default {
     LinchazoOverlay,
     EmpateDiaOverlay,
     EmpateSegundoDiaOverlay,
+    MuertoOverlay,
   },
   data() {
     return {
@@ -252,6 +268,7 @@ export default {
       isVotingPhase: false,
       isLynchPhase: false,
       LoboHavotado: false,
+      isSpectator: false,
       MiId: null,
       // Variables del temporizador
       timeLeft: 60,
@@ -345,6 +362,7 @@ export default {
         "empate_dia",
         "empate_dia_segundo",
         "votaciones_dia",
+        "death",
       ].includes(this.currentPhase);
     },
 
@@ -478,6 +496,11 @@ export default {
           if (p.rol === "Hombre lobo") this.aliveWolves--;
         }
       });
+
+      // Si tú has muerto, pasas a espectador y sales al overlay de muerte
+      if (victimaIds.includes(this.MiId)) {
+        return this.markDead();
+      }
 
       // 1) Overlay de recuento de muertes
       this.currentPhase = "recuento_muertes";
@@ -616,6 +639,10 @@ export default {
     clearInterval(this.countdownInterval);
   },
   methods: {
+    markDead() {
+      this.isSpectator = true;
+      this.currentPhase = "death";
+    },
     // Función auxiliar: pausa la ejecución
     sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
@@ -680,7 +707,7 @@ export default {
               this.currentPhase = "habilidad_bruja"; // TODO: que se vea el juego pero con los botones de habilidad nuevos de la bruja
               this.timeLeft = event.data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
             } else {
-              this.currentPhase = "estado_durmiendo"; // Cambia a la fase correspondiente para los demás jugadores
+              //this.currentPhase = "estado_durmiendo"; // Cambia a la fase correspondiente para los demás jugadores
             }
           }, 3000);
           this.timeLeft = event.data.tiempo || 30;
@@ -701,6 +728,11 @@ export default {
             pl.id === eliminadoId ? { ...pl, estaVivo: false } : pl
           );
           this.aliveVillagers--;
+
+          if (eliminadoId === this.MiId) {
+            this.markDead(); // Aquí es donde llamas al método markDead
+          }
+
           // 4) Tras X segundos, volver al ciclo normal (día->noche)
           setTimeout(() => {
             this.currentPhase = "game";
@@ -731,7 +763,12 @@ export default {
       }
     },
 
+    handleContinueViewing() {
+      // quita overlay, pero mantiene isSpectator = true
+      this.currentPhase = "game";
+    },
     addMessage(message) {
+      if (this.isSpectator) return; // No envíes mensajes si eres espectador
       // Envía al servidor
       socket.emit("enviarMensaje", {
         idPartida: this.idPartida,
@@ -1003,6 +1040,7 @@ export default {
 
     // Permite la selección de un jugador. Se utiliza una variable de control separada según la fase.
     selectPlayer(playerId) {
+      if (this.isSpectator) return; // No permite seleccionar si eres espectador
       // Si no estamos en fase de votación o en la fase de vidente, no se permite seleccionar
       if (
         !this.isVotingPhase &&
@@ -1027,6 +1065,7 @@ export default {
 
     //Método modificado para emitir la votación al servidor
     voteForPlayer() {
+      if (this.isSpectator) return; // No permite votar si eres espectador
       if (!this.selectedPlayerIndex) return;
 
       const objetivo = this.selectedPlayerIndex.toString();
