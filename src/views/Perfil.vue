@@ -107,7 +107,7 @@ const actualizarPerfil = async () => {
   } catch (error) {
     errorMensaje.value =
       error.response?.data?.error || "Error al actualizar el perfil";
-    toast.error(errorMensaje.value);
+    toast.error(errorMensaje.value, { autoClose: 3000 });
   }
 };
 
@@ -366,7 +366,7 @@ onUnmounted(() => {
           <h3>Actualizar Perfil</h3>
           <form @submit.prevent="actualizarPerfil" class="update-form">
             <div class="form-group">
-              <label for="nuevoNombre">Nuevo Nombre:</label>
+              <label for="nuevoNombre">Nombre de usuario:</label>
               <input
                 id="nuevoNombre"
                 v-model="nuevoNombre"

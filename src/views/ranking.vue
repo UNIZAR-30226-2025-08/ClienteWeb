@@ -5,6 +5,28 @@ import axios from "axios";
 import Volver from "../components/Volver.vue";
 import Cabecera from "../components/Cabecera.vue";
 
+// Importación de avatares
+import avatar1 from "../assets/avatares/imagenPerfil.webp";
+import avatar2 from "../assets/avatares/imagenPerfil2.webp";
+import avatar3 from "../assets/avatares/imagenPerfil3.webp";
+import avatar4 from "../assets/avatares/imagenPerfil4.webp";
+import avatar5 from "../assets/avatares/imagenPerfil5.webp";
+import avatar6 from "../assets/avatares/imagenPerfil6.webp";
+import avatar7 from "../assets/avatares/imagenPerfil7.webp";
+import avatar8 from "../assets/avatares/imagenPerfil8.webp";
+
+// Mapeo de avatares
+const avatarMap = {
+  avatar1,
+  avatar2,
+  avatar3,
+  avatar4,
+  avatar5,
+  avatar6,
+  avatar7,
+  avatar8,
+};
+
 const router = useRouter();
 
 // Variables reactivas para los datos, estado de carga y errores
@@ -40,6 +62,11 @@ onMounted(() => {
 const sortedPlayers = computed(() => {
   return [...rankedPlayers.value].sort((a, b) => b.victories - a.victories);
 });
+
+// Función para obtener el avatar correcto
+const getAvatar = (avatarName) => {
+  return avatarMap[avatarName] || avatar1; // Si no se encuentra el avatar, usar el predeterminado
+};
 </script>
 
 <template>
@@ -86,7 +113,16 @@ const sortedPlayers = computed(() => {
             <span v-else>{{ index + 1 }}</span>
           </td>
 
-          <td class="player-name">{{ player.name }}</td>
+          <td class="player-cell">
+            <div class="player-info">
+              <img
+                :src="getAvatar(player.avatar)"
+                :alt="player.name"
+                class="player-avatar"
+              />
+              <span class="player-name">{{ player.name }}</span>
+            </div>
+          </td>
           <td class="victories">{{ player.victories }}</td>
         </tr>
       </tbody>
@@ -135,12 +171,15 @@ const sortedPlayers = computed(() => {
   width: 100%;
   border-collapse: collapse;
   background-color: rgba(255, 255, 255, 0.05);
+  table-layout: fixed; /* Asegura que las columnas tengan un ancho consistente */
 }
 
 .ranking-table th,
 .ranking-table td {
   padding: 1.2rem;
   border: 1px solid #302e2b;
+  height: 60px; /* Altura fija para todas las filas */
+  vertical-align: middle; /* Centra el contenido verticalmente */
 }
 
 .ranking-table th {
@@ -170,10 +209,33 @@ thead {
   text-shadow: 5px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
-.rank-cell {
+/* Ajustes para la celda del jugador */
+.player-cell {
+  text-align: left;
+  height: 60px; /* Misma altura que las demás celdas */
+}
+
+.player-info {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 1rem;
+  height: 100%; /* Ocupa toda la altura de la celda */
+}
+
+.player-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #fbdc2e;
+  object-fit: cover;
+}
+
+.player-name {
+  font-family: "MedievalSharp", cursive;
+  font-size: 1.7rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 5px 3px 3px rgba(0, 0, 0, 0.7);
 }
 
 .bi-trophy-fill {
@@ -188,9 +250,27 @@ thead {
   color: #f0ec00;
 }
 
+/* Ajustes para la celda de victorias */
+.victories {
+  text-align: center;
+  height: 60px; /* Misma altura que las demás celdas */
+}
+
+/* Ajustes para la celda de posición */
+.rank-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60px; /* Misma altura que las demás celdas */
+}
+
 .icon {
   margin-right: 0.5rem;
   color: #f4f4f4;
+  height: 100%; /* Ocupa toda la altura de la celda */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .trophy {

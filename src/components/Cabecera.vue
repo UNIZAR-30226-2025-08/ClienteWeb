@@ -43,6 +43,7 @@ const feedbackMessage = ref("");
 const feedbackType = ref("");
 const showInvitationModal = ref(false);
 const invitationData = ref(null);
+const nombreInvitador = ref("");
 
 // Para poder usar las rutas dentro del setup()
 const route = useRoute();
@@ -173,6 +174,21 @@ const initUser = () => {
 
 initUser();
 
+// Función para obtener el nombre del invitador
+const obtenerNombreInvitador = async (idInvitador) => {
+  try {
+    const response = await axios.post("/api/usuario/obtener_nombre_por_id", {
+      idUsuario: idInvitador,
+    });
+    if (response.data?.nombre) {
+      nombreInvitador.value = response.data.nombre;
+    }
+  } catch (error) {
+    console.error("Error al obtener el nombre del invitador:", error);
+    nombreInvitador.value = "Usuario desconocido";
+  }
+};
+
 onMounted(() => {
   toggleNotifications(); // Cargar solicitudes al montar el componente
   // Socket events
@@ -181,6 +197,8 @@ onMounted(() => {
       console.log("Invitación recibida:", data);
       invitationData.value = data;
       showInvitationModal.value = true;
+      // Obtener el nombre del invitador cuando se recibe la invitación
+      obtenerNombreInvitador(data.idInvitador);
     }
   });
 
@@ -301,8 +319,7 @@ onUnmounted(() => {
           <strong>{{ invitationData?.idSala }}</strong
           >.
         </p>
-        <p>Invitación de: {{ invitationData?.idInvitador }}</p>
-        <p>Código: {{ invitationData?.codigoInvitacion }}</p>
+        <p>Invitación del usuario: {{ nombreInvitador }}</p>
         <div class="modal-buttons">
           <button class="green-button" @click="acceptInvitation">
             Aceptar

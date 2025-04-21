@@ -11,6 +11,7 @@ const usuario = ref(null);
 const nombreServidor = ref(""); // Inicializar vacío para que se actualice correctamente
 const privacidad = ref("publica");
 const password = ref("");
+const showPassword = ref(false); // variable para controlar la visibilidad de la contraseña
 
 // Recuperar usuario autenticado al cargar la vista
 onMounted(() => {
@@ -228,11 +229,23 @@ socket.on("errorSala", (msg) => {
         </div>
         <div v-if="privacidad === 'Privada'" class="contraseña">
           <label>Contraseña:</label>
-          <input
-            type="password"
-            v-model="password"
-            placeholder="Introduce una contraseña"
-          />
+          <div class="password-input-container">
+            <input
+              :type="showPassword ? 'text' : 'password'"
+              v-model="password"
+              placeholder="Introduce una contraseña"
+            />
+            <button
+              class="toggle-password"
+              @click="showPassword = !showPassword"
+              :class="{ show: showPassword }"
+            >
+              <i
+                class="bi"
+                :class="showPassword ? 'bi-eye-slash' : 'bi-eye'"
+              ></i>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -648,21 +661,38 @@ h3::before {
   border-radius: 2px;
 }
 
-.contraseña {
-  flex-grow: 1;
-  animation: slideIn 0.3s ease;
+.password-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 70%;
 }
+
+.password-input-container input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #a8a6a1;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+  color: #a2d060;
+}
+
+.toggle-password i {
+  font-size: 1.2rem;
+}
+
 .contraseña input {
-  width: 30%;
-}
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  width: 100%;
 }
 </style>
