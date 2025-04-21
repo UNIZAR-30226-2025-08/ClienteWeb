@@ -78,7 +78,11 @@
         @exit="$router.push('../juego')"
       />
 
-      <mensajeBrujaOverlay v-else-if="currentPhase === 'mensaje_burja'" />
+      <mensajeBrujaOverlay 
+        v-else-if="currentPhase === 'mensaje_burja'" 
+        :victimName="wolfVictimName"
+      />
+
     </template>
 
     <!-- Cuando no es fase overlay se muestra el contenido principal -->
@@ -337,6 +341,8 @@ export default {
 
       victimas: [],
       victimasNombres: [],
+
+      wolfVictimName: "",
     };
   },
   computed: {
@@ -423,12 +429,12 @@ export default {
     socket.on("nocheComienza", (data) => {
       this.addEventToQueue({ type: "nocheComienza", data });
     });
-
+    
     // 6. Evento: habilidad de la vidente
     socket.on("habilidadVidente", (data) => {
       this.addEventToQueue({ type: "habilidadVidente", data });
     });
-
+    
     // Evento que recibes para saber rol del jugador antes de los lobos
     // Listener para el resultado de la acción de la vidente (revelación)
     socket.on("visionJugador", (data) => {
@@ -466,15 +472,10 @@ export default {
 
     //9. Evento que notifica a la bruja con el mensaje y la víctima elegida por los lobos (Si la bruja existe)
     socket.on("mensajeBruja", (data) => {
-      console.log(
-        "Mensaje para la bruja:",
-        data.mensaje,
-        "Víctima:",
-        data.victima
-      );
-      this.currentPhase = "mensaje_burja"
-      // En la UI, muestra la interfaz para que la bruja decida si curar o eliminar, mostrando los detalles
+      console.log("Mensaje para la bruja:");
+      this.addEventToQueue({ type: "loboAttack", data });
     });
+
     //10. Evento para activar la habilidad de la bruja
     socket.on("habilidadBruja", (data) => {
       this.addEventToQueue({ type: "habilidadBruja", data });
@@ -763,6 +764,21 @@ export default {
           this.currentPhase = "game";
           this.isVotingPhase = false;
           this.isLynchPhase = false;
+          break;
+
+          case "loboAttack":
+            // obtenemos el nombre de la víctima
+            const victimId = Number(event.data.victima);
+            this.wolfVictimName = this.findPlayerNameById(victimId);
+            this.currentPhase = "mensaje_burja";
+            // tras 6s pasamos a la fase de habilidad de la bruja (si la hay)
+            setTimeout(() => {
+              if (this.isBruja()) {
+                this.currentPhase = "despertar_bruja";
+              } else {
+                this.currentPhase = "game";
+              }
+            }, 6000);
           break;
         default:
           console.warn("Evento desconocido en cola", event);
