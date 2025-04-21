@@ -18,6 +18,13 @@ const partidas = ref([]); // Lista de partidas
 const partidaSeleccionada = ref(null); // Partida seleccionada para mostrar detalles
 const mostrarDetalles = ref(false); // Controla la visibilidad del modal de detalles
 
+// Variables para estadísticas
+const estadisticas = ref({
+  partidasGanadas: 0,
+  partidasTotales: 0,
+  porcentajeVictorias: 0,
+});
+
 // Función para obtener el ID del usuario logueado desde localStorage
 const getUserId = () => {
   return JSON.parse(localStorage.getItem("usuario")).id;
@@ -50,6 +57,25 @@ const obtenerHistorialPartidas = async () => {
   } catch (error) {
     console.error("Error al obtener el historial de partidas:", error);
     toast.error("No se pudo cargar el historial de partidas.");
+  }
+};
+
+// Función para obtener estadísticas del usuario
+const obtenerEstadisticas = async () => {
+  try {
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    if (!usuario?.id) {
+      toast.error("No se encontró información del usuario.");
+      return;
+    }
+
+    const response = await axios.get(`/api/estadisticas/obtener/${usuario.id}`);
+    if (response.data?.stats) {
+      estadisticas.value = response.data.stats;
+    }
+  } catch (error) {
+    console.error("Error al obtener estadísticas:", error);
+    toast.error("No se pudieron cargar las estadísticas.");
   }
 };
 
@@ -92,6 +118,7 @@ onMounted(() => {
   verificarAdministrador(); // Llamamos a la función de verificación al montar el componente
 
   obtenerHistorialPartidas(); // Cargar el historial de partidas al montar el componente
+  obtenerEstadisticas(); // Agregamos la llamada para obtener estadísticas
 
   // Manejo de errores
   socket.on("error", (mensaje) => {
@@ -215,6 +242,31 @@ const unirseRapido = () => {
 
         <!-- Contenido principal: Tabla -->
         <div class="content">
+          <!-- Sección de estadísticas -->
+          <div class="stats-section">
+            <h3>Estadísticas</h3>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="stat-label">Partidas Ganadas</span>
+                <span class="stat-value">{{
+                  estadisticas.partidasGanadas
+                }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Partidas Totales</span>
+                <span class="stat-value">{{
+                  estadisticas.partidasTotales
+                }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Porcentaje de Victorias</span>
+                <span class="stat-value"
+                  >{{ estadisticas.porcentajeVictorias.toFixed(2) }}%</span
+                >
+              </div>
+            </div>
+          </div>
+
           <div class="history">
             <table class="history-table">
               <thead>
@@ -698,5 +750,48 @@ const unirseRapido = () => {
 /* Estilos para el modal */
 .exit-modal h3 {
   margin-bottom: 15px;
+}
+
+/* Estilos para la sección de estadísticas */
+.stats-section {
+  background-color: #1e1c1a;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.stats-section h3 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.stat-item {
+  background-color: #262522;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stat-label {
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.stat-value {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 </style>

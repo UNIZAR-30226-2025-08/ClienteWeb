@@ -52,6 +52,13 @@ const partidas = ref([]); // Lista de partidas
 const partidaSeleccionada = ref(null); // Partida seleccionada para mostrar detalles
 const mostrarDetalles = ref(false); // Controla la visibilidad del modal de detalles
 
+// Variables para estadísticas
+const estadisticas = ref({
+  partidasGanadas: 0,
+  partidasTotales: 0,
+  porcentajeVictorias: 0,
+});
+
 // Función para actualizar el perfil (solo para el perfil propio)
 const actualizarPerfil = async () => {
   errorMensaje.value = "";
@@ -128,6 +135,19 @@ const obtenerHistorialPartidas = async (userId) => {
   }
 };
 
+// Función para obtener estadísticas del usuario
+const obtenerEstadisticas = async (userId) => {
+  try {
+    const response = await axios.get(`/api/estadisticas/obtener/${userId}`);
+    if (response.data?.stats) {
+      estadisticas.value = response.data.stats;
+    }
+  } catch (error) {
+    console.error("Error al obtener estadísticas:", error);
+    toast.error("No se pudieron cargar las estadísticas.");
+  }
+};
+
 // Función para seleccionar y ver detalles de una partida
 const seleccionarPartida = (partida) => {
   partidaSeleccionada.value = partida;
@@ -188,6 +208,7 @@ onMounted(async () => {
       ? route.params.idUsuario
       : getMyId();
   obtenerHistorialPartidas(idParaHistorial);
+  obtenerEstadisticas(idParaHistorial);
 
   // Manejo de errores
   socket.on("error", (mensaje) => {
@@ -233,6 +254,27 @@ onUnmounted(() => {
             <button class="btn friends-btn" @click="$router.push('/amigos')">
               Ver mis amigos
             </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección de estadísticas -->
+      <div class="stats-section">
+        <h3>Estadísticas</h3>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-label">Partidas Ganadas</span>
+            <span class="stat-value">{{ estadisticas.partidasGanadas }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Partidas Totales</span>
+            <span class="stat-value">{{ estadisticas.partidasTotales }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Porcentaje de Victorias</span>
+            <span class="stat-value"
+              >{{ estadisticas.porcentajeVictorias.toFixed(2) }}%</span
+            >
           </div>
         </div>
       </div>
@@ -458,6 +500,40 @@ onUnmounted(() => {
 
 .friends-btn:hover {
   background-color: #218838;
+}
+
+/* Sección de estadísticas */
+.stats-section {
+  background-color: #1e1c1a;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.stats-section h3 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
 /* Sección de historial de partidas */
