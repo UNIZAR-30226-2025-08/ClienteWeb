@@ -77,6 +77,8 @@
         @continue="handleContinueViewing"
         @exit="$router.push('../juego')"
       />
+
+      <mensajeBrujaOverlay v-else-if="currentPhase === 'mensaje_burja'" />
     </template>
 
     <!-- Cuando no es fase overlay se muestra el contenido principal -->
@@ -212,6 +214,8 @@ import EmpateDiaOverlay from "../../views/partida/Overlay/EmpateDiaOverlay.vue";
 import EmpateSegundoDiaOverlay from "../../views/partida/Overlay/EmpateSegundoDiaOverlay.vue";
 import MuertoOverlay from "../../views/partida/Overlay/MuertoOverlay.vue";
 
+import mensajeBrujaOverlay from "./Overlay/mensajeBrujaOverlay.vue";
+
 import avatar1 from "../../assets/avatares/imagenPerfil.webp";
 import avatar2 from "../../assets/avatares/imagenPerfil2.webp";
 import avatar3 from "../../assets/avatares/imagenPerfil3.webp";
@@ -245,8 +249,7 @@ export default {
     DespertarHombresLobo,
     FinTurnoLobos,
     EstadoDurmiendo,
-    DespertarBruja, //NUEVO
-    //BotonesBruja, // NUEVO
+    DespertarBruja, 
     BotonBrujaVida,
     BotonBrujaMuerte,
     PocionMuerteUsadaOverlay,
@@ -257,6 +260,7 @@ export default {
     EmpateDiaOverlay,
     EmpateSegundoDiaOverlay,
     MuertoOverlay,
+    mensajeBrujaOverlay,
   },
   data() {
     return {
@@ -362,6 +366,7 @@ export default {
         "empate_dia",
         "empate_dia_segundo",
         "votaciones_dia",
+        "mensaje_burja",
         "death",
       ].includes(this.currentPhase);
     },
@@ -467,6 +472,7 @@ export default {
         "Víctima:",
         data.victima
       );
+      this.currentPhase = "mensaje_burja"
       // En la UI, muestra la interfaz para que la bruja decida si curar o eliminar, mostrando los detalles
     });
     //10. Evento para activar la habilidad de la bruja
