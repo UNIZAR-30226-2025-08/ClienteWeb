@@ -161,12 +161,14 @@ export default {
   border-radius: 50%;
   overflow: hidden;
   border: 0.3vw solid var(--player-color);
+  transition: border-color 0.3s, transform 0.3s;
 }
 
 .player-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
 }
 
 .player-label {
@@ -175,15 +177,17 @@ export default {
   transition: color 0.3s;
   color: var(--player-color);
   font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 100);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
 }
 
 .player-label.dead {
   color: #888;
 }
+
 .player-label.self {
   font-weight: bold;
 }
+
 .self-icon {
   position: absolute;
   top: -1.8vw;
@@ -200,7 +204,7 @@ export default {
   top: 50%;
   width: 100%;
   height: 3px;
-  background: #f00; /* color de la línea */
+  background: #f00;
   transform: scaleX(0);
   transform-origin: left center;
   animation: strike 1.5s forwards;
@@ -225,18 +229,32 @@ export default {
   background-color: #33ff00;
   margin: 0.2vw;
 }
+
 .skull-overlay {
   position: absolute;
-  top: 0vw;
+  top: 0;
   right: 0.2vw;
   font-size: 3vw;
   pointer-events: none;
   z-index: 5;
 }
 
+/* Efecto de halo y escalado para avatar seleccionado */
 .player-icon.selected .avatar-wrapper {
-  outline: 0.3vw solid yellow; /* o un valor en px si prefieres */
-  outline-offset: -0.3vw; /* hace que el contorno quede "pegado" al borde */
-  border-radius: 50%; /* mantiene la forma circular */
+  border-color: #ffeb3b;
+  transform: scale(1.3);
+  animation: pulseGlow 1.5s infinite ease-out;
+}
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0.5vw rgba(255, 235, 59, 0.9);
+  }
+  50% {
+    box-shadow: 0 0 3vw rgba(255, 235, 59, 0);
+  }
+  100% {
+    box-shadow: 0 0 0.5vw rgba(255, 235, 59, 0.9);
+  }
 }
 </style>
