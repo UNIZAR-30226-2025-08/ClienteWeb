@@ -78,11 +78,10 @@
         @exit="$router.push('../juego')"
       />
 
-      <mensajeBrujaOverlay 
-        v-else-if="currentPhase === 'mensaje_burja'" 
+      <mensajeBrujaOverlay
+        v-else-if="currentPhase === 'mensaje_burja'"
         :victimName="wolfVictimName"
       />
-
     </template>
 
     <!-- Cuando no es fase overlay se muestra el contenido principal -->
@@ -253,7 +252,7 @@ export default {
     DespertarHombresLobo,
     FinTurnoLobos,
     EstadoDurmiendo,
-    DespertarBruja, 
+    DespertarBruja,
     BotonBrujaVida,
     BotonBrujaMuerte,
     PocionMuerteUsadaOverlay,
@@ -341,6 +340,7 @@ export default {
 
       victimas: [],
       victimasNombres: [],
+      VotacionLobos: false,
 
       wolfVictimName: "",
     };
@@ -429,12 +429,12 @@ export default {
     socket.on("nocheComienza", (data) => {
       this.addEventToQueue({ type: "nocheComienza", data });
     });
-    
+
     // 6. Evento: habilidad de la vidente
     socket.on("habilidadVidente", (data) => {
       this.addEventToQueue({ type: "habilidadVidente", data });
     });
-    
+
     // Evento que recibes para saber rol del jugador antes de los lobos
     // Listener para el resultado de la acción de la vidente (revelación)
     socket.on("visionJugador", (data) => {
@@ -659,6 +659,11 @@ export default {
       return p ? p.nombre : "Desconocido";
     },
 
+    IsPlayerDead(id) {
+      const player = this.players.find((p) => p.id === id);
+      return player ? !player.estaVivo : false;
+    },
+
     // Agrega un evento a la cola y, si no se está procesando, comienza a procesarla
     addEventToQueue(event) {
       this.eventQueue.push(event);
@@ -688,6 +693,7 @@ export default {
             this.alguacilWinnerIndex
           );
           this.endVotingPhase();
+          this.resetVotingState();
           this.hasVotedAlguacil = true;
           break;
         case "nocheComienza":
@@ -701,10 +707,12 @@ export default {
           this.handleHabilidadVidente();
           this.currentPeriod = "NOCHE";
           this.timeLeft = event.data.tiempo || 15;
+          this.resetVotingState();
           break;
         case "turnoHombresLobos":
           console.log("Procesando en cola: turnoHombresLobos", event.data);
           this.handleTurnoHombresLobo(event.data);
+          this.resetVotingState();
           break;
         case "habilidadBruja":
           this.currentPhase = "despertar_bruja"; //NUEVO
@@ -718,6 +726,7 @@ export default {
             }
           }, 3000);
           this.timeLeft = event.data.tiempo || 30;
+          this.resetVotingState();
           break;
         case "resultadoVotosDia":
           // 1) Actualizar víctimas
@@ -758,6 +767,7 @@ export default {
           this.isLynchPhase = true;
           break;
         case "empateSegundoDia":
+          this.resetVotingState();
           this.currentPhase = "empate_dia_segundo";
           await this.sleep(5000);
           // ya no repetimos voto
@@ -766,19 +776,19 @@ export default {
           this.isLynchPhase = false;
           break;
 
-          case "loboAttack":
-            // obtenemos el nombre de la víctima
-            const victimId = Number(event.data.victima);
-            this.wolfVictimName = this.findPlayerNameById(victimId);
-            this.currentPhase = "mensaje_burja";
-            // tras 6s pasamos a la fase de habilidad de la bruja (si la hay)
-            setTimeout(() => {
-              if (this.isBruja()) {
-                this.currentPhase = "despertar_bruja";
-              } else {
-                this.currentPhase = "game";
-              }
-            }, 6000);
+        case "loboAttack":
+          // obtenemos el nombre de la víctima
+          const victimId = Number(event.data.victima);
+          this.wolfVictimName = this.findPlayerNameById(victimId);
+          this.currentPhase = "mensaje_burja";
+          // tras 6s pasamos a la fase de habilidad de la bruja (si la hay)
+          setTimeout(() => {
+            if (this.isBruja()) {
+              this.currentPhase = "despertar_bruja";
+            } else {
+              this.currentPhase = "game";
+            }
+          }, 6000);
           break;
         default:
           console.warn("Evento desconocido en cola", event);
@@ -922,6 +932,7 @@ export default {
         // 2) Abrir votación si eres lobo o "durmiendo" si no lo eres
         if (this.isLobo()) {
           this.LoboHavotado = false;
+          this.VotacionLobos = true;
           this.currentPhase = "game_voting";
           this.isVotingPhase = true;
         } else {
@@ -1064,6 +1075,10 @@ export default {
     selectPlayer(playerId) {
       if (this.isSpectator) return; // No permite seleccionar si eres espectador
       // Si no estamos en fase de votación o en la fase de vidente, no se permite seleccionar
+
+      /*Si el jugaodor que queremos votar esta muerto, no se le puede selecionar, convendría enseñar un popup de este jugador ya esta muerto */
+      if (this.IsPlayerDead(playerId)) return; // No permite seleccionar si el jugador está muerto
+
       if (
         !this.isVotingPhase &&
         this.currentPhase !== "vidente_action" &&
@@ -1077,6 +1092,20 @@ export default {
       }
       // En la fase de acción de la vidente, verifica si ya se ha actuado
       if (this.currentPhase === "vidente_action" && this.hasVidenteActed) {
+        return;
+      }
+
+      if (
+        this.currentPhase === "vidente_action" &&
+        playerId === this.getMyId()
+      ) {
+        return;
+      }
+      if (
+        this.currentPhase === "game_voting" &&
+        this.VotacionLobos == true &&
+        playerId === this.getMyId()
+      ) {
         return;
       }
 
@@ -1101,6 +1130,7 @@ export default {
           idObjetivo: objetivo,
         });
         this.LoboHavotado = true;
+        this.VotacionLobos = false;
         return;
       }
 
@@ -1123,7 +1153,6 @@ export default {
           idObjetivo: objetivo,
         });
       }
-
       this.hasVotedAlguacil = true; // deshabilita el botón en DÍA
     },
 

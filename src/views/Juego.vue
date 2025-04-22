@@ -267,6 +267,19 @@ const unirseRapido = () => {
             </div>
           </div>
 
+          <!-- Botones de acción -->
+          <div class="actions">
+            <button class="action-button" @click="irACrearSala">
+              Crear Sala
+            </button>
+            <button class="action-button" @click="unirseRapido">
+              Unirse a Sala rápidamente
+            </button>
+            <button class="action-button" @click="irABuscarSalas">
+              Buscar Salas
+            </button>
+          </div>
+
           <div class="history">
             <table class="history-table">
               <thead>
@@ -304,19 +317,6 @@ const unirseRapido = () => {
               </table>
             </div>
           </div>
-        </div>
-
-        <!-- Botones de acción -->
-        <div class="actions">
-          <button class="action-button" @click="irACrearSala">
-            Crear Sala
-          </button>
-          <button class="action-button" @click="unirseRapido">
-            Unirse a Sala rápidamente
-          </button>
-          <button class="action-button" @click="irABuscarSalas">
-            Buscar Salas
-          </button>
         </div>
       </div>
     </div>
@@ -407,7 +407,10 @@ const unirseRapido = () => {
   flex-direction: column;
   gap: 4%;
 }
-
+.action-button-sidebar:hover {
+  transform: translateY(-2px);
+  color: #ccc;
+}
 .action-button-sidebar {
   width: 100%;
   padding: 12px 16px;
@@ -428,11 +431,6 @@ const unirseRapido = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.action-button-sidebar:hover {
-  transform: translateY(-2px);
-  color: #ccc;
 }
 
 /* Contenido principal */
