@@ -11,7 +11,7 @@ export default { name: "EmpateDiaOverlay" };
 </script>
 <style scoped>
 .overlay {
-  /* igual que tus otros overlays */
+  /* igual que otros overlays */
 }
 .fadeInOut {
   animation: fadeInOut 5s forwards;

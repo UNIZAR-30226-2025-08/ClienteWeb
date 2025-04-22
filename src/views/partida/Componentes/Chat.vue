@@ -16,7 +16,9 @@
         <input
           v-model="newMessage"
           @keyup.enter="sendMessage"
-          placeholder="Escribe un mensaje..."
+          :placeholder="
+            isLobo ? 'Chat privado entre lobos...' : 'Escribe un mensaje...'
+          "
         />
       </div>
       <button @click="sendMessage" class="send-button">Enviar</button>
@@ -33,6 +35,10 @@ export default {
       required: true,
     },
     disabled: {
+      type: Boolean,
+      default: false,
+    },
+    isLobo: {
       type: Boolean,
       default: false,
     },

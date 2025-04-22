@@ -5,7 +5,10 @@
       :key="player.id"
       class="player-icon"
       :class="{ selected: selectedPlayerIndex === player.id }"
-      :style="getPlayerPositionStyle(index, players.length)"
+      :style="[
+        getPlayerPositionStyle(index, players.length),
+        getPlayerStyles(player),
+      ]"
       @click="onPlayerClick(player.id)"
     >
       <!-- Contenedor exclusivo para la imagen con overflow hidden -->
@@ -30,7 +33,6 @@
         }"
       >
         {{ player.nombre }}
-        {{ console.log(MiPlayerNombre) }}
       </span>
 
       <!-- Visualización de los votos (Palitos) -->
@@ -49,6 +51,28 @@
 <script>
 export default {
   name: "PlayersCircle",
+  data() {
+    return {
+      usernameColors: {},
+      colorPalette: [
+        "#FF6B6B", // Rojo
+        "#4ECDC4", // Turquesa
+        "#45B7D1", // Azul claro
+        "#96CEB4", // Verde menta
+        "#FFEEAD", // Amarillo claro
+        "#D4A5A5", // Rosa
+        "#9B59B6", // Púrpura
+        "#3498DB", // Azul
+        "#E67E22", // Naranja
+        "#2ECC71", // Verde
+        "#F1C40F", // Amarillo
+        "#E74C3C", // Rojo oscuro
+        "#1ABC9C", // Verde esmeralda
+        "#34495E", // Azul oscuro
+        "#F39C12", // Naranja oscuro
+      ],
+    };
+  },
   props: {
     players: {
       type: Array,
@@ -78,6 +102,16 @@ export default {
     },
   },
   methods: {
+    getUsernameColor(username) {
+      if (!this.usernameColors[username]) {
+        const hash = username.split("").reduce((acc, char, index) => {
+          return acc + char.charCodeAt(0) * (index + 1);
+        }, 0);
+        const colorIndex = hash % this.colorPalette.length;
+        this.usernameColors[username] = this.colorPalette[colorIndex];
+      }
+      return this.usernameColors[username];
+    },
     onPlayerClick(playerId) {
       this.$emit("select-player", playerId);
     },
@@ -90,6 +124,12 @@ export default {
       const y = radiusY * Math.sin(rad);
       return {
         transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
+      };
+    },
+    getPlayerStyles(player) {
+      const color = this.getUsernameColor(player.nombre);
+      return {
+        "--player-color": color,
       };
     },
   },
@@ -120,6 +160,7 @@ export default {
   height: 4.7vw;
   border-radius: 50%;
   overflow: hidden;
+  border: 0.3vw solid var(--player-color);
 }
 
 .player-image {
@@ -132,15 +173,16 @@ export default {
   position: relative;
   display: inline-block;
   transition: color 0.3s;
-  color: black;
+  color: var(--player-color);
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 100);
 }
 
 .player-label.dead {
   color: #888;
 }
 .player-label.self {
-  color: black; /* por ejemplo, azul vivo */
-  font-weight: bold; /* opcional */
+  font-weight: bold;
 }
 .self-icon {
   position: absolute;

@@ -165,6 +165,7 @@
         :messages="chatMessages"
         @new-message="addMessage"
         :disabled="isSpectator"
+        :isLobo="isLobo() && currentPhase === 'game_voting' && VotacionLobos"
       />
     </template>
   </div>
@@ -416,6 +417,7 @@ export default {
       console.log("Empate en la votación del alguacil:", data.mensaje);
       this.flujoVotacionAlguacilEmpate();
       this.timeLeft = data.tiempo || 30;
+      this.resetVotingState(); // Reseteamos el estado para permitir votar de nuevo
       this.isVotingPhase = true;
     });
 
@@ -737,7 +739,7 @@ export default {
               (this.players.find((pl) => pl.id === id) || {}).nombre ||
               "Desconocido"
           );
-          // 2) Mostrar overlay de muertes (puedes reutilizar el de noche)
+          // 2) Mostrar overlay de muertes (reutilizamos el de noche)
           this.currentPhase = "recuento_linchazo";
           // 3) Marcar al jugador como muerto en tu estado
           this.players = this.players.map((pl) =>
@@ -801,13 +803,14 @@ export default {
     },
     addMessage(message) {
       if (this.isSpectator) return; // No envíes mensajes si eres espectador
-      // Envía al servidor
+
+      // Envía al servidor - el backend se encarga de determinar si es mensaje privado de lobos o no
       socket.emit("enviarMensaje", {
         idPartida: this.idPartida,
         idJugador: this.getMyId(),
         mensaje: message.content,
       });
-      // No empujes aquí: lo recibirás de vuelta por socket.on('mensajeChat') más abajo
+      // No empujes aquí: lo recibirás de vuelta por socket.on('mensajeChat') o socket.on('mensajePrivado')
     },
 
     getMyId() {
@@ -863,6 +866,7 @@ export default {
 
     flujoVotacionAlguacilEmpate() {
       this.currentPhase = "alguacil_empate";
+      this.hasVotedAlguacil = false; // Reseteamos el voto para permitir votar de nuevo
       setTimeout(() => {
         this.currentPhase = "game_voting";
         this.isVotingPhase = true;
