@@ -404,6 +404,33 @@ export default {
   },
   mounted() {
     this.MiId = this.getMyId();
+
+    // Obtener el ID de la partida del localStorage
+    const partidaGuardada = localStorage.getItem("partidaID");
+    if (!partidaGuardada) {
+      console.error("No se encontró la información de la partida");
+      this.$router.push("/juego");
+      return;
+    }
+    this.idPartida = JSON.parse(partidaGuardada);
+
+    // Asegurarnos de que el socket está conectado y actualizado
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    // Actualizar el socketId en el backend DESPUÉS de tener el idPartida
+    socket.emit("actualizarSocketId", {
+      idPartida: String(this.idPartida),
+      idJugador: String(this.MiId),
+      socketId: socket.id,
+    });
+
+    // Añadir log para debug
+    console.log("Socket ID actual:", socket.id);
+    console.log("Socket ID anterior:", localStorage.getItem("miSocketId"));
+    console.log("ID Partida:", this.idPartida);
+
     //Todos los sockets de escucha para eventos del backend
     //Los he dejado numerados en el orden que seguiran más omenos, luego se repetiran los eventos
     this.startGameFlow();
@@ -528,13 +555,13 @@ export default {
       // 1) Overlay de recuento de muertes
       this.currentPhase = "recuento_muertes";
 
-      // 2) Tras 5 s arrancas el día (charla libre)
+      // 2) Tras 5 s arrancas el día (charla libre)
       setTimeout(() => {
         this.currentPhase = "game"; // Vuelves a la vista principal
         this.currentPeriod = "DÍA";
         this.timeLeft = data.tiempo || 60;
 
-        // 3) Espera 30 s de charla libre…
+        // 3) Espera 30 s de charla libre…
         setTimeout(() => {
           // 4) Muestras overlay de votaciones de día
           this.currentPhase = "votaciones_dia";
@@ -543,12 +570,12 @@ export default {
           setTimeout(() => {
             this.isVotingPhase = true;
             this.isLynchPhase = true; // activamos linchamiento
-            this.hasVotedAlguacil = false; // reseteamos para usarlo como “hasVotedLynch”
+            this.hasVotedAlguacil = false; // reseteamos para usarlo como "hasVotedLynch"
             this.timeLeft = data.tiempo || 30;
             this.currentPhase = "game"; // o 'game_voting'
           }, 5000);
         }, 2000); // 2 s y vamos a las votaciones
-      }, 5000); // 5 s de recuento de muertes
+      }, 5000); // 5 s de recuento de muertes
     });
 
     //12. Evento que notifica un empate en la votación del día y reinicia la votación
@@ -587,16 +614,6 @@ export default {
 
     // Sincronizar la lista de jugadores
     this.players = sala.jugadores || [];
-
-    // NUEVO: Asignar el ID de la partida (suponiendo que está en la propiedad "id" de la sala)
-    const partidaGuardada = localStorage.getItem("partidaID");
-    if (!partidaGuardada) {
-      console.error("No se encontró la información de la partida");
-      this.$router.push("/juego");
-      return;
-    }
-
-    this.idPartida = JSON.parse(partidaGuardada);
 
     // Obtener el rol del jugador (por ejemplo, de localStorage)
     const rol = localStorage.getItem("miRol");
@@ -638,10 +655,21 @@ export default {
 
     socket.on("mensajePrivado", ({ nombre, mensaje, timestamp }) => {
       // si quieres diferenciar el chat de lobos
+      console.log("Mensaje privado recibido:", { nombre, mensaje, timestamp });
       this.chatMessages.push({
         username: `${nombre} (lobo)`,
         content: mensaje,
         time: timestamp,
+      });
+    });
+
+    // Manejar reconexiones del socket
+    socket.on("connect", () => {
+      console.log("Socket reconectado, nuevo ID:", socket.id);
+      socket.emit("actualizarSocketId", {
+        idPartida: String(this.idPartida),
+        idJugador: String(this.MiId),
+        socketId: socket.id,
       });
     });
   },
@@ -659,6 +687,7 @@ export default {
     socket.off("segundoEmpateVotacionDia");
     socket.off("partidaFinalizada");
     socket.off("votoRegistrado");
+    socket.off("connect");
     clearInterval(this.countdownInterval);
   },
   methods: {

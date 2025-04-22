@@ -77,6 +77,8 @@ onMounted(() => {
   if (!socket.connected) {
     socket.connect();
   }
+  // Guardar el socketId actual
+  localStorage.setItem("miSocketId", socket.id);
   const usuarioGuardado = localStorage.getItem("usuario");
   if (!usuarioGuardado) {
     alert("Debes iniciar sesión para unirte a una sala.");
