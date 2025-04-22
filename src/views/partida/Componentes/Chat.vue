@@ -39,9 +39,7 @@ export default {
   },
   data() {
     return {
-<<<<<<< HEAD
       newMessage: "", // Definir 'newMessage' aquí
-=======
       usernameColors: {},
       colorPalette: [
         "#FF6B6B", // Rojo
@@ -60,7 +58,6 @@ export default {
         "#34495E", // Azul oscuro
         "#F39C12", // Naranja oscuro
       ],
->>>>>>> e13a441dd45b18864d1bdca4c0cb386e10203e40
     };
   },
   methods: {

@@ -544,7 +544,7 @@ export default {
             this.timeLeft = data.tiempo || 30;
             this.currentPhase = "game"; // o 'game_voting'
           }, 5000);
-        }, 2000); // vamos a las votaciones
+        }, 2000); // 2 s y vamos a las votaciones
       }, 5000); // 5 s de recuento de muertes
     });
 
