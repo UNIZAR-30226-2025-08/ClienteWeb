@@ -565,16 +565,26 @@ export default {
         setTimeout(() => {
           // 4) Muestras overlay de votaciones de día
           this.currentPhase = "votaciones_dia";
-
+          if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+          }
           // 5) Tras unos segundos (o instantáneo), habilita la votación
           setTimeout(() => {
             this.isVotingPhase = true;
             this.isLynchPhase = true; // activamos linchamiento
             this.hasVotedAlguacil = false; // reseteamos para usarlo como "hasVotedLynch"
-            this.timeLeft = data.tiempo || 30;
+            this.timeLeft = 16;
             this.currentPhase = "game"; // o 'game_voting'
+            this.countdownInterval = setInterval(() => {
+              if (this.timeLeft > 0) {
+                this.timeLeft--;
+              } else {
+                clearInterval(this.countdownInterval);
+                //TODO: he quitado lo de pasar al endingvoting phase porque lo hago cuando llega el socket de que ha acabado la votacion
+              }
+            }, 1000);
           }, 5000);
-        }, 2000); // 2 s y vamos a las votaciones
+        }, 3000); // 3 s y vamos a las votaciones
       }, 5000); // 5 s de recuento de muertes
     });
 
@@ -825,6 +835,18 @@ export default {
           this.currentPhase = "game";
           this.isVotingPhase = true;
           this.isLynchPhase = true;
+          if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+          }
+          this.timeLeft = 25;
+          this.countdownInterval = setInterval(() => {
+            if (this.timeLeft > 0) {
+              this.timeLeft--;
+            } else {
+              clearInterval(this.countdownInterval);
+              //TODO: he quitado lo de pasar al endingvoting phase porque lo hago cuando llega el socket de que ha acabado la votacion
+            }
+          }, 1000);
           break;
         case "empateSegundoDia":
           this.resetVotingState();

@@ -1,21 +1,46 @@
 <template>
-  <div class="overlay fadeInOut">
-    <div class="overlay-content">
-      <h1>¡Empate en la votación!</h1>
-      <p>Se repiten las votaciones del día.</p>
+  <div class="alguacil-overlay fadeInOut">
+    <div class="overlay-inner">
+      <h1 class="alguacil-text">¡Empate en la votación!</h1>
+      <p class="alguacil-text">Se repiten las votaciones del día.</p>
     </div>
   </div>
 </template>
+
 <script>
-export default { name: "EmpateDiaOverlay" };
+export default {
+  name: "EmpateDiaOverlay",
+};
 </script>
+
 <style scoped>
-.overlay {
-  /* igual que otros overlays */
+.alguacil-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
 }
+
+.alguacil-text {
+  color: white;
+  font-size: 2.5rem;
+  text-align: center;
+  max-width: 80%;
+  line-height: 1.3;
+  font-family: "Times New Roman", serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
 .fadeInOut {
-  animation: fadeInOut 5s forwards;
+  animation: fadeInOut 6s forwards;
 }
+
 @keyframes fadeInOut {
   0% {
     opacity: 0;
@@ -30,8 +55,8 @@ export default { name: "EmpateDiaOverlay" };
     opacity: 0;
   }
 }
-.overlay-content {
-  color: white;
+
+.overlay-inner {
   text-align: center;
 }
 </style>
