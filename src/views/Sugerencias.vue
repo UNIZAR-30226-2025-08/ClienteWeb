@@ -25,11 +25,11 @@
       }}
     </button>
 
-    <!-- Sección con dos columnas: Abiertas y Cerradas -->
+    <!-- Sección con dos columnas: Pendientes (abiertas) y Revisadas (cerradas) -->
     <div v-if="mostrarMisSugerencias" class="columnas-contenedor">
       <div class="columna">
         <h3 class="titulo-columna">
-          Abiertas ({{ sugerenciasAbiertas.length }})
+          Pendientes ({{ sugerenciasAbiertas.length }})
         </h3>
         <div class="lista-sugerencias">
           <div
@@ -41,7 +41,7 @@
               <span class="fecha">{{
                 formatDate(sugerencia.fechaSugerencia)
               }}</span>
-              <span class="estado abierta">Abierta</span>
+              <span class="estado abierta">Pendiente</span>
             </div>
             <div class="contenido">{{ sugerencia.contenido }}</div>
           </div>
@@ -49,7 +49,7 @@
       </div>
       <div class="columna">
         <h3 class="titulo-columna">
-          Cerradas ({{ sugerenciasCerradas.length }})
+          Revisadas ({{ sugerenciasCerradas.length }})
         </h3>
         <div class="lista-sugerencias">
           <div
@@ -61,7 +61,7 @@
               <span class="fecha">{{
                 formatDate(sugerencia.fechaSugerencia)
               }}</span>
-              <span class="estado cerrada">Cerrada</span>
+              <span class="estado cerrada">Revisada</span>
             </div>
             <div class="contenido">{{ sugerencia.contenido }}</div>
             <div v-if="sugerencia.respuesta" class="respuesta">

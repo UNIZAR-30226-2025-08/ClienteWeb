@@ -207,6 +207,7 @@ socket.on("errorSala", (msg) => {
           @click="decrementarJugadores"
           class="flecha"
           :disabled="numJugadores <= 5"
+          v-show="numJugadores > 5"
         >
           -
         </button>
@@ -214,7 +215,8 @@ socket.on("errorSala", (msg) => {
         <button
           @click="incrementarJugadores"
           class="flecha"
-          :hidden="numJugadores >= 18"
+          :disabled="numJugadores >= 18"
+          v-show="numJugadores < 18"
         >
           +
         </button>
@@ -665,7 +667,7 @@ h3::before {
   position: relative;
   display: flex;
   align-items: center;
-  width: 70%;
+  width: 100%;
 }
 
 .password-input-container input {

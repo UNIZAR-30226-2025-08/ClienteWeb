@@ -91,7 +91,7 @@ export default {
           idSugerencia,
           revisada: cerrar,
         });
-        toast.success(cerrar ? "Sugerencia cerrada" : "Sugerencia reabierta", {
+        toast.success(cerrar ? "Sugerencia revisada" : "Sugerencia reabierta", {
           autoClose: 3000,
         });
         await this.obtenerTodasSugerencias();
@@ -115,7 +115,7 @@ export default {
     <div class="columnas-contenedor">
       <div class="columna">
         <h2 class="titulo-columna">
-          Abiertas ({{ sugerenciasAbiertas.length }})
+          Pendientes ({{ sugerenciasAbiertas.length }})
         </h2>
         <div class="lista-sugerencias">
           <div
@@ -127,7 +127,7 @@ export default {
               <span class="fecha">{{
                 formatDate(sugerencia.fechaSugerencia)
               }}</span>
-              <span class="estado abierta">Abierta</span>
+              <span class="estado abierta">Pendiente</span>
             </div>
 
             <div class="contenido">
@@ -139,23 +139,27 @@ export default {
             </div>
 
             <div class="acciones">
-              <textarea
-                v-model="respuesta[sugerencia.idSugerencia]"
-                placeholder="Escribe tu respuesta..."
-                class="respuesta-input"
-              ></textarea>
+              <div class="campo-respuesta">
+                <label for="respuesta">Respuesta:</label>
+                <textarea
+                  v-model="respuesta[sugerencia.idSugerencia]"
+                  placeholder="Escribe tu respuesta..."
+                  class="respuesta-input"
+                  id="respuesta"
+                ></textarea>
+              </div>
               <div class="botones-accion">
                 <button
                   @click="responderSugerencia(sugerencia.idSugerencia)"
                   class="btn-responder"
                 >
-                  Responder y Cerrar
+                  Responder y marcar como Revisada
                 </button>
                 <button
                   @click="marcarCerrada(sugerencia.idSugerencia)"
                   class="btn-cerrar"
                 >
-                  Cerrar sin respuesta
+                  Marcar como Revisada sin respuesta
                 </button>
               </div>
             </div>
@@ -165,7 +169,7 @@ export default {
 
       <div class="columna">
         <h2 class="titulo-columna">
-          Cerradas ({{ sugerenciasCerradas.length }})
+          Revisadas ({{ sugerenciasCerradas.length }})
         </h2>
         <div class="lista-sugerencias">
           <div
@@ -177,7 +181,7 @@ export default {
               <span class="fecha">{{
                 formatDate(sugerencia.fechaSugerencia)
               }}</span>
-              <span class="estado cerrada">Cerrada</span>
+              <span class="estado cerrada">Revisada</span>
             </div>
 
             <div class="contenido">
@@ -185,7 +189,17 @@ export default {
             </div>
 
             <div v-if="sugerencia.respuesta" class="respuesta">
-              <strong>Respuesta:</strong> {{ sugerencia.respuesta }}
+              <div class="respuesta-header">
+                <strong>Respuesta:</strong>
+              </div>
+              <div class="respuesta-contenido">
+                {{ sugerencia.respuesta }}
+              </div>
+            </div>
+            <div v-else class="respuesta">
+              <div class="respuesta-header">
+                <strong>Sin respuesta</strong>
+              </div>
             </div>
 
             <div class="acciones-cerradas">
@@ -193,7 +207,7 @@ export default {
                 @click="marcarCerrada(sugerencia.idSugerencia, false)"
                 class="btn-reabrir"
               >
-                Reabrir Sugerencia
+                Reabrir Sugerencia como Pendiente
               </button>
             </div>
           </div>
@@ -279,21 +293,45 @@ export default {
 }
 
 .respuesta {
-  padding: 10px;
+  padding: 15px;
   background: #2d2d2d;
-  border-radius: 6px;
-  margin-top: 10px;
+  border-radius: 8px;
+  margin-top: 15px;
+  border-left: 4px solid #2196f3;
+}
+
+.respuesta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #444;
+}
+
+.respuesta-contenido {
+  line-height: 1.5;
+  color: #e0e0e0;
 }
 
 .respuesta-input {
   width: 100%;
-  height: 80px;
-  padding: 10px;
-  margin-top: 10px;
+  height: 100px;
+  padding: 12px;
+  margin-top: 5px;
   background: #2c2c2c;
   border: 1px solid #444;
   border-radius: 6px;
   color: #fff;
+  font-size: 1em;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.respuesta-input:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
 }
 
 .botones-accion {
@@ -347,6 +385,17 @@ export default {
 
 .acciones-cerradas {
   margin-top: 15px;
+}
+
+.campo-respuesta {
+  margin-top: 15px;
+}
+
+.campo-respuesta label {
+  display: block;
+  margin-bottom: 5px;
+  color: #fff;
+  font-weight: bold;
 }
 
 @media (max-width: 768px) {
