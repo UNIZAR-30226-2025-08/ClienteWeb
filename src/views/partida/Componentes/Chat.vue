@@ -31,6 +31,11 @@ export default {
       default: false,
     },
   },
+  data() {
+    return {
+      newMessage: "", // Definir 'newMessage' aquí
+    };
+  },
   methods: {
     sendMessage() {
       if (this.newMessage.trim()) {
