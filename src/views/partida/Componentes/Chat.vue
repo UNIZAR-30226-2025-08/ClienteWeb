@@ -45,6 +45,7 @@ export default {
   },
   data() {
     return {
+      newMessage: "", // Definir 'newMessage' aquí
       usernameColors: {},
       colorPalette: [
         "#FF6B6B", // Rojo

@@ -82,6 +82,13 @@
         v-else-if="currentPhase === 'mensaje_burja'"
         :victimName="wolfVictimName"
       />
+      <CazadorOverlay
+        v-else-if="currentPhase === 'habilidad_cazador' && isCazador()"
+        :players="players.filter((p) => p.estaVivo)"
+        @fire="handleCazadorFire"
+        @continue="handleContinueViewing"
+        @exit="$router.push('/juego')"
+      />
     </template>
 
     <!-- Cuando no es fase overlay se muestra el contenido principal -->
@@ -219,6 +226,7 @@ import EmpateSegundoDiaOverlay from "../../views/partida/Overlay/EmpateSegundoDi
 import MuertoOverlay from "../../views/partida/Overlay/MuertoOverlay.vue";
 
 import mensajeBrujaOverlay from "./Overlay/mensajeBrujaOverlay.vue";
+import CazadorOverlay from "./Overlay/CazadorOverlay.vue";
 
 import avatar1 from "../../assets/avatares/imagenPerfil.webp";
 import avatar2 from "../../assets/avatares/imagenPerfil2.webp";
@@ -265,6 +273,7 @@ export default {
     EmpateSegundoDiaOverlay,
     MuertoOverlay,
     mensajeBrujaOverlay,
+    CazadorOverlay,
   },
   data() {
     return {
@@ -409,12 +418,13 @@ export default {
     socket.on("iniciarVotacionAlguacil", (data) => {
       console.log("Votación del alguacil iniciada", data);
       this.flujoVotacionAlguacil();
-      this.timeLeft = 25; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
+      this.timeLeft = 24; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
       this.isVotingPhase = true;
     });
     //3. Evento que notifica en caso de empate en la votación del alguacil
     socket.on("empateVotacionAlguacil", (data) => {
       console.log("Empate en la votación del alguacil:", data.mensaje);
+      this.timeLeft = data.tiempo - 5 || 29; //Cuadrar los tiempos con
       this.flujoVotacionAlguacilEmpate();
       this.timeLeft = data.tiempo || 30;
       this.resetVotingState(); // Reseteamos el estado para permitir votar de nuevo
@@ -484,6 +494,10 @@ export default {
       //console.log("Habilidad de la bruja activada:", data.mensaje);
     });
 
+    socket.on("habilidadCazador", (data) => {
+      this.addEventToQueue({ type: "habilidadCazador", data });
+    });
+
     //11. Escuchar evento para pasar al día
     socket.on("diaComienza", (data) => {
       console.log("El día ha comenzado", data);
@@ -530,10 +544,10 @@ export default {
             this.isVotingPhase = true;
             this.isLynchPhase = true; // activamos linchamiento
             this.hasVotedAlguacil = false; // reseteamos para usarlo como “hasVotedLynch”
-            this.timeLeft = data.tiempo || 60;
+            this.timeLeft = data.tiempo || 30;
             this.currentPhase = "game"; // o 'game_voting'
           }, 5000);
-        }, 15000); // 15 s de charla previa
+        }, 2000); // 2 s y vamos a las votaciones
       }, 5000); // 5 s de recuento de muertes
     });
 
@@ -648,9 +662,23 @@ export default {
     clearInterval(this.countdownInterval);
   },
   methods: {
+    isCazador() {
+      return this.chosenRole && this.chosenRole.nombre === "Cazador";
+    },
     markDead() {
-      this.isSpectator = true;
-      this.currentPhase = "death";
+      this.isSpectator = true; // El jugador se convierte en espectador.
+
+      // Verificar si el jugador que murió es el cazador
+      if (this.isCazador()) {
+        // Si es el cazador, mostramos el overlay de cazador
+        this.currentPhase = "habilidad_cazador"; // Overlay de cazador
+        // setTimeout(() => {
+        //   this.currentPhase = "game";
+        // }, 5000);
+      } else {
+        // Si no es el cazador, mostramos el overlay de muerto
+        this.currentPhase = "death"; // Overlay de muerto
+      }
     },
     // Función auxiliar: pausa la ejecución
     sleep(ms) {
@@ -705,6 +733,7 @@ export default {
           this.currentPeriod = "NOCHE";
           break;
         case "habilidadVidente":
+          this.endVotingPhase();
           console.log("Procesando en cola: habilidadVidente", event.data);
           this.handleHabilidadVidente();
           this.currentPeriod = "NOCHE";
@@ -792,6 +821,10 @@ export default {
             }
           }, 6000);
           break;
+        case "habilidadCazador":
+          this.currentPhase = "habilidad_cazador";
+          this.timeLeft = event.data.tiempo || 30;
+          break;
         default:
           console.warn("Evento desconocido en cola", event);
       }
@@ -867,10 +900,13 @@ export default {
     flujoVotacionAlguacilEmpate() {
       this.currentPhase = "alguacil_empate";
       this.hasVotedAlguacil = false; // Reseteamos el voto para permitir votar de nuevo
+      if (this.countdownInterval) {
+        clearInterval(this.countdownInterval);
+      }
       setTimeout(() => {
         this.currentPhase = "game_voting";
         this.isVotingPhase = true;
-        // this.timeLeft = 25;
+        this.timeLeft = 24;
         this.countdownInterval = setInterval(() => {
           if (this.timeLeft > 0) {
             this.timeLeft--;
@@ -927,6 +963,9 @@ export default {
     },
 
     handleTurnoHombresLobo(data) {
+      if (this.countdownInterval) {
+        clearInterval(this.countdownInterval);
+      }
       console.log("Turno de hombres lobos:", data.mensaje);
       // 1) Mostrar despertar
       this.currentPhase = "despertar_hombres_lobo";
@@ -942,6 +981,15 @@ export default {
         } else {
           this.currentPhase = "estado_durmiendo";
         }
+        this.timeLeft = 19;
+        this.countdownInterval = setInterval(() => {
+          if (this.timeLeft > 0) {
+            this.timeLeft--;
+          } else {
+            clearInterval(this.countdownInterval);
+            //TODO: he quitado lo de pasar al endingvoting phase porque lo hago cuando llega el socket de que ha acabado la votacion
+          }
+        }, 1000);
         // **Ya no esperes N segundos** ni programes aquí el fin de turno:
         // el socket.on('resultadoVotosNoche') lo manejará en cuanto llegue.
       }, 6000);
@@ -1028,7 +1076,15 @@ export default {
         alert("Esta pocima ya ha sido usada");
       }
     },
-
+    handleCazadorFire(targetId) {
+      socket.emit("cazadorDispara", {
+        idPartida: this.idPartida,
+        idJugador: this.getMyId(),
+        idObjetivo: targetId,
+      });
+      // Después de disparar, pasamos a la pantalla de muerto
+      this.currentPhase = "death";
+    },
     handleDiscoverRole() {
       if (!this.hasVidenteActed) {
         if (this.selectedPlayerIndex) {
