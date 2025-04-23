@@ -81,12 +81,6 @@
         />
         <VotacionesDiaOverlay v-else-if="currentPhase === 'votaciones_dia'" />
 
-        <MuertoOverlay
-          v-else-if="currentPhase === 'death'"
-          @continue="handleContinueViewing"
-          @exit="$router.push('../juego')"
-        />
-
         <mensajeBrujaOverlay
           v-else-if="currentPhase === 'mensaje_burja'"
           :victimName="wolfVictimName"
@@ -97,6 +91,11 @@
           @fire="handleCazadorFire"
           @continue="handleContinueViewing"
           @exit="$router.push('/juego')"
+        />
+        <MuertoOverlay
+          v-if="showDeathOverlay"
+          @continue="handleContinueViewing"
+          @exit="$router.push('../juego')"
         />
       </template>
 
@@ -301,6 +300,8 @@ export default {
       LoboHavotado: false,
       isSpectator: false,
       MiId: null,
+      showDeathOverlay: false,
+      showCazadorOverlay: false,
       // Variables del temporizador
       timeLeft: 60,
       countdownInterval: null,
@@ -517,15 +518,15 @@ export default {
       // 1) Cancelamos la fase de votación
       this.isVotingPhase = false;
       // 2) Mostramos al instante el overlay de "fin_turno_lobos"
-      this.currentPhase = "fin_turno_lobos";
+      this.changePhase("fin_turno_lobos");
       // 3) Tras la duración del overlay (6s), pasamos a la fase de bruja (si existe) o al juego
       setTimeout(() => {
         if (this.isBruja()) {
           // si eres bruja, despertamos su overlay
-          this.currentPhase = "despertar_bruja";
+          this.changePhase("despertar_bruja");
         } else {
           // si no, volvemos al juego
-          this.currentPhase = "game";
+          this.changePhase("game");
         }
       }, 6000);
     });
@@ -575,18 +576,18 @@ export default {
       }
 
       // 1) Overlay de recuento de muertes
-      this.currentPhase = "recuento_muertes";
+      this.changePhase("recuento_muertes");
 
       // 2) Tras 5 s arrancas el día (charla libre)
       setTimeout(() => {
-        this.currentPhase = "game"; // Vuelves a la vista principal
+        this.changePhase("game");
         this.currentPeriod = "DÍA";
         this.timeLeft = data.tiempo || 60;
 
         // 3) Espera 30 s de charla libre…
         setTimeout(() => {
           // 4) Muestras overlay de votaciones de día
-          this.currentPhase = "votaciones_dia";
+          this.changePhase("votaciones_dia");
           if (this.countdownInterval) {
             clearInterval(this.countdownInterval);
           }
@@ -596,7 +597,7 @@ export default {
             this.isLynchPhase = true; // activamos linchamiento
             this.hasVotedAlguacil = false; // reseteamos para usarlo como "hasVotedLynch"
             this.timeLeft = 16;
-            this.currentPhase = "game"; // o 'game_voting'
+            this.changePhase("game");
             this.countdownInterval = setInterval(() => {
               if (this.timeLeft > 0) {
                 this.timeLeft--;
@@ -642,7 +643,7 @@ export default {
       console.log("Partida finalizada", resultado);
       this.BandoGanador = resultado.ganador;
       this.MensajeGanadoresPartida = resultado.mensaje;
-      this.currentPhase = "game_over";
+      this.changePhase("game_over");
       //Limpio también cuentas atras que pudiesen haber pendientes
       clearInterval(this.countdownInterval);
       this.currentPeriod = "FIN";
@@ -735,22 +736,29 @@ export default {
     clearInterval(this.countdownInterval);
   },
   methods: {
+    changePhase(newPhase) {
+      if (!this.showDeathOverlay || !this.showCazadorOverlay) {
+        this.currentPhase = newPhase; // Solo cambiar la fase si el overlay de muerte no está activo
+      }
+    },
     isCazador() {
       return this.chosenRole && this.chosenRole.nombre === "Cazador";
     },
     markDead() {
-      this.isSpectator = true; // El jugador se convierte en espectador.
+      this.isSpectator = true; // El jugador se convierte en espectador
 
       // Verificar si el jugador que murió es el cazador
       if (this.isCazador()) {
         // Si es el cazador, mostramos el overlay de cazador
-        this.currentPhase = "habilidad_cazador"; // Overlay de cazador
+        this.changePhase("habilidad_cazador");
+        this.showCazadorOverlay = true;
         // setTimeout(() => {
         //   this.currentPhase = "game";
         // }, 5000);
       } else {
         // Si no es el cazador, mostramos el overlay de muerto
-        this.currentPhase = "death"; // Overlay de muerto
+        this.changePhase("death");
+        this.showDeathOverlay = true; // Mostrar overlay de muerte
       }
     },
     // Función auxiliar: pausa la ejecución
@@ -803,7 +811,7 @@ export default {
         case "nocheComienza":
           this.hasVotedAlguacil = false;
           console.log("Procesando en cola: nocheComienza", event.data);
-          this.currentPhase = "night";
+          this.changePhase("night");
           this.currentPeriod = "NOCHE";
           break;
         case "habilidadVidente":
@@ -820,11 +828,11 @@ export default {
           this.resetVotingState();
           break;
         case "habilidadBruja":
-          this.currentPhase = "despertar_bruja"; //NUEVO
+          this.changePhase("despertar_bruja");
           setTimeout(() => {
             if (this.currentPeriod === "DÍA") return; // Se debería de quitar pero es necesario la funcionalidad de no recibir sockets de roles que no existan en la partida
             if (this.isBruja()) {
-              this.currentPhase = "habilidad_bruja"; // TODO: que se vea el juego pero con los botones de habilidad nuevos de la bruja
+              this.changePhase("habilidad_bruja");
               this.timeLeft = event.data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
             } else {
               //this.currentPhase = "estado_durmiendo"; // Cambia a la fase correspondiente para los demás jugadores
@@ -843,7 +851,7 @@ export default {
               "Desconocido"
           );
           // 2) Mostrar overlay de muertes (reutilizamos el de noche)
-          this.currentPhase = "recuento_linchazo";
+          this.changePhase("recuento_linchazo");
           // 3) Marcar al jugador como muerto en tu estado
           this.players = this.players.map((pl) =>
             pl.id === eliminadoId ? { ...pl, estaVivo: false } : pl
@@ -856,18 +864,20 @@ export default {
 
           // 4) Tras X segundos, volver al ciclo normal (día->noche)
           setTimeout(() => {
-            this.currentPhase = "game";
+            this.changePhase("game");
             this.currentPeriod = "NOCHE";
             // reinicia banderas si hace falta
             this.resetVotingState();
           }, 5000);
           break;
         case "empateDia":
-          this.currentPhase = "empate_dia";
+          this.changePhase("empate_dia");
+
           // esperar que termine la animación
           await this.sleep(5000);
           // reiniciar votación de día
-          this.currentPhase = "game";
+          this.changePhase("game");
+
           this.isVotingPhase = true;
           this.isLynchPhase = true;
           if (this.countdownInterval) {
@@ -885,10 +895,10 @@ export default {
           break;
         case "empateSegundoDia":
           this.resetVotingState();
-          this.currentPhase = "empate_dia_segundo";
+          this.changePhase("empate_dia_segundo");
           await this.sleep(5000);
           // ya no repetimos voto
-          this.currentPhase = "game";
+          this.changePhase("game");
           this.isVotingPhase = false;
           this.isLynchPhase = false;
           break;
@@ -897,18 +907,19 @@ export default {
           // obtenemos el nombre de la víctima
           const victimId = Number(event.data.victima);
           this.wolfVictimName = this.findPlayerNameById(victimId);
-          this.currentPhase = "mensaje_burja";
+          this.changePhase("mensaje_burja");
           // tras 6s pasamos a la fase de habilidad de la bruja (si la hay)
           setTimeout(() => {
             if (this.isBruja()) {
-              this.currentPhase = "despertar_bruja";
+              this.changePhase("despertar_bruja");
             } else {
-              this.currentPhase = "game";
+              this.changePhase("game");
             }
           }, 6000);
           break;
         case "habilidadCazador":
-          this.currentPhase = "habilidad_cazador";
+          this.changePhase("habilidad_cazador");
+
           this.timeLeft = event.data.tiempo || 30;
           break;
         default:
@@ -918,7 +929,8 @@ export default {
 
     handleContinueViewing() {
       // quita overlay, pero mantiene isSpectator = true
-      this.currentPhase = "game";
+      this.showDeathOverlay = false;
+      this.changePhase("game");
     },
     addMessage(message) {
       if (this.isSpectator) return; // No envíes mensajes si eres espectador
@@ -956,20 +968,20 @@ export default {
 
     startGameFlow() {
       setTimeout(() => {
-        this.currentPhase = "role";
+        this.changePhase("role");
         setTimeout(() => {
-          this.currentPhase = "start";
+          this.changePhase("start");
           setTimeout(() => {
-            this.currentPhase = "game";
+            this.changePhase("game");
           }, 3000);
         }, 6000);
       }, 6000);
     },
 
     flujoVotacionAlguacil() {
-      this.currentPhase = "alguacil_announce";
+      this.changePhase("alguacil_announce");
       setTimeout(() => {
-        this.currentPhase = "game_voting";
+        this.changePhase("game_voting");
         this.isVotingPhase = true;
         // this.timeLeft = 25;
         this.countdownInterval = setInterval(() => {
@@ -984,13 +996,13 @@ export default {
     },
 
     flujoVotacionAlguacilEmpate() {
-      this.currentPhase = "alguacil_empate";
+      this.changePhase("alguacil_empate");
       this.hasVotedAlguacil = false; // Reseteamos el voto para permitir votar de nuevo
       if (this.countdownInterval) {
         clearInterval(this.countdownInterval);
       }
       setTimeout(() => {
-        this.currentPhase = "game_voting";
+        this.changePhase("game_voting");
         this.isVotingPhase = true;
         this.timeLeft = 24;
         this.countdownInterval = setInterval(() => {
@@ -1009,7 +1021,7 @@ export default {
       this.isVotingPhase = false;
       this.revealVotes = true;
       this.showVotesProgressively();
-      this.currentPhase = "alguacil_result";
+      this.changePhase("alguacil_result");
     },
 
     /**
@@ -1029,15 +1041,16 @@ export default {
     },
 
     handleHabilidadVidente() {
-      this.currentPhase = "vidente_awaken";
+      this.changePhase("vidente_awaken");
+
       setTimeout(() => {
         if (this.isVidente()) {
           // Resetea la variable de control para la vidente al entrar en esta fase
           this.hasVidenteActed = false;
-          this.currentPhase = "vidente_action";
+          this.changePhase("vidente_action");
           this.timeLeft = 30;
         } else {
-          this.currentPhase = "ojo_cerrado";
+          this.changePhase("ojo_cerrado");
         }
       }, 6000);
     },
@@ -1045,7 +1058,7 @@ export default {
     finishVidenteAction() {
       this.isVotingPhase = false;
       this.resetVotingState();
-      this.currentPhase = "game";
+      this.changePhase("game");
     },
 
     handleTurnoHombresLobo(data) {
@@ -1054,7 +1067,7 @@ export default {
       }
       console.log("Turno de hombres lobos:", data.mensaje);
       // 1) Mostrar despertar
-      this.currentPhase = "despertar_hombres_lobo";
+      this.changePhase("despertar_hombres_lobo");
       this.currentPeriod = "NOCHE";
 
       setTimeout(() => {
@@ -1062,10 +1075,10 @@ export default {
         if (this.isLobo()) {
           this.LoboHavotado = false;
           this.VotacionLobos = true;
-          this.currentPhase = "game_voting";
+          this.changePhase("game_voting");
           this.isVotingPhase = true;
         } else {
-          this.currentPhase = "estado_durmiendo";
+          this.changePhase("estado_durmiendo");
         }
         this.timeLeft = 19;
         this.countdownInterval = setInterval(() => {
@@ -1118,13 +1131,14 @@ export default {
         // Asigna el mensaje a mostrar en el overlay
         this.pocionVidaMessage = `Has decidido usar la pócima de vida con el jugador ${this.selectedPlayerIndex}`;
         // Cambia la fase para mostrar el overlay correspondiente
-        this.currentPhase = "pocion_vida_usada";
+        this.changePhase("pocion_vida_usada");
+
         this.pocionVidaUsada = true;
         // Limpia la selección
         this.selectedPlayerIndex = null;
         // Después de 3 segundos se regresa a la fase de habilidad de bruja
         setTimeout(() => {
-          this.currentPhase = "habilidad_bruja";
+          this.changePhase("habilidad_bruja");
         }, 3000);
       } else {
         alert("La pócima de vida ya ha sido usada");
@@ -1152,11 +1166,11 @@ export default {
 
       if (this.pocionMuerteUsada == false) {
         this.pocionMuerteMessage = `Has decidido usar la pocima de muerte con el jugador ${this.selectedPlayerIndex}`;
-        this.currentPhase = "pocion_muerte_usada";
+        this.changePhase("pocion_muerte_usada");
         this.pocionMuerteUsada = true;
         this.selectedPlayerIndex = null;
         setTimeout(() => {
-          this.currentPhase = "habilidad_bruja";
+          this.changePhase("habilidad_bruja");
         }, 3000);
       } else {
         alert("Esta pocima ya ha sido usada");
@@ -1169,7 +1183,7 @@ export default {
         idObjetivo: targetId,
       });
       // Después de disparar, pasamos a la pantalla de muerto
-      this.currentPhase = "death";
+      this.changePhase("death");
     },
     handleDiscoverRole() {
       if (!this.hasVidenteActed) {
