@@ -2,178 +2,190 @@
   <!-- Contenedor principal: se aplica la clase "modo-noche" si currentPeriod es "NOCHE" -->
   <div
     class="partida-container"
-    :class="{ 'modo-noche': currentPeriod === 'NOCHE' }"
+    :class="{ 'modo-noche': currentPeriod === 'NOCHE' && !gameEnded }"
   >
-    <!-- Modal para mostrar la revelación de la vidente -->
-    <div v-if="isModalVisible" class="modal-overlay" @click="closeModal">
-      <div class="modal-content" @click.stop>
-        <h3>Revelación de la Vidente</h3>
-        <p>{{ revelationMessage }}</p>
-        <button @click="closeModal">Cerrar</button>
-      </div>
-    </div>
+    <FinalPartidaOverlay
+      v-if="gameEnded"
+      :Mensaje="MensajeGanadoresPartida"
+      :ganador="BandoGanador"
+      @exit="$router.push('../juego')"
+    />
 
-    <!-- Si la fase actual es tratada como overlay, se muestran sólo los overlays -->
-    <template v-if="isOverlayActive">
-      <!-- Overlays iniciales -->
-      <IntroOverlay v-if="currentPhase === 'intro'" />
-      <RoleOverlay v-else-if="currentPhase === 'role'" :role="chosenRole" />
-      <EmpiezaOverlay v-else-if="currentPhase === 'start'" />
-
-      <!-- Overlays del alguacil -->
-      <AlguacilOverlay v-else-if="currentPhase === 'alguacil_announce'" />
-      <AlguacilResultOverlay
-        v-else-if="currentPhase === 'alguacil_result'"
-        :winnerName="AlguacilWinnerName"
-      />
-      <AlguacilEmpate v-else-if="currentPhase === 'alguacil_empate'" />
-
-      <!-- Overlay de noche -->
-      <NocheOverlay v-else-if="currentPhase === 'night'" :visible="true" />
-
-      <!-- Overlays de la vidente -->
-      <VidenteOverlay
-        v-else-if="currentPhase === 'vidente_awaken'"
-        :visible="true"
-      />
-      <!-- NUEVO -->
-      <DespertarBruja v-else-if="currentPhase === 'despertar_bruja'" />
-
-      <PocionMuerteUsadaOverlay
-        v-else-if="currentPhase === 'pocion_muerte_usada'"
-        :text="pocionMuerteMessage"
-      />
-
-      <PocimaVidaUsadaOverlay
-        v-else-if="currentPhase === 'pocion_vida_usada'"
-        :text="pocionVidaMessage"
-      />
-
-      <OjoCerradoOverlay
-        v-else-if="currentPhase === 'ojo_cerrado'"
-        :visible="true"
-      />
-      <DespertarHombresLobo
-        v-else-if="currentPhase === 'despertar_hombres_lobo'"
-      />
-      <EstadoDurmiendo v-else-if="currentPhase === 'estado_durmiendo'" />
-      <FinTurnoLobos v-else-if="currentPhase === 'fin_turno_lobos'" />
-
-      <MuertesDuranteNocheOverlay
-        v-else-if="currentPhase === 'recuento_muertes'"
-        :victimas="victimasNombres"
-      />
-      <LinchazoOverlay
-        v-else-if="currentPhase === 'recuento_linchazo'"
-        :victimas="victimasNombres"
-      />
-      <EmpateDiaOverlay v-else-if="currentPhase === 'empate_dia'" />
-      <EmpateSegundoDiaOverlay
-        v-else-if="currentPhase === 'empate_dia_segundo'"
-      />
-      <VotacionesDiaOverlay v-else-if="currentPhase === 'votaciones_dia'" />
-      <MuertoOverlay
-        v-else-if="currentPhase === 'death'"
-        @continue="handleContinueViewing"
-        @exit="$router.push('../juego')"
-      />
-
-      <mensajeBrujaOverlay
-        v-else-if="currentPhase === 'mensaje_burja'"
-        :victimName="wolfVictimName"
-      />
-      <CazadorOverlay
-        v-else-if="currentPhase === 'habilidad_cazador' && isCazador()"
-        :players="players.filter((p) => p.estaVivo)"
-        @fire="handleCazadorFire"
-        @continue="handleContinueViewing"
-        @exit="$router.push('/juego')"
-      />
-    </template>
-
-    <!-- Cuando no es fase overlay se muestra el contenido principal -->
     <template v-else>
-      <GameStatus
-        :aliveVillagers="aliveVillagers"
-        :totalVillagers="totalVillagers"
-        :aliveWolves="aliveWolves"
-        :totalWolves="totalWolves"
-        :currentDay="currentDay"
-        :timePeriod="currentPeriod"
-      />
-      <RoleInfoPanel :role="chosenRole" />
-
-      <!-- Círculo de jugadores -->
-      <PlayersCircle
-        :players="players"
-        :MiPlayerNombre="MiNombre"
-        :deadPlayers="deadPlayerIds"
-        :selected-player-index="selectedPlayerIndex"
-        :avatarMap="avatarMap"
-        :defaultAvatar="defaultAvatar"
-        :alguacil-voting-active="isVotingPhase"
-        :reveal-votes="revealVotes"
-        :reveal-index="revealIndex"
-        @select-player="selectPlayer"
-      />
-
-      <!-- Nuevo bloque para la acción de la bruja (fase "habilidad_bruja") -->
-      <div
-        v-if="!isSpectator && currentPhase === 'habilidad_bruja' && isBruja()"
-        class="bruja-buttons"
-      >
-        <BotonBrujaVida @usar-pocima-vida="manejarPocimaVida" />
-        <BotonBrujaMuerte @usar-pocima-muerte="manejarPocimaMuerte" />
+      <!-- Modal para mostrar la revelación de la vidente -->
+      <div v-if="isModalVisible" class="modal-overlay" @click="closeModal">
+        <div class="modal-content" @click.stop>
+          <h3>Revelación de la Vidente</h3>
+          <p>{{ revelationMessage }}</p>
+          <button @click="closeModal">Cerrar</button>
+        </div>
       </div>
 
-      <!-- Contador: se muestra en fase "game_voting" y en "vidente_action" -->
-      <CountdownTimer
-        v-if="!isSpectator && isVotingPhase"
-        :time-left="timeLeft"
-      />
+      <!-- Si la fase actual es tratada como overlay, se muestran sólo los overlays -->
+      <template v-if="isOverlayActive">
+        <!-- Overlays iniciales -->
+        <IntroOverlay v-if="currentPhase === 'intro'" />
+        <RoleOverlay v-else-if="currentPhase === 'role'" :role="chosenRole" />
+        <EmpiezaOverlay v-else-if="currentPhase === 'start'" />
 
-      <!-- Botón de voto se muestra solo en fase de votación (y para quienes NO son la Vidente) -->
-      <VoteButton
-        v-if="!isSpectator && isVotingPhase && currentPeriod === 'DÍA'"
-        :selected-player-index="selectedPlayerIndex"
-        :has-voted="hasVotedAlguacil"
-        @vote="voteForPlayer"
-      />
-      <VoteButton
-        v-else-if="!isSpectator && isVotingPhase && currentPeriod === 'NOCHE'"
-        :selected-player-index="selectedPlayerIndex"
-        :has-voted="LoboHavotado"
-        @vote="voteForPlayer"
-      />
-
-      <!-- Nuevo bloque para la acción de la Vidente (fase "vidente_action") -->
-      <div
-        v-if="!isSpectator && currentPhase === 'vidente_action' && isVidente()"
-        class="vidente-buttons"
-      >
-        <TurnButton :has-passed="hasVidenteActed" @pass="handlePassTurn" />
-        <DiscoverRoleButton
-          :has-discovered="hasVidenteActed"
-          @discover="handleDiscoverRole"
+        <!-- Overlays del alguacil -->
+        <AlguacilOverlay v-else-if="currentPhase === 'alguacil_announce'" />
+        <AlguacilResultOverlay
+          v-else-if="currentPhase === 'alguacil_result'"
+          :winnerName="AlguacilWinnerName"
         />
-      </div>
+        <AlguacilEmpate v-else-if="currentPhase === 'alguacil_empate'" />
 
-      <!-- Mensaje cuando ya has votado -->
-      <div
-        v-if="
-          (hasVotedAlguacil || LoboHavotado) && isVotingPhase && !isSpectator
-        "
-        class="vote-message"
-      >
-        Has votado a <strong>{{ votedPlayerName }}</strong>
-      </div>
+        <!-- Overlay de noche -->
+        <NocheOverlay v-else-if="currentPhase === 'night'" :visible="true" />
 
-      <Chat
-        :messages="chatMessages"
-        @new-message="addMessage"
-        :disabled="isSpectator"
-        :isLobo="isLobo() && currentPhase === 'game_voting' && VotacionLobos"
-      />
+        <!-- Overlays de la vidente -->
+        <VidenteOverlay
+          v-else-if="currentPhase === 'vidente_awaken'"
+          :visible="true"
+        />
+        <!-- NUEVO -->
+        <DespertarBruja v-else-if="currentPhase === 'despertar_bruja'" />
+
+        <PocionMuerteUsadaOverlay
+          v-else-if="currentPhase === 'pocion_muerte_usada'"
+          :text="pocionMuerteMessage"
+        />
+
+        <PocimaVidaUsadaOverlay
+          v-else-if="currentPhase === 'pocion_vida_usada'"
+          :text="pocionVidaMessage"
+        />
+
+        <OjoCerradoOverlay
+          v-else-if="currentPhase === 'ojo_cerrado'"
+          :visible="true"
+        />
+        <DespertarHombresLobo
+          v-else-if="currentPhase === 'despertar_hombres_lobo'"
+        />
+        <EstadoDurmiendo v-else-if="currentPhase === 'estado_durmiendo'" />
+        <FinTurnoLobos v-else-if="currentPhase === 'fin_turno_lobos'" />
+
+        <MuertesDuranteNocheOverlay
+          v-else-if="currentPhase === 'recuento_muertes'"
+          :victimas="victimasNombres"
+        />
+        <LinchazoOverlay
+          v-else-if="currentPhase === 'recuento_linchazo'"
+          :victimas="victimasNombres"
+        />
+        <EmpateDiaOverlay v-else-if="currentPhase === 'empate_dia'" />
+        <EmpateSegundoDiaOverlay
+          v-else-if="currentPhase === 'empate_dia_segundo'"
+        />
+        <VotacionesDiaOverlay v-else-if="currentPhase === 'votaciones_dia'" />
+
+        <MuertoOverlay
+          v-else-if="currentPhase === 'death'"
+          @continue="handleContinueViewing"
+          @exit="$router.push('../juego')"
+        />
+
+        <mensajeBrujaOverlay
+          v-else-if="currentPhase === 'mensaje_burja'"
+          :victimName="wolfVictimName"
+        />
+        <CazadorOverlay
+          v-else-if="currentPhase === 'habilidad_cazador' && isCazador()"
+          :players="players.filter((p) => p.estaVivo)"
+          @fire="handleCazadorFire"
+          @continue="handleContinueViewing"
+          @exit="$router.push('/juego')"
+        />
+      </template>
+
+      <!-- Cuando no es fase overlay se muestra el contenido principal -->
+      <template v-else>
+        <GameStatus
+          :aliveVillagers="aliveVillagers"
+          :totalVillagers="totalVillagers"
+          :aliveWolves="aliveWolves"
+          :totalWolves="totalWolves"
+          :currentDay="currentDay"
+          :timePeriod="currentPeriod"
+        />
+        <RoleInfoPanel :role="chosenRole" />
+
+        <!-- Círculo de jugadores -->
+        <PlayersCircle
+          :players="players"
+          :MiPlayerNombre="MiNombre"
+          :deadPlayers="deadPlayerIds"
+          :selected-player-index="selectedPlayerIndex"
+          :avatarMap="avatarMap"
+          :defaultAvatar="defaultAvatar"
+          :alguacil-voting-active="isVotingPhase"
+          :reveal-votes="revealVotes"
+          :reveal-index="revealIndex"
+          @select-player="selectPlayer"
+        />
+
+        <!-- Nuevo bloque para la acción de la bruja (fase "habilidad_bruja") -->
+        <div
+          v-if="!isSpectator && currentPhase === 'habilidad_bruja' && isBruja()"
+          class="bruja-buttons"
+        >
+          <BotonBrujaVida @usar-pocima-vida="manejarPocimaVida" />
+          <BotonBrujaMuerte @usar-pocima-muerte="manejarPocimaMuerte" />
+        </div>
+
+        <!-- Contador: se muestra en fase "game_voting" y en "vidente_action" -->
+        <CountdownTimer
+          v-if="!isSpectator && isVotingPhase"
+          :time-left="timeLeft"
+        />
+
+        <!-- Botón de voto se muestra solo en fase de votación (y para quienes NO son la Vidente) -->
+        <VoteButton
+          v-if="!isSpectator && isVotingPhase && currentPeriod === 'DÍA'"
+          :selected-player-index="selectedPlayerIndex"
+          :has-voted="hasVotedAlguacil"
+          @vote="voteForPlayer"
+        />
+        <VoteButton
+          v-else-if="!isSpectator && isVotingPhase && currentPeriod === 'NOCHE'"
+          :selected-player-index="selectedPlayerIndex"
+          :has-voted="LoboHavotado"
+          @vote="voteForPlayer"
+        />
+
+        <!-- Nuevo bloque para la acción de la Vidente (fase "vidente_action") -->
+        <div
+          v-if="
+            !isSpectator && currentPhase === 'vidente_action' && isVidente()
+          "
+          class="vidente-buttons"
+        >
+          <TurnButton :has-passed="hasVidenteActed" @pass="handlePassTurn" />
+          <DiscoverRoleButton
+            :has-discovered="hasVidenteActed"
+            @discover="handleDiscoverRole"
+          />
+        </div>
+
+        <!-- Mensaje cuando ya has votado -->
+        <div
+          v-if="
+            (hasVotedAlguacil || LoboHavotado) && isVotingPhase && !isSpectator
+          "
+          class="vote-message"
+        >
+          Has votado a <strong>{{ votedPlayerName }}</strong>
+        </div>
+
+        <Chat
+          :messages="chatMessages"
+          @new-message="addMessage"
+          :disabled="isSpectator"
+          :isLobo="isLobo() && currentPhase === 'game_voting' && VotacionLobos"
+        />
+      </template>
     </template>
   </div>
 </template>
@@ -224,6 +236,7 @@ import LinchazoOverlay from "./Overlay/LinchazoOverlay.vue";
 import EmpateDiaOverlay from "../../views/partida/Overlay/EmpateDiaOverlay.vue";
 import EmpateSegundoDiaOverlay from "../../views/partida/Overlay/EmpateSegundoDiaOverlay.vue";
 import MuertoOverlay from "../../views/partida/Overlay/MuertoOverlay.vue";
+import FinalPartidaOverlay from "../../views/partida/Overlay/FinalPartidaOverlay.vue";
 
 import mensajeBrujaOverlay from "./Overlay/mensajeBrujaOverlay.vue";
 import CazadorOverlay from "./Overlay/CazadorOverlay.vue";
@@ -274,6 +287,7 @@ export default {
     MuertoOverlay,
     mensajeBrujaOverlay,
     CazadorOverlay,
+    FinalPartidaOverlay,
   },
   data() {
     return {
@@ -353,6 +367,9 @@ export default {
       VotacionLobos: false,
 
       wolfVictimName: "",
+      MensajeGanadoresPartida: "",
+      gameEnded: false,
+      BandoGanador: "",
     };
   },
   computed: {
@@ -384,6 +401,7 @@ export default {
         "votaciones_dia",
         "mensaje_burja",
         "death",
+        "game_over",
       ].includes(this.currentPhase);
     },
 
@@ -471,19 +489,21 @@ export default {
 
     // 6. Evento: habilidad de la vidente
     socket.on("habilidadVidente", (data) => {
+      console.log("Habilidad de la vidente activada:", data);
       this.addEventToQueue({ type: "habilidadVidente", data });
     });
 
     // Evento que recibes para saber rol del jugador antes de los lobos
     // Listener para el resultado de la acción de la vidente (revelación)
     socket.on("visionJugador", (data) => {
-      console.log("Resultado de la revelación de la vidente:", data.mensaje);
+      console.log("Resultado de la revelación de la vidente:", data);
       // Mostrar el modal con la información recibida y esperar antes de cerrar
       this.showRevelationModal(`${data.mensaje}`);
     });
 
     // 7. Evento: turno de los hombres lobo
     socket.on("turnoHombresLobos", (data) => {
+      console.log("Turno de los hombres lobo:", data);
       // espera los 5s que quieras antes de encolar
       setTimeout(() => {
         this.addEventToQueue({ type: "turnoHombresLobos", data });
@@ -492,6 +512,7 @@ export default {
 
     //8. Evento que envía el resultado de los votos de la noche a cada jugador que corresponda
     socket.on("resultadoVotosNoche", (data) => {
+      this.resetVotingState(); //si quitais esto consultar JUAN, SINO SE QUEDA PRESELECCIONADO LA VOTACION EN EL CASO DE LOS LOBOS
       console.log(data);
       // 1) Cancelamos la fase de votación
       this.isVotingPhase = false;
@@ -522,6 +543,7 @@ export default {
     });
 
     socket.on("habilidadCazador", (data) => {
+      console.log("Habilidad de cazador activada:", data.mensaje);
       this.addEventToQueue({ type: "habilidadCazador", data });
     });
 
@@ -590,11 +612,13 @@ export default {
 
     //12. Evento que notifica un empate en la votación del día y reinicia la votación
     socket.on("empateVotacionDia", (data) => {
+      console.log("Empate en la votación del día:", data.mensaje);
       this.addEventToQueue({ type: "empateDia", data });
     });
 
     //13. Evento que notifica el segundo empate en la votación del día (ningún jugador es eliminado)
     socket.on("segundoEmpateVotacionDia", (data) => {
+      console.log("Segundo empate en la votación del día:", data.mensaje);
       this.addEventToQueue({ type: "empateSegundoDia", data });
     });
 
@@ -611,8 +635,18 @@ export default {
 
     // Escuchar la finalización de la partida
     socket.on("partidaFinalizada", (resultado) => {
+      //Juan: Vacio la cola al finalizar partida para que no me cambie de fase y no pierda el overlay del final de la partida
+      this.gameEnded = true;
+      this.eventQueue = [];
+      this.isProcessing = false;
       console.log("Partida finalizada", resultado);
-      // Manejar el final de la partida mostrando mensaje y redirigiendo o actualizando el estado
+      this.BandoGanador = resultado.ganador;
+      this.MensajeGanadoresPartida = resultado.mensaje;
+      this.currentPhase = "game_over";
+      //Limpio también cuentas atras que pudiesen haber pendientes
+      clearInterval(this.countdownInterval);
+      this.currentPeriod = "FIN";
+      //En desarrollo
     });
     const salaGuardada = localStorage.getItem("salaActual");
     if (!salaGuardada) {
@@ -745,6 +779,7 @@ export default {
     async processQueue() {
       this.isProcessing = true;
       while (this.eventQueue.length > 0) {
+        if (this.currentPhase === "game_over") break; // Si la partida ha terminado, no procesamos más eventos
         const event = this.eventQueue.shift();
         this.processSocketEvent(event);
         await this.sleep(5000); // Espera 5 segundos
