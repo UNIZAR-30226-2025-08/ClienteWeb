@@ -487,13 +487,13 @@ export default {
     socket.on("nocheComienza", (data) => {
       this.addEventToQueue({ type: "nocheComienza", data });
     });
-    /*
+    
     // 6. Evento: habilidad de la vidente
     socket.on("habilidadVidente", (data) => {
       console.log("Habilidad de la vidente activada:", data);
       this.addEventToQueue({ type: "habilidadVidente", data });
     });
-    */
+    
     // Evento que recibes para saber rol del jugador antes de los lobos
     // Listener para el resultado de la acción de la vidente (revelación)
     socket.on("visionJugador", (data) => {
