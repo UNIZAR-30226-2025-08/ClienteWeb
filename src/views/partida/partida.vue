@@ -35,6 +35,10 @@
           :winnerName="AlguacilWinnerName"
         />
         <AlguacilEmpate v-else-if="currentPhase === 'alguacil_empate'" />
+        <!-- SUCESION DE ALGUCIL GESTIONADA POR JUAN (EN PROCESO) -->
+        <SucesionAlguacilOverlay
+          v-else-if="currentPhase === 'esperando_eleccion_sucesor'"
+        />
 
         <!-- Overlay de noche -->
         <NocheOverlay v-else-if="currentPhase === 'night'" :visible="true" />
@@ -206,6 +210,7 @@ import EmpiezaOverlay from "../../views/partida/Overlay/InicioPartidaOverlay.vue
 import AlguacilOverlay from "../../views/partida/Overlay/VotacionAlguacilOverlay.vue";
 import AlguacilResultOverlay from "../../views/partida/Overlay/ResultadoAlguacilOverlay.vue";
 import AlguacilEmpate from "../../views/partida/Overlay/AlguacilEmpate.vue";
+import SucesionAlguacilOverlay from "../../views/partida/Overlay/SucesionAlguacilOverlay.vue";
 
 import NocheOverlay from "../../views/partida/Overlay/InicioNocheOverlay.vue";
 import VidenteOverlay from "../../views/partida/Overlay/VidenteOverlay.vue";
@@ -265,6 +270,7 @@ export default {
     AlguacilOverlay,
     AlguacilResultOverlay,
     AlguacilEmpate,
+    SucesionAlguacilOverlay,
     NocheOverlay,
     VidenteOverlay,
     OjoCerradoOverlay,
@@ -335,6 +341,8 @@ export default {
       chosenRole: {},
       alguacilWinnerIndex: null,
       AlguacilWinnerName: null,
+      MensajeSucesionAlguacil: "",
+      idAlguacilMuerto: null,
       aliveVillagers: 5,
       totalVillagers: 6,
       aliveWolves: 2,
@@ -401,6 +409,8 @@ export default {
         "empate_dia_segundo",
         "votaciones_dia",
         "mensaje_burja",
+        "esperando_eleccion_sucesor",
+        "elegir_sucesor",
         "death",
         "game_over",
       ].includes(this.currentPhase);
@@ -487,13 +497,13 @@ export default {
     socket.on("nocheComienza", (data) => {
       this.addEventToQueue({ type: "nocheComienza", data });
     });
-    
+
     // 6. Evento: habilidad de la vidente
     socket.on("habilidadVidente", (data) => {
       console.log("Habilidad de la vidente activada:", data);
       this.addEventToQueue({ type: "habilidadVidente", data });
     });
-    
+
     // Evento que recibes para saber rol del jugador antes de los lobos
     // Listener para el resultado de la acción de la vidente (revelación)
     socket.on("visionJugador", (data) => {
@@ -707,6 +717,19 @@ export default {
         time: timestamp,
       });
     });
+    // SUCESION DE ALGUCIL GESTIONADA POR JUAN EN PROCESO, COMENTO PORQUE PUEDE DAR ERROR SI NO
+    // socket.on("habilidadAlguacil", (data) => {
+    //   console.log("Habilidad de alguacil activada:", data.mensaje);
+    //   MensajeSucesionAlguacil = data.mensaje;
+    //   idAlguacilMuerto = data.idAlguacil;
+    //   if (this.MiId === idAlguacilMuerto) {
+    //     this.changePhase("elegir_sucesor");
+    //   } else {
+    //     this.changePhase("esperando_eleccion_sucesor");
+    //   }
+
+    //   this.addEventToQueue({ type: "habilidadAlguacil", data });
+    // });
 
     // Manejar reconexiones del socket
     socket.on("connect", () => {
@@ -942,6 +965,18 @@ export default {
         mensaje: message.content,
       });
       // No empujes aquí: lo recibirás de vuelta por socket.on('mensajeChat') o socket.on('mensajePrivado')
+    },
+    EnviarSucesorAlguacil() {
+      const idSucesor = this.selectedPlayerIndex.toString();
+      // Enviar el ID del sucesor al servidor
+      socket.emit("elegirSucesor", {
+        idPartida: this.idPartida,
+        idJugador: this.getMyId(),
+        idSucesor: idSucesor,
+      });
+      // Cambiar la fase a "game" y ocultar el overlay de elección de sucesor
+      this.changePhase("game");
+      this.showDeathOverlay = false;
     },
 
     getMyId() {
