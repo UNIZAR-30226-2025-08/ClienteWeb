@@ -487,13 +487,13 @@ export default {
     socket.on("nocheComienza", (data) => {
       this.addEventToQueue({ type: "nocheComienza", data });
     });
-
+    /*
     // 6. Evento: habilidad de la vidente
     socket.on("habilidadVidente", (data) => {
       console.log("Habilidad de la vidente activada:", data);
       this.addEventToQueue({ type: "habilidadVidente", data });
     });
-
+    */
     // Evento que recibes para saber rol del jugador antes de los lobos
     // Listener para el resultado de la acción de la vidente (revelación)
     socket.on("visionJugador", (data) => {
@@ -1102,15 +1102,15 @@ export default {
     },
 
     manejarPocimaVida() {
-      // Verifica que se haya seleccionado un jugador objetivo
-      if (!this.selectedPlayerIndex) {
-        alert("Por favor, selecciona un jugador para usar la Poción de Vida.");
+      // Verifica si existe una víctima de los lobos
+      if (!this.wolfVictimName) {
+        alert("No hay ninguna víctima de los lobos en este momento.");
         return;
       }
 
-      // Busca en el array de jugadores el jugador seleccionado
+      // Busca al jugador víctima en el array de jugadores
       const jugadorSeleccionado = this.players.find(
-        (player) => player.id === this.selectedPlayerIndex
+        (player) => player.nombre === this.wolfVictimName
       );
       if (!jugadorSeleccionado) {
         alert("El jugador seleccionado no existe.");
@@ -1122,14 +1122,14 @@ export default {
         idPartida: this.idPartida, // ID de la partida actual
         idJugador: this.getMyId(), // ID de la bruja
         tipo: "curar", // Tipo de acción: curar (poción de vida)
-        idObjetivo: this.selectedPlayerIndex, // ID del jugador seleccionado
+        idObjetivo: jugadorSeleccionado.id, // ID del jugador seleccionado
       });
 
       console.log("Se ha enviado la solicitud para usar la Poción de Vida.");
 
       if (this.pocionVidaUsada === false) {
         // Asigna el mensaje a mostrar en el overlay
-        this.pocionVidaMessage = `Has decidido usar la pócima de vida con el jugador ${this.selectedPlayerIndex}`;
+        this.pocionVidaMessage = `Has decidido usar la pócima de vida con el jugador ${this.wolfVictimName}`;
         // Cambia la fase para mostrar el overlay correspondiente
         this.changePhase("pocion_vida_usada");
 
