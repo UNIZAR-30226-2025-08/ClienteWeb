@@ -10,7 +10,11 @@
       :ganador="BandoGanador"
       @exit="$router.push('../juego')"
     />
-
+    <MuertoOverlay
+      v-if="showDeathOverlay"
+      @continue="handleContinueViewing"
+      @exit="$router.push('../juego')"
+    />
     <template v-else>
       <!-- Modal para mostrar la revelación de la vidente -->
       <div v-if="isModalVisible" class="modal-overlay" @click="closeModal">
@@ -95,11 +99,6 @@
           @fire="handleCazadorFire"
           @continue="handleContinueViewing"
           @exit="$router.push('/juego')"
-        />
-        <MuertoOverlay
-          v-if="showDeathOverlay"
-          @continue="handleContinueViewing"
-          @exit="$router.push('../juego')"
         />
       </template>
 
@@ -254,6 +253,8 @@ import avatar6 from "../../assets/avatares/imagenPerfil6.webp";
 import avatar7 from "../../assets/avatares/imagenPerfil7.webp";
 import avatar8 from "../../assets/avatares/imagenPerfil8.webp";
 import defaultAvatar from "../../assets/profile_icon.jpg"; // Imagen por defecto
+
+import inicioLobosAudio from "../../assets/audios/3.0 HOMBRES LOBO.wav"; // Asegúrate de usar la ruta correcta
 
 export default {
   name: "Partida",
@@ -1097,6 +1098,8 @@ export default {
     },
 
     handleTurnoHombresLobo(data) {
+      const audio = new Audio(inicioLobosAudio); // Usamos la ruta importada
+      audio.play();
       if (this.countdownInterval) {
         clearInterval(this.countdownInterval);
       }
