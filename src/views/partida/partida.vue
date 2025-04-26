@@ -136,6 +136,10 @@
         >
           <BotonBrujaVida @usar-pocima-vida="manejarPocimaVida" />
           <BotonBrujaMuerte @usar-pocima-muerte="manejarPocimaMuerte" />
+          <TurnButton
+            :has-passed="hasBrujaPassed"
+            @pass="handlePassBrujaTurn"
+          />
         </div>
 
         <!-- Contador: se muestra en fase "game_voting" y en "vidente_action" -->
@@ -371,6 +375,8 @@ export default {
       pocionVidaMessage: "",
       pocionVidaUsada: false,
 
+      hasBrujaPassed: false,
+
       victimas: [],
       victimasNombres: [],
       VotacionLobos: false,
@@ -489,7 +495,7 @@ export default {
 
     // 4. Evento: resultado de votación del alguacil
     socket.on("alguacilElegido", (data) => {
-      console.log("Recibo el aguacil elegido");
+      console.log("Recibo el alguacil elegido");
       this.addEventToQueue({ type: "alguacilElegido", data });
     });
 
@@ -740,6 +746,10 @@ export default {
         socketId: socket.id,
       });
     });
+
+    socket.on("pasarTurnoBruja", (data) => {
+      console.log("Turno de la bruja pasado:", data.mensaje);
+    });
   },
   beforeUnmount() {
     socket.off("iniciarVotacionAlguacil");
@@ -863,6 +873,7 @@ export default {
           }, 3000);
           this.timeLeft = event.data.tiempo || 30;
           this.resetVotingState();
+          this.hasBrujaPassed = false;
           break;
         case "resultadoVotosDia":
           // 1) Actualizar víctimas
@@ -1367,6 +1378,16 @@ export default {
         (role) => role.nombre.toLowerCase() !== "alguacil"
       );
       return validRoles[Math.floor(Math.random() * validRoles.length)];
+    },
+
+    handlePassBrujaTurn() {
+      if (!this.hasBrujaPassed) {
+        socket.emit("pasarTurnoBruja", {
+          idPartida: this.idPartida,
+          idJugador: this.getMyId(),
+        });
+        this.hasBrujaPassed = true;
+      }
     },
   },
 };

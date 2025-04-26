@@ -315,7 +315,13 @@ onMounted(() => {
           alt="Mockup del juego"
           class="mockup-image"
         />
-        <a href="/path/to/apk" class="btn-download">Descargar el APK</a>
+        <a
+          href="https://github.com/UNIZAR-30226-2025-08/ClienteMovil/releases/latest/download/app.apk"
+          class="btn-download"
+          target="_blank"
+          rel="noopener"
+          >Descargar el APK</a
+        >
       </div>
     </div>
 
@@ -474,7 +480,13 @@ onMounted(() => {
       <h2>¿Listo Para Empezar?</h2>
       <p>Descarga Ya La App O Quédate En La Web</p>
       <div class="ready-buttons">
-        <a href="/path/to/apk" class="btn-download">DESCARGAR</a>
+        <a
+          href="https://github.com/UNIZAR-30226-2025-08/ClienteMovil/releases/latest/download/app.apk"
+          class="btn-download"
+          target="_blank"
+          rel="noopener"
+          >DESCARGAR</a
+        >
         <a href="#" @click.prevent="desplazarArriba" class="btn-home"
           >Volver al inicio</a
         >

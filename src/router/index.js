@@ -17,23 +17,43 @@ import SugerenciasAdmin from "../views/SugerenciasAdmin.vue";
 
 const routes = [
   { path: "/", component: Home },
-  { path: "/Roles", component: Roles },
   { path: "/register", component: Register },
-  { path: "/crear-sala", component: CrearSala },
-  { path: "/juego", component: Juego },
-  { path: "/reglas", component: Reglas },
-  { path: "/servidores", component: Servidores },
-  { path: "/sala/:idSala", component: Sala }, // Ruta dinámica para la sala
-  { path: "/amigos", name: "amigos", component: Amigos },
-  { path: "/ranking", component: ranking },
-  { path: "/partida/:idSala", component: Partida },
+  { path: "/Roles", component: Roles, meta: { requiresAuth: true } },
+  { path: "/crear-sala", component: CrearSala, meta: { requiresAuth: true } },
+  { path: "/juego", component: Juego, meta: { requiresAuth: true } },
+  { path: "/reglas", component: Reglas, meta: { requiresAuth: true } },
+  { path: "/servidores", component: Servidores, meta: { requiresAuth: true } },
+  { path: "/sala/:idSala", component: Sala, meta: { requiresAuth: true } }, // Ruta dinámica para la sala
+  {
+    path: "/amigos",
+    name: "amigos",
+    component: Amigos,
+    meta: { requiresAuth: true },
+  },
+  { path: "/ranking", component: ranking, meta: { requiresAuth: true } },
+  {
+    path: "/partida/:idSala",
+    component: Partida,
+    meta: { requiresAuth: true },
+  },
   // La ruta de perfil acepta un parámetro opcional
-  { path: "/perfil/:idUsuario?", name: "perfil", component: Perfil },
-  { path: "/sugerencias", name: "sugerencias", component: Sugerencias },
+  {
+    path: "/perfil/:idUsuario?",
+    name: "perfil",
+    component: Perfil,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/sugerencias",
+    name: "sugerencias",
+    component: Sugerencias,
+    meta: { requiresAuth: true },
+  },
   {
     path: "/sugerenciasadmin",
     name: "sugerenciasadmin",
     component: SugerenciasAdmin,
+    meta: { requiresAuth: true },
   },
 ];
 
@@ -47,8 +67,12 @@ const navigationHistory = [];
 
 // En cada navegación agregamos la ruta "from" al historial
 router.beforeEach((to, from, next) => {
-  if (from.fullPath) {
-    navigationHistory.push(from.fullPath);
+  // Mantener historial
+  if (from.fullPath) navigationHistory.push(from.fullPath);
+  // Verificar rutas protegidas
+  if (to.meta.requiresAuth && !localStorage.getItem("usuario")) {
+    // Si no está logueado, redirigir a Home
+    return next({ path: "/" });
   }
   next();
 });
