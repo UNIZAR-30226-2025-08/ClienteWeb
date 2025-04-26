@@ -23,6 +23,19 @@
           💀
         </div>
       </div>
+      <!-- Iconos miniatura fuera de avatar-wrapper para evitar overflow hidden -->
+      <img
+        v-if="player.id === alguacilId"
+        src="../../../assets/alguacil.png"
+        alt="Alguacil"
+        class="icon-mini alguacil-mini"
+      />
+      <img
+        v-if="player.id === wolfVictimId"
+        src="../../../assets/peligro_lobo.png"
+        alt="Próxima Víctima"
+        class="icon-mini wolf-mini"
+      />
 
       <!-- Etiqueta con el nombre del jugador -->
       <span
@@ -100,6 +113,14 @@ export default {
       type: String,
       required: true,
     },
+    alguacilId: {
+      type: Number,
+      default: null,
+    },
+    wolfVictimId: {
+      type: Number,
+      default: null,
+    },
   },
   methods: {
     getUsernameColor(username) {
@@ -162,6 +183,7 @@ export default {
   overflow: hidden;
   border: 0.3vw solid var(--player-color);
   transition: border-color 0.3s, transform 0.3s;
+  z-index: 0;
 }
 
 .player-image {
@@ -256,5 +278,26 @@ export default {
   100% {
     box-shadow: 0 0 0.5vw rgba(255, 235, 59, 0.9);
   }
+}
+
+/* Estilos para iconos miniatura */
+.icon-mini {
+  position: absolute;
+  width: 3vw;
+  height: 3vw;
+  top: -1vw;
+  left: -1vw;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.alguacil-mini {
+  border: none;
+  filter: drop-shadow(0 0 0.2vw gold);
+}
+
+.wolf-mini {
+  border: none;
+  filter: drop-shadow(0 0 0.2vw red);
 }
 </style>

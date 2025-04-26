@@ -1,5 +1,10 @@
 <template>
   <div class="result-overlay fadeInOut">
+    <img
+      src="../../../assets/alguacil.png"
+      alt="Alguacil"
+      class="alguacil-img"
+    />
     <h1 class="result-text">{{ winnerName }} ES EL ALGUACIL</h1>
   </div>
 </template>
@@ -39,5 +44,10 @@ export default {
 
 .fadeInOut {
   animation: fadeInOut 6s forwards;
+}
+
+.alguacil-img {
+  width: 10vw;
+  margin-bottom: 2vh;
 }
 </style>

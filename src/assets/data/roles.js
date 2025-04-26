@@ -35,7 +35,7 @@ export const roles = [
     equipo: "Bando de los aldeanos",
   },
   {
-    src: new URL("../roles/alguacil.png", import.meta.url).href,
+    src: new URL("../alguacil.png", import.meta.url).href,
     nombre: "Alguacil",
     descripcion:
       "El cargo del Alguacil se elige democráticamente por el pueblo. Es un cargo o función extra, no es un rol de personaje. Un jugador siempre tendrá su rol y la posibilidad de ostentar el cargo del Alguacil. Por tanto, no supone ningún bando, y quien reciba el cargo de Alguacil gana la habilidad de que su voto para linchar a un jugador durante el día valdrá por dos. Si el Alguacil muere en el transcurso de la partida, él mismo designa un sucesor para recibir el cargo de Alguacil.",

@@ -1,6 +1,13 @@
 <template>
   <div class="result-overlay fadeInOut">
-    <h1 class="result-text">{{ victimName }} ha sido asesinado por los lobos</h1>
+    <img
+      src="../../../assets/peligro_lobo.png"
+      alt="Peligro Lobo"
+      class="peligro-img"
+    />
+    <h1 class="result-text">
+      {{ victimName }} ha sido atacado por los lobos
+    </h1>
   </div>
 </template>
 
@@ -41,8 +48,20 @@ export default {
 .fadeInOut {
   animation: fadeInOut 6s forwards;
 }
+
+.peligro-img {
+  width: 10vw;
+  margin-bottom: 2vh;
+}
+
 @keyframes fadeInOut {
-  0%,100% { opacity: 0; }
-  10%,90% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
 }
 </style>

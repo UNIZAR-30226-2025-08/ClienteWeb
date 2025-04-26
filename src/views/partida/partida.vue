@@ -122,6 +122,8 @@
           :selected-player-index="selectedPlayerIndex"
           :avatarMap="avatarMap"
           :defaultAvatar="defaultAvatar"
+          :alguacil-id="alguacilId"
+          :wolf-victim-id="nextWolfVictimId"
           :alguacil-voting-active="isVotingPhase"
           :reveal-votes="revealVotes"
           :reveal-index="revealIndex"
@@ -186,6 +188,7 @@
         </div>
 
         <Chat
+          v-if="!(currentPeriod === 'NOCHE' && (isVidente() || isBruja()))"
           :messages="chatMessages"
           @new-message="addMessage"
           :disabled="isSpectator"
@@ -378,6 +381,9 @@ export default {
 
       hasBrujaPassed: false,
 
+      alguacilId: null,
+      nextWolfVictimId: null,
+
       victimas: [],
       victimasNombres: [],
       VotacionLobos: false,
@@ -567,6 +573,8 @@ export default {
 
     //11. Escuchar evento para pasar al día
     socket.on("diaComienza", (data) => {
+      // Eliminar icono de próxima víctima al inicio del día
+      this.nextWolfVictimId = null;
       console.log("El día ha comenzado", data);
 
       // — Tu lógica existente para marcar víctimas —
@@ -835,6 +843,7 @@ export default {
         case "alguacilElegido":
           console.log("Procesando en cola: alguacilElegido", event.data);
           this.alguacilWinnerIndex = Number(event.data.alguacil);
+          this.alguacilId = Number(event.data.alguacil);
           this.AlguacilWinnerName = this.findPlayerNameById(
             this.alguacilWinnerIndex
           );
@@ -941,6 +950,7 @@ export default {
         case "loboAttack":
           // obtenemos el nombre de la víctima
           const victimId = Number(event.data.victima);
+          this.nextWolfVictimId = victimId;
           this.wolfVictimName = this.findPlayerNameById(victimId);
           this.changePhase("mensaje_burja");
           // tras 6s pasamos a la fase de habilidad de la bruja (si la hay)
@@ -1169,9 +1179,9 @@ export default {
       // Emite el evento "usaPocionBruja" con tipo "curar"
       socket.emit("usaPocionBruja", {
         idPartida: this.idPartida, // ID de la partida actual
-        idJugador: this.getMyId(), // ID de la bruja
+        idJugador: String(this.getMyId()), // ID de la bruja
         tipo: "curar", // Tipo de acción: curar (poción de vida)
-        idObjetivo: jugadorSeleccionado.id, // ID del jugador seleccionado
+        idObjetivo: String(jugadorSeleccionado.id), // ID del jugador seleccionado
       });
 
       console.log("Se ha enviado la solicitud para usar la Poción de Vida.");
@@ -1408,8 +1418,19 @@ export default {
   overflow: hidden;
 }
 
-.modo-noche {
-  filter: brightness(0.4);
+/* Overlay para fondo en modo noche */
+.partida-container.modo-noche {
+  /* mantiene posición relativa */
+}
+.partida-container.modo-noche::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  pointer-events: none;
 }
 
 /* En vote-message convertimos:
