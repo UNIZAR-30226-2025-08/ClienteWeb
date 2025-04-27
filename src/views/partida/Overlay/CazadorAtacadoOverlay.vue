@@ -27,7 +27,7 @@ export default {
   z-index: 3000;
 }
 .dialog {
-  background: #fff;
+  background: #000000;
   padding: 2rem;
   border-radius: 0.5rem;
   text-align: center;

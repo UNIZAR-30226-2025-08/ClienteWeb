@@ -28,7 +28,10 @@
       <!-- Si la fase actual es tratada como overlay, se muestran sólo los overlays -->
       <template v-if="isOverlayActive">
         <!-- Overlays iniciales -->
-        <IntroOverlay v-if="currentPhase === 'intro'" :isFirstTime="isFirstTime" />
+        <IntroOverlay
+          v-if="currentPhase === 'intro'"
+          :isFirstTime="isFirstTime"
+        />
         <RoleOverlay v-else-if="currentPhase === 'role'" :role="chosenRole" />
         <EmpiezaOverlay v-else-if="currentPhase === 'start'" />
 
@@ -93,12 +96,16 @@
           v-else-if="currentPhase === 'mensaje_burja'"
           :victimName="wolfVictimName"
         />
+
         <CazadorOverlay
           v-else-if="currentPhase === 'habilidad_cazador' && isCazador()"
           :players="players.filter((p) => p.estaVivo)"
           @fire="handleCazadorFire"
           @continue="handleContinueViewing"
           @exit="$router.push('/juego')"
+        />
+        <CazadorAtacadoOverlay
+          v-else-if="currentPhase === 'habilidad_cazador' && !isCazador()"
         />
       </template>
 
@@ -250,6 +257,7 @@ import FinalPartidaOverlay from "../../views/partida/Overlay/FinalPartidaOverlay
 
 import mensajeBrujaOverlay from "./Overlay/mensajeBrujaOverlay.vue";
 import CazadorOverlay from "./Overlay/CazadorOverlay.vue";
+import CazadorAtacadoOverlay from "./Overlay/CazadorAtacadoOverlay.vue";
 
 import avatar1 from "../../assets/avatares/imagenPerfil.webp";
 import avatar2 from "../../assets/avatares/imagenPerfil2.webp";
@@ -298,6 +306,7 @@ export default {
     MuertoOverlay,
     mensajeBrujaOverlay,
     CazadorOverlay,
+    CazadorAtacadoOverlay,
     FinalPartidaOverlay,
   },
   data() {
@@ -311,6 +320,7 @@ export default {
       isLynchPhase: false,
       LoboHavotado: false,
       isSpectator: false,
+      hasFired: false,
       MiId: null,
       showDeathOverlay: false,
       showCazadorOverlay: false,
@@ -399,33 +409,36 @@ export default {
      * No se incluyen "game_voting" ni "vidente_action" para que se muestre el contenido principal.
      */
     isOverlayActive() {
-      return [
-        "intro",
-        "role",
-        "start",
-        "alguacil_announce",
-        "alguacil_empate",
-        "alguacil_result",
-        "night",
-        "vidente_awaken",
-        "ojo_cerrado",
-        "despertar_hombres_lobo",
-        "despertar_bruja", //NUEVO
-        "estado_durmiendo",
-        "fin_turno_lobos",
-        "pocion_muerte_usada",
-        "pocion_vida_usada",
-        "recuento_muertes",
-        "recuento_linchazo",
-        "empate_dia",
-        "empate_dia_segundo",
-        "votaciones_dia",
-        "mensaje_burja",
-        "esperando_eleccion_sucesor",
-        "elegir_sucesor",
-        "death",
-        "game_over",
-      ].includes(this.currentPhase);
+      return (
+        [
+          "intro",
+          "role",
+          "start",
+          "alguacil_announce",
+          "alguacil_empate",
+          "alguacil_result",
+          "night",
+          "vidente_awaken",
+          "ojo_cerrado",
+          "despertar_hombres_lobo",
+          "despertar_bruja", //NUEVO
+          "estado_durmiendo",
+          "fin_turno_lobos",
+          "pocion_muerte_usada",
+          "pocion_vida_usada",
+          "recuento_muertes",
+          "recuento_linchazo",
+          "empate_dia",
+          "empate_dia_segundo",
+          "votaciones_dia",
+          "habilidad_cazador",
+          "mensaje_burja",
+          "esperando_eleccion_sucesor",
+          "elegir_sucesor",
+          "death",
+          "game_over",
+        ].includes(this.currentPhase) && !this.hasFired
+      );
     },
 
     MiNombre() {
@@ -555,7 +568,7 @@ export default {
 
     //9. Evento que notifica a la bruja con el mensaje y la víctima elegida por los lobos (Si la bruja existe)
     socket.on("mensajeBruja", (data) => {
-      console.log("Mensaje para la bruja:");
+      console.log("Mensaje para la bruja:", data);
       this.addEventToQueue({ type: "loboAttack", data });
     });
 
@@ -574,6 +587,7 @@ export default {
     socket.on("diaComienza", (data) => {
       // Eliminar icono de próxima víctima al inicio del día
       this.nextWolfVictimId = null;
+      this.showCazadorOverlay = false;
       console.log("El día ha comenzado", data);
 
       // — Tu lógica existente para marcar víctimas —
@@ -779,8 +793,15 @@ export default {
   },
   methods: {
     changePhase(newPhase) {
-      if (!this.showDeathOverlay || !this.showCazadorOverlay) {
-        this.currentPhase = newPhase; // Solo cambiar la fase si el overlay de muerte no está activo
+      console.log(`showDeathOverlay es: ${this.showDeathOverlay}`);
+      console.log(`showCazadorOverlay es: ${this.showCazadorOverlay}`);
+      if (!this.showDeathOverlay && !this.showCazadorOverlay) {
+        this.currentPhase = newPhase;
+        console.log(`Cambiando a la fase: ${newPhase}`); // Esto registrará la fase a la que se está cambiando
+      } else {
+        console.log(
+          `No se puede cambiar a la fase: ${newPhase} porque hay un overlay activo`
+        );
       }
     },
     isCazador() {
@@ -791,16 +812,10 @@ export default {
 
       // Verificar si el jugador que murió es el cazador
       if (this.isCazador()) {
-        // Si es el cazador, mostramos el overlay de cazador
-        this.changePhase("habilidad_cazador");
         this.showCazadorOverlay = true;
-        // setTimeout(() => {
-        //   this.currentPhase = "game";
-        // }, 5000);
       } else {
-        // Si no es el cazador, mostramos el overlay de muerto
         this.changePhase("death");
-        this.showDeathOverlay = true; // Mostrar overlay de muerte
+        this.showDeathOverlay = true;
       }
     },
     // Función auxiliar: pausa la ejecución
@@ -964,7 +979,7 @@ export default {
           break;
         case "habilidadCazador":
           this.changePhase("habilidad_cazador");
-
+          this.showCazadorOverlay = true;
           this.timeLeft = event.data.tiempo || 30;
           break;
         default:
@@ -975,6 +990,7 @@ export default {
     handleContinueViewing() {
       // quita overlay, pero mantiene isSpectator = true
       this.showDeathOverlay = false;
+      this.showCazadorOverlay = false;
       this.changePhase("game");
     },
     addMessage(message) {
@@ -1239,8 +1255,7 @@ export default {
         idJugador: this.getMyId(),
         idObjetivo: targetId,
       });
-      // Después de disparar, pasamos a la pantalla de muerto
-      this.changePhase("death");
+      this.showCazadorOverlay = false;
     },
     handleDiscoverRole() {
       if (!this.hasVidenteActed) {
