@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import audioVotaciones from "../../../assets/audios/6 votaciones.wav";
+import audioVotaciones from "../../../assets/audios/6 VOTACIONES.wav";
 
 export default {
   props: {
