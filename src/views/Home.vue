@@ -296,13 +296,6 @@ onMounted(() => {
               </div>
 
               <button type="submit" class="login-button">ENTRAR</button>
-
-              <div class="google-login">
-                <button class="google-button">
-                  <img src="../assets/google-icon.png" alt="Google Logo" />
-                  Continuar con Google
-                </button>
-              </div>
             </form>
           </div>
         </div>
@@ -765,36 +758,6 @@ main {
 
 .login-button:hover {
   background-color: #790063;
-}
-
-.google-login {
-  margin-top: 20px;
-}
-
-.google-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 12px;
-  border: 2px solid #00000056;
-  border-radius: 8px;
-  background: #8b2b22;
-  font-weight: bold;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
-  font-family: "MedievalSharp", cursive;
-  color: white;
-}
-
-.google-button:hover {
-  background-color: #c1351d;
-}
-
-.google-button img {
-  width: 1.5rem;
-  margin-right: 1rem;
 }
 
 .game-intro {
