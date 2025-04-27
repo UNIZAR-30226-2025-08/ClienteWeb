@@ -2,18 +2,30 @@
   <div class="cazador-overlay">
     <div class="cazador-dialog">
       <h2>¡Eres el Cazador!</h2>
-      <p>Selecciona un jugador para disparar:</p>
-      <ul class="target-list">
+
+      <p v-if="!hasFired">Selecciona un jugador para disparar:</p>
+
+      <!-- Muestra la lista de jugadores solo si no ha disparado -->
+      <ul class="target-list" v-if="!hasFired">
         <li v-for="player in players" :key="player.id">
           <button
             class="target-button"
-            :disabled="selectedId === player.id"
-            @click="select(player.id)"
+            :disabled="player.id === myId"
+            @click="confirmFire(player.id)"
           >
             {{ player.nombre }}
           </button>
         </li>
       </ul>
+
+      <!-- Popup de confirmación -->
+      <div v-if="showConfirm" class="confirmation-popup">
+        <p>¿Estás seguro de que quieres disparar a {{ selectedPlayerName }}?</p>
+        <button @click="firePlayer">Confirmar</button>
+        <button @click="cancelFire">Cancelar</button>
+      </div>
+
+      <!-- Muestra el mensaje después de disparar -->
       <div class="actions" v-if="hasFired">
         <p>Has disparado a {{ firedName }}.</p>
         <button @click="$emit('continue')">Seguir viendo</button>
@@ -28,25 +40,39 @@ export default {
   name: "CazadorOverlay",
   props: {
     players: Array,
+    myId: Number, // Recibe el ID del jugador actual
   },
   data() {
     return {
       selectedId: null,
       hasFired: false,
+      firedName: "", // Guardará el nombre de la víctima seleccionada
+      showConfirm: false, // Controla la visibilidad del popup de confirmación
+      selectedPlayerName: "", // Nombre del jugador seleccionado para disparar
     };
   },
-  computed: {
-    firedName() {
-      const p = this.players.find((p) => p.id === this.selectedId);
-      return p ? p.nombre : "";
-    },
-  },
   methods: {
-    select(id) {
-      if (this.hasFired) return;
+    // Muestra el popup de confirmación antes de disparar
+    confirmFire(id) {
+      if (this.hasFired || id === this.myId) return; // No permite dispararse a sí mismo ni disparar si ya se disparó
       this.selectedId = id;
+      this.selectedPlayerName = this.players.find(
+        (player) => player.id === id
+      ).nombre;
+      this.showConfirm = true; // Muestra el popup
+    },
+
+    // Confirma que el cazador disparará
+    firePlayer() {
       this.hasFired = true;
-      this.$emit("fire", id);
+      this.firedName = this.selectedPlayerName; // Guarda el nombre de la víctima
+      this.showConfirm = false; // Cierra el popup
+      this.$emit("fire", this.selectedId); // Emite el evento para notificar que se disparó
+    },
+
+    // Cancela la acción de disparar
+    cancelFire() {
+      this.showConfirm = false; // Cierra el popup sin hacer nada
     },
   },
 };
@@ -83,7 +109,32 @@ export default {
   border: none;
   border-radius: 0.25rem;
   cursor: pointer;
+  background-color: #4caf50;
+  color: white;
+  transition: background-color 0.3s ease;
 }
+.target-button:disabled {
+  background-color: #9e9e9e; /* Cambia el color cuando el botón está deshabilitado */
+  cursor: not-allowed;
+}
+
+.confirmation-popup {
+  background: rgba(0, 0, 0, 0.85);
+  padding: 1rem;
+  border-radius: 10px;
+  color: white;
+  text-align: center;
+}
+.confirmation-popup button {
+  margin: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  background-color: #ff5722;
+  color: white;
+}
+
 .actions {
   margin-top: 1.5rem;
 }
@@ -93,5 +144,7 @@ export default {
   border: none;
   border-radius: 0.25rem;
   cursor: pointer;
+  background-color: #ff5722;
+  color: white;
 }
 </style>

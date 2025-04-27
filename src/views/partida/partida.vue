@@ -99,11 +99,12 @@
 
         <CazadorOverlay
           v-else-if="currentPhase === 'habilidad_cazador' && isCazador()"
-          :players="players.filter((p) => p.estaVivo)"
+          :players="players.filter((p) => p.estaVivo && p.id !== MiId)"
           @fire="handleCazadorFire"
           @continue="handleContinueViewing"
           @exit="$router.push('/juego')"
         />
+
         <CazadorAtacadoOverlay
           v-else-if="currentPhase === 'habilidad_cazador' && !isCazador()"
         />
