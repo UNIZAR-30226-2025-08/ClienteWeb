@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import videnteAudioSrc from "../../../assets/audios/2.0 VIDENTE.wav";
 export default {
   name: "VidenteOverlay",
   props: {
@@ -21,6 +22,26 @@ export default {
       type: Boolean,
       default: false,
     },
+  },
+  data() {
+    return {
+      audio: new Audio(videnteAudioSrc),
+    };
+  },
+  watch: {
+    visible(newVal) {
+      if (newVal) {
+        this.audio.play();
+      } else {
+        this.audio.pause();
+        this.audio.currentTime = 0;
+      }
+    },
+  },
+  mounted() {
+    if (this.visible) {
+      this.audio.play();
+    }
   },
 };
 </script>

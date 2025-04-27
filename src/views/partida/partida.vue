@@ -28,7 +28,7 @@
       <!-- Si la fase actual es tratada como overlay, se muestran sólo los overlays -->
       <template v-if="isOverlayActive">
         <!-- Overlays iniciales -->
-        <IntroOverlay v-if="currentPhase === 'intro'" />
+        <IntroOverlay v-if="currentPhase === 'intro'" :isFirstTime="isFirstTime" />
         <RoleOverlay v-else-if="currentPhase === 'role'" :role="chosenRole" />
         <EmpiezaOverlay v-else-if="currentPhase === 'start'" />
 
@@ -261,8 +261,6 @@ import avatar7 from "../../assets/avatares/imagenPerfil7.webp";
 import avatar8 from "../../assets/avatares/imagenPerfil8.webp";
 import defaultAvatar from "../../assets/profile_icon.jpg"; // Imagen por defecto
 
-import inicioLobosAudio from "../../assets/audios/3.0 HOMBRES LOBO.wav"; // Asegúrate de usar la ruta correcta
-
 export default {
   name: "Partida",
   components: {
@@ -357,6 +355,7 @@ export default {
       totalWolves: 2,
       currentDay: 1,
       currentPeriod: "DÍA",
+      isFirstTime: true,
 
       // Nuevas propiedades para la acción de la Vidente
       hasPassedTurn: false,
@@ -623,6 +622,7 @@ export default {
             this.hasVotedAlguacil = false; // reseteamos para usarlo como "hasVotedLynch"
             this.timeLeft = 16;
             this.changePhase("game");
+            this.isFirstTime = false;
             this.countdownInterval = setInterval(() => {
               if (this.timeLeft > 0) {
                 this.timeLeft--;
@@ -1119,8 +1119,6 @@ export default {
     },
 
     handleTurnoHombresLobo(data) {
-      const audio = new Audio(inicioLobosAudio); // Usamos la ruta importada
-      audio.play();
       if (this.countdownInterval) {
         clearInterval(this.countdownInterval);
       }

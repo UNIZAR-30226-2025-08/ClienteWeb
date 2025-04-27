@@ -1,36 +1,31 @@
 <template>
-  <div class="empieza-overlay fadeInOut" @animationend="onAnimationEnd">
-    <h1 class="empieza-text">{{ text }}</h1>
+  <div
+    class="empieza-overlay fadeInOut"
+    :style="{ animationDuration: '2s' }"
+    @animationend="onAnimationEnd"
+  >
+    <h1 class="empieza-text">LA VIDENTE SE VUELVE A DORMIR</h1>
   </div>
 </template>
 
 <script>
-import audioLobosDormir from "../../../assets/audios/3.1 HOMBRES LOBO DORMIR.wav";
+import audioVidente from "../../../assets/audios/2.1 VIDENTE DORMIR.wav";
 
 export default {
-  name: "FinTurnoLobos",
-  props: {
-    text: {
-      type: String,
-      default:
-        "LOS HOMBRES LOBO SACIADOS VUELVEN A DORMIRSE Y SUEÑAN CON PROXIMAS Y SABROSAS VICTIMAS",
-    },
-  },
+  name: "VidenteDormir",
   data() {
     return {
       audio: null,
     };
   },
   mounted() {
-    this.audio = new Audio(audioLobosDormir);
+    this.audio = new Audio(audioVidente);
     this.audio.play();
   },
   methods: {
     onAnimationEnd() {
-      if (this.audio) {
-        this.audio.pause();
-        this.audio.currentTime = 0;
-      }
+      this.audio.pause();
+      this.audio.currentTime = 0;
       this.$emit("finish");
     },
   },
@@ -57,8 +52,6 @@ export default {
   font-family: "Times New Roman", serif;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   letter-spacing: 2px;
-  text-align: center;
-  padding: 0 20px;
 }
 
 .fadeInOut {
@@ -66,17 +59,9 @@ export default {
 }
 
 @keyframes fadeInOut {
-  0% {
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
 }
 </style>

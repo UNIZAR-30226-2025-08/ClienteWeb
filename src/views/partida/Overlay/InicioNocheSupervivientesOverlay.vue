@@ -1,18 +1,17 @@
 <template>
-  <div class="votaciones-dia-overlay fadeInOut" @animationend="onAnimationEnd">
-    <h1 class="votaciones-text">{{ text }}</h1>
+  <div class="noche-overlay fadeInOut" @animationend="onAnimationEnd">
+    <h1 class="noche-text">{{ text }}</h1>
   </div>
 </template>
 
 <script>
-import audioVotaciones from "../../../assets/audios/6 votaciones.wav";
+import audioNoche from "../../../assets/audios/7. Noche. Volver a 2.wav";
 
 export default {
   props: {
     text: {
       type: String,
-      default:
-        "LOS JUGADORES DEBEN ELIMINAR, DE FORMA CONSENSUADA, A UN JUGADOR SOSPECHOSO DE SER HOMBRE LOBO. COMIENZAN LAS VOTACIONES",
+      default: "SE HACE DE NOCHE. LOS SUPERVIVIENTES SE VUELVEN A DORMIR.",
     },
   },
   data() {
@@ -21,7 +20,7 @@ export default {
     };
   },
   mounted() {
-    this.audio = new Audio(audioVotaciones);
+    this.audio = new Audio(audioNoche);
     this.audio.play();
   },
   methods: {
@@ -37,7 +36,7 @@ export default {
 </script>
 
 <style scoped>
-.votaciones-dia-overlay {
+.noche-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -50,9 +49,9 @@ export default {
   z-index: 9999;
 }
 
-.votaciones-text {
+.noche-text {
   color: white;
-  font-size: 2.5rem;
+  font-size: 3rem;
   text-align: center;
   max-width: 80%;
   line-height: 1.3;
