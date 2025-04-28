@@ -23,8 +23,8 @@
         <p>
           ¿Dejas la responsabilidad de ser Alguacil a {{ selectedPlayerName }}?
         </p>
-        <button @click="firePlayer">Confirmar</button>
-        <button @click="cancelFire">Cancelar</button>
+        <button @click="VotePlayer">Confirmar</button>
+        <button @click="cancelVote">Cancelar</button>
       </div>
 
       <!-- Muestra el mensaje después de disparar -->
@@ -66,15 +66,15 @@ export default {
     },
 
     // Confirma que el cazador disparará
-    firePlayer() {
+    VotePlayer() {
       this.hasVoted = true;
-      this.sucessorName = this.selectedPlayerName; // Guarda el nombre de la víctima
+      this.sucessorName = this.selectedPlayerName; // Guarda el nombre de el nuevo alguacil
       this.showConfirm = false; // Cierra el popup
-      this.$emit("fire", this.selectedId); // Emite el evento para notificar que se disparó
+      this.$emit("vote", this.selectedId); // Emite el evento para notificar que se disparó
     },
 
     // Cancela la acción de disparar
-    cancelFire() {
+    cancelVote() {
       this.showConfirm = false; // Cierra el popup sin hacer nada
     },
   },

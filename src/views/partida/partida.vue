@@ -767,8 +767,7 @@ export default {
     socket.on("habilidadAlguacil", (data) => {
       console.log("Habilidad de alguacil activada:", data.mensaje);
       console.log("ID del alguacil muerto:", data.idAlguacil);
-      MensajeSucesionAlguacil = data.mensaje;
-      idAlguacilMuerto = data.idAlguacil;
+      this.idAlguacilMuerto = data.idAlguacil;
       this.addEventToQueue({ type: "eleccion_sucesor", data });
     });
 
@@ -825,7 +824,7 @@ export default {
       return this.chosenRole && this.chosenRole.nombre === "Cazador";
     },
     isAlguacil() {
-      return this.MiId === idAlguacilMuerto;
+      return this.MiId == this.idAlguacilMuerto;
     },
     markDead() {
       this.isSpectator = true; // El jugador se convierte en espectador
@@ -1156,7 +1155,7 @@ export default {
       }, 6000);
     },
     handleHabilidadAlguacil() {
-      if (this.MiId === idAlguacilMuerto) {
+      if (this.MiId === this.idAlguacilMuerto) {
         this.changePhase("elegir_sucesor");
         this.hasAlguacilActed = false;
         this.timeLeft = 30;
@@ -1299,7 +1298,7 @@ export default {
       socket.emit("elegirSucesor", {
         idPartida: this.idPartida,
         idJugador: this.getMyId(),
-        idSucesor: targetId,
+        idObjetivo: targetId,
       });
       this.showSucesionOverlay = false;
     },
