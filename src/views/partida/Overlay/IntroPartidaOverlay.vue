@@ -67,7 +67,7 @@ export default {
 .overlay-text {
   color: white;
   font-size: 3rem;
-  text-align: center;
+  text-align: center; /*prittier*/
   max-width: 80%;
   line-height: 1.2;
   font-family: "Times New Roman", serif;

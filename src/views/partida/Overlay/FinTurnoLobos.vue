@@ -47,7 +47,7 @@ export default {
   background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center; /*prittier*/
   z-index: 9999;
 }
 

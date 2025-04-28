@@ -38,7 +38,7 @@ export default {
   name: "PlayersCircle",
   props: {
     players: {
-      type: Array,
+      type: Array /*prittier*/,
       required: true,
     },
     deadPlayers: {

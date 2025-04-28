@@ -69,7 +69,7 @@ export default {
 .candado-icon {
   /* Aproximadamente 20px */
   width: 1vw;
-  height: 1vw;
+  height: 1vw; /*prittier*/
 }
 
 .vote-button.active {

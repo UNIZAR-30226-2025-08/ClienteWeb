@@ -22,7 +22,7 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
+  right: 0; /*prittier*/
   bottom: 0;
   background: rgba(0, 0, 0, 0.7);
   display: flex;

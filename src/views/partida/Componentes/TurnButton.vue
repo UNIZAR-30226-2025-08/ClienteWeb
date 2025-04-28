@@ -58,7 +58,7 @@ export default {
 
 .candado-icon {
   /* 1.25rem ≈ 20px → 1vw */
-  width: 1vw;
+  width: 1vw; /*prittier*/
   height: 1vw;
 }
 

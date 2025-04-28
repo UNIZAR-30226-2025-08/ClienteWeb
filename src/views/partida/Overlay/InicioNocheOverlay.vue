@@ -60,7 +60,7 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: center; /*prittier*/
   z-index: 9999; /* Asegúrate de que se muestre por encima de otros elementos */
 }
 

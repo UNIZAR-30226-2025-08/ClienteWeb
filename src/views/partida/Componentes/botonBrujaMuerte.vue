@@ -12,6 +12,7 @@
 </template>
 
 <script>
+//prittier
 export default {
   name: "BotonBrujaMuerte",
 };

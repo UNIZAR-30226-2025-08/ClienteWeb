@@ -13,6 +13,7 @@
 <script>
 export default {
   props: {
+    /*prittier*/
     role: {
       type: Object,
       required: true,

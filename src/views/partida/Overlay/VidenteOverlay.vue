@@ -56,7 +56,7 @@ export default {
   background: rgba(0, 0, 0, 0.8);
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: center; /*prittier*/
   align-items: center;
   z-index: 9999; /* Asegúrate de que se muestre por encima de otros elementos */
 }

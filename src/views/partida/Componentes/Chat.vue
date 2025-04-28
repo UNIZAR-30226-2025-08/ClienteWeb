@@ -41,7 +41,7 @@ export default {
     isLobo: {
       type: Boolean,
       default: false,
-    },
+    } /*prittier*/,
   },
   data() {
     return {

@@ -30,7 +30,7 @@ export default {
   cursor: pointer;
   transition: transform 0.2s;
 }
-
+/*prittier*/
 .boton-bruja:hover {
   transform: scale(1.05);
 }

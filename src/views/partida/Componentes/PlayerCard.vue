@@ -65,6 +65,7 @@
 export default {
   name: "PlayersCircle",
   data() {
+    /*prittier*/
     return {
       usernameColors: {},
       colorPalette: [

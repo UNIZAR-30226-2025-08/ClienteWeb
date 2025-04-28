@@ -54,7 +54,7 @@ export default {
   color: white;
   font-size: 2.5rem;
   text-align: center;
-  max-width: 80%;
+  max-width: 80%; /*prittier*/
   line-height: 1.3;
   font-family: "Times New Roman", serif;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);

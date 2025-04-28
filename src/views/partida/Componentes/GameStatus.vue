@@ -31,7 +31,7 @@
 export default {
   props: {
     aliveVillagers: {
-      type: Number,
+      type: Number /*prittier*/,
       default: 5,
     },
     totalVillagers: {

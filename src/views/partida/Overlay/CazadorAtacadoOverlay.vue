@@ -19,6 +19,7 @@ export default {
 <style scoped>
 /* Contenedor principal del overlay */
 .cazador-atacado-overlay {
+  /*prittier*/
   position: absolute;
   top: 0;
   left: 0;

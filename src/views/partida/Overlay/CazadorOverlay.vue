@@ -104,7 +104,7 @@ export default {
   margin: 1rem 0;
 }
 .target-button {
-  margin: 0.5rem;
+  margin: 0.5rem; /*prittier*/
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 0.25rem;

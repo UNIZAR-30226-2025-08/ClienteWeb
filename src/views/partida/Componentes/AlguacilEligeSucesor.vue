@@ -53,6 +53,7 @@ export default {
       selectedPlayerName: "", // Nombre del jugador seleccionado para disparar
     };
   },
+  //prittier
   methods: {
     // Muestra el popup de confirmación antes de disparar
     confirmSucessor(id) {

@@ -36,7 +36,7 @@ export default {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.8);
   display: flex;
-  justify-content: center;
+  justify-content: center; /*prittier*/
   align-items: center;
   z-index: 9999;
 }

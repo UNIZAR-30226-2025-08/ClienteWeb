@@ -5,9 +5,7 @@
       alt="Peligro Lobo"
       class="peligro-img"
     />
-    <h1 class="result-text">
-      {{ victimName }} ha sido atacado por los lobos
-    </h1>
+    <h1 class="result-text">{{ victimName }} ha sido atacado por los lobos</h1>
   </div>
 </template>
 
@@ -33,7 +31,7 @@ export default {
   background-color: rgba(0, 0, 0, 0.9);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center; /*prittier*/
   z-index: 9999;
 }
 

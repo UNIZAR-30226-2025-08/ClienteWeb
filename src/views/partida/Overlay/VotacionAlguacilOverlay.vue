@@ -25,7 +25,7 @@ export default {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.85);
   display: flex;
-  justify-content: center;
+  justify-content: center; /*prittier*/
   align-items: center;
   z-index: 9999;
 }

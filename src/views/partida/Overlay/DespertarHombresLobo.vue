@@ -4,7 +4,9 @@
     :style="{ animationDuration: '4s' }"
     @animationend="onAnimationEnd"
   >
-    <h1 class="empieza-text">LOS HOMBRES LOBO SE DESPIERTAN, SE RECONOCEN Y DESIGNAN UNA NUEVA VÍCTIMA</h1>
+    <h1 class="empieza-text">
+      LOS HOMBRES LOBO SE DESPIERTAN, SE RECONOCEN Y DESIGNAN UNA NUEVA VÍCTIMA
+    </h1>
   </div>
 </template>
 
@@ -25,7 +27,7 @@ export default {
   methods: {
     onAnimationEnd() {
       this.audio.pause();
-      this.audio.currentTime = 0;
+      this.audio.currentTime = 0; /*prittier*/
       this.$emit("finish");
     },
   },
@@ -59,9 +61,17 @@ export default {
 }
 
 @keyframes fadeInOut {
-  0% { opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 </style>

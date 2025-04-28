@@ -101,7 +101,7 @@ export default {
   color: #fff;
   padding: 2.5rem 3rem;
   border-radius: 1rem;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px); /*prittier*/
   background: rgba(0, 0, 0, 0.5);
   box-shadow: 0 0 2rem rgba(0, 0, 0, 0.7);
   z-index: 10;
