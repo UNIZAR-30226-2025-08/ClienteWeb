@@ -16,6 +16,7 @@ import avatar5 from "../assets/avatares/imagenPerfil5.webp";
 import avatar6 from "../assets/avatares/imagenPerfil6.webp";
 import avatar7 from "../assets/avatares/imagenPerfil7.webp";
 import avatar8 from "../assets/avatares/imagenPerfil8.webp";
+import defaultAvatar from "../assets/profile_icon.jpg";
 
 // Mapeo de avatares
 const avatarMap = {
@@ -39,6 +40,7 @@ const getMyId = () => JSON.parse(localStorage.getItem("usuario")).id;
 const nombre = ref("");
 const avatar = ref("");
 const rolFavorito = ref("Sin rol favorito");
+const user = ref({});
 
 // Variables para la edición del perfil (solo se usan si es el propio usuario)
 const nuevoNombre = ref("");
@@ -58,6 +60,21 @@ const estadisticas = ref({
   partidasTotales: 0,
   porcentajeVictorias: 0,
 });
+const initUser = () => {
+  const storedUser = localStorage.getItem("usuario");
+  if (storedUser) {
+    user.value = JSON.parse(storedUser);
+    if (!user.value.avatar) {
+      user.value.avatar = "avatar1";
+    }
+  } else {
+    user.value = {
+      nombre: "NombreCuenta",
+      avatar: "avatar1",
+      rolFavorito: "Sin rol favorito",
+    };
+  }
+};
 
 // Función para actualizar el perfil (solo para el perfil propio)
 const actualizarPerfil = async () => {
@@ -209,6 +226,7 @@ onMounted(async () => {
       : getMyId();
   obtenerHistorialPartidas(idParaHistorial);
   obtenerEstadisticas(idParaHistorial);
+  initUser();
 
   // Manejo de errores
   socket.on("error", (mensaje) => {
@@ -233,7 +251,11 @@ onUnmounted(() => {
       <!-- Tarjeta de información del usuario -->
       <div class="user-info-card">
         <div class="avatar-section">
-          <img :src="avatarMap[avatar]" alt="Avatar" class="avatar-image" />
+          <img
+            :src="avatarMap[avatar] || defaultAvatar"
+            alt="Avatar"
+            class="avatar-image"
+          />
         </div>
         <div class="user-details">
           <h2 class="user-name">{{ nombre }}</h2>

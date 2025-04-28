@@ -43,9 +43,6 @@
         />
         <AlguacilEmpate v-else-if="currentPhase === 'alguacil_empate'" />
         <!-- SUCESION DE ALGUCIL GESTIONADA POR JUAN (EN PROCESO) -->
-        <SucesionAlguacilOverlay
-          v-else-if="currentPhase === 'esperando_eleccion_sucesor'"
-        />
 
         <!-- Overlay de noche -->
         <NocheOverlay v-else-if="currentPhase === 'night'" :visible="true" />
@@ -107,6 +104,20 @@
 
         <CazadorAtacadoOverlay
           v-else-if="currentPhase === 'habilidad_cazador' && !isCazador()"
+        />
+        <SucesionAlguacilOverlay
+          v-else-if="
+            currentPhase === 'esperando_eleccion_sucesor' && !isAlguacil()
+          "
+        />
+        <AlguacilEligeSucesor
+          v-else-if="
+            currentPhase === 'esperando_eleccion_sucesor' && isAlguacil()
+          "
+          :players="players.filter((p) => p.estaVivo && p.id !== MiId)"
+          @vote="handleVoteForSuccessor"
+          @continue="handleContinueViewing"
+          @exit="$router.push('/juego')"
         />
       </template>
 
@@ -225,6 +236,7 @@ import AlguacilOverlay from "../../views/partida/Overlay/VotacionAlguacilOverlay
 import AlguacilResultOverlay from "../../views/partida/Overlay/ResultadoAlguacilOverlay.vue";
 import AlguacilEmpate from "../../views/partida/Overlay/AlguacilEmpate.vue";
 import SucesionAlguacilOverlay from "../../views/partida/Overlay/SucesionAlguacilOverlay.vue";
+import AlguacilEligeSucesor from "./Componentes/AlguacilEligeSucesor.vue";
 
 import NocheOverlay from "../../views/partida/Overlay/InicioNocheOverlay.vue";
 import VidenteOverlay from "../../views/partida/Overlay/VidenteOverlay.vue";
@@ -291,6 +303,7 @@ export default {
     OjoCerradoOverlay,
     TurnButton,
     DiscoverRoleButton,
+    AlguacilEligeSucesor,
     DespertarHombresLobo,
     FinTurnoLobos,
     EstadoDurmiendo,
@@ -325,6 +338,7 @@ export default {
       MiId: null,
       showDeathOverlay: false,
       showCazadorOverlay: false,
+      showSucesionOverlay: false,
       // Variables del temporizador
       timeLeft: 60,
       countdownInterval: null,
@@ -348,6 +362,7 @@ export default {
       hasVotedAlguacil: false,
       // Nueva variable de control para la acción de la vidente
       hasVidenteActed: false,
+      hasAlguacilActed: false,
       revealVotes: false,
       revealIndex: 0,
 
@@ -589,6 +604,7 @@ export default {
       // Eliminar icono de próxima víctima al inicio del día
       this.nextWolfVictimId = null;
       this.showCazadorOverlay = false;
+      this.showSucesionOverlay = false;
       console.log("El día ha comenzado", data);
 
       // — Tu lógica existente para marcar víctimas —
@@ -747,19 +763,14 @@ export default {
         time: timestamp,
       });
     });
-    // SUCESION DE ALGUCIL GESTIONADA POR JUAN EN PROCESO, COMENTO PORQUE PUEDE DAR ERROR SI NO
-    // socket.on("habilidadAlguacil", (data) => {
-    //   console.log("Habilidad de alguacil activada:", data.mensaje);
-    //   MensajeSucesionAlguacil = data.mensaje;
-    //   idAlguacilMuerto = data.idAlguacil;
-    //   if (this.MiId === idAlguacilMuerto) {
-    //     this.changePhase("elegir_sucesor");
-    //   } else {
-    //     this.changePhase("esperando_eleccion_sucesor");
-    //   }
 
-    //   this.addEventToQueue({ type: "habilidadAlguacil", data });
-    // });
+    socket.on("habilidadAlguacil", (data) => {
+      console.log("Habilidad de alguacil activada:", data.mensaje);
+      console.log("ID del alguacil muerto:", data.idAlguacil);
+      MensajeSucesionAlguacil = data.mensaje;
+      idAlguacilMuerto = data.idAlguacil;
+      this.addEventToQueue({ type: "eleccion_sucesor", data });
+    });
 
     // Manejar reconexiones del socket
     socket.on("connect", () => {
@@ -788,17 +799,22 @@ export default {
     socket.off("empateVotacionDia");
     socket.off("segundoEmpateVotacionDia");
     socket.off("partidaFinalizada");
+    socket.off("habilidadAlguacil");
     socket.off("votoRegistrado");
     socket.off("connect");
     clearInterval(this.countdownInterval);
   },
   methods: {
     changePhase(newPhase) {
-      console.log(`showDeathOverlay es: ${this.showDeathOverlay}`);
-      console.log(`showCazadorOverlay es: ${this.showCazadorOverlay}`);
-      if (!this.showDeathOverlay && !this.showCazadorOverlay) {
+      //console.log(`showDeathOverlay es: ${this.showDeathOverlay}`);
+      //console.log(`showCazadorOverlay es: ${this.showCazadorOverlay}`);
+      if (
+        !this.showDeathOverlay &&
+        !this.showCazadorOverlay &&
+        !this.showSucesionOverlay
+      ) {
         this.currentPhase = newPhase;
-        console.log(`Cambiando a la fase: ${newPhase}`); // Esto registrará la fase a la que se está cambiando
+        //console.log(`Cambiando a la fase: ${newPhase}`); LO DEJO COMENTADO QUE SINO HAY MUCHA MIERDA EN LA CONSOLA// Esto registrará la fase a la que se está cambiando
       } else {
         console.log(
           `No se puede cambiar a la fase: ${newPhase} porque hay un overlay activo`
@@ -808,12 +824,17 @@ export default {
     isCazador() {
       return this.chosenRole && this.chosenRole.nombre === "Cazador";
     },
+    isAlguacil() {
+      return this.MiId === idAlguacilMuerto;
+    },
     markDead() {
       this.isSpectator = true; // El jugador se convierte en espectador
 
-      // Verificar si el jugador que murió es el cazador
+      // Verificar si el jugador que murió es el cazador o el alguacil
       if (this.isCazador()) {
         this.showCazadorOverlay = true;
+      } else if (this.isAlguacil()) {
+        this.showSucesionOverlay = true;
       } else {
         this.changePhase("death");
         this.showDeathOverlay = true;
@@ -983,6 +1004,11 @@ export default {
           this.showCazadorOverlay = true;
           this.timeLeft = event.data.tiempo || 30;
           break;
+        case "eleccion_sucesor":
+          this.changePhase("esperando_eleccion_sucesor");
+          this.showSucesionOverlay = true;
+          this.timeLeft = event.data.tiempo || 30;
+          break;
         default:
           console.warn("Evento desconocido en cola", event);
       }
@@ -992,6 +1018,7 @@ export default {
       // quita overlay, pero mantiene isSpectator = true
       this.showDeathOverlay = false;
       this.showCazadorOverlay = false;
+      this.showSucesionOverlay = false;
       this.changePhase("game");
     },
     addMessage(message) {
@@ -1128,6 +1155,15 @@ export default {
         }
       }, 6000);
     },
+    handleHabilidadAlguacil() {
+      if (this.MiId === idAlguacilMuerto) {
+        this.changePhase("elegir_sucesor");
+        this.hasAlguacilActed = false;
+        this.timeLeft = 30;
+      } else {
+        this.changePhase("esperando_eleccion_sucesor");
+      }
+    },
 
     finishVidenteAction() {
       this.isVotingPhase = false;
@@ -1257,6 +1293,15 @@ export default {
         idObjetivo: targetId,
       });
       this.showCazadorOverlay = false;
+    },
+
+    handleVoteForSuccessor(targetId) {
+      socket.emit("elegirSucesor", {
+        idPartida: this.idPartida,
+        idJugador: this.getMyId(),
+        idSucesor: targetId,
+      });
+      this.showSucesionOverlay = false;
     },
     handleDiscoverRole() {
       if (!this.hasVidenteActed) {
