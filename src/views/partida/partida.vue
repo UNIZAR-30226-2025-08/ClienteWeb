@@ -161,6 +161,12 @@
             @pass="handlePassBrujaTurn"
           />
         </div>
+        <div v-if="showReconnectOverlay" class="reconnect-overlay">
+          <div class="reconnect-content">
+            <div class="reconnect-spinner"></div>
+            <p>Reconectando... Intento {{ reconnectAttempts + 1 }}</p>
+          </div>
+        </div>
 
         <!-- Contador: se muestra en fase "game_voting" y en "vidente_action" -->
         <CountdownTimer
@@ -339,6 +345,8 @@ export default {
       showDeathOverlay: false,
       showCazadorOverlay: false,
       showSucesionOverlay: false,
+      showReconnectOverlay: false,
+      reconnectAttempts: 0,
       // Variables del temporizador
       timeLeft: 60,
       countdownInterval: null,
@@ -483,18 +491,10 @@ export default {
       return;
     }
     this.idPartida = JSON.parse(partidaGuardada);
-
     // Asegurarnos de que el socket está conectado y actualizado
-    if (!socket.connected) {
-      socket.connect();
-    }
+    if (!socket.connected) socket.connect();
 
-    // Actualizar el socketId en el backend DESPUÉS de tener el idPartida
-    socket.emit("actualizarSocketId", {
-      idPartida: String(this.idPartida),
-      idJugador: String(this.MiId),
-      socketId: socket.id,
-    });
+    socket.on("estadoPartida", this.handleEstadoPartida);
 
     // Añadir log para debug
     console.log("Socket ID actual:", socket.id);
@@ -503,7 +503,7 @@ export default {
 
     //Todos los sockets de escucha para eventos del backend
     //Los he dejado numerados en el orden que seguiran más omenos, luego se repetiran los eventos
-    this.startGameFlow();
+    //this.startGameFlow();
     // 1. Evento de espera inicial para comenzar la partida
     socket.on("esperaInicial", (data) => {
       console.log("Esperando para iniciar la partida:", data.mensaje);
@@ -704,6 +704,7 @@ export default {
       clearInterval(this.countdownInterval);
       this.currentPeriod = "FIN";
       //En desarrollo
+      sessionStorage.removeItem("gameFlowStarted"); // Limpiar el flag al terminar
     });
     const salaGuardada = localStorage.getItem("salaActual");
     if (!salaGuardada) {
@@ -734,7 +735,10 @@ export default {
     this.totalWolves = sala.maxRoles["Hombre lobo"] || 0;
 
     // Iniciar el flujo de juego
-    //this.startGameFlow();
+    if (!sessionStorage.getItem("gameFlowStarted")) {
+      sessionStorage.setItem("gameFlowStarted", "true");
+      this.startGameFlow();
+    }
 
     // NUEVO: Escuchar eventos del socket para actualizar el estado tras votar
     socket.on("votoRegistrado", (data) => {
@@ -773,14 +777,20 @@ export default {
 
     // Manejar reconexiones del socket
     socket.on("connect", () => {
-      console.log("Socket reconectado, nuevo ID:", socket.id);
-      socket.emit("actualizarSocketId", {
-        idPartida: String(this.idPartida),
-        idJugador: String(this.MiId),
-        socketId: socket.id,
-      });
-    });
+      // Esperar 500ms para asegurar que la conexión está estable
+      setTimeout(() => {
+        socket.emit("actualizarSocketId", {
+          idPartida: String(this.idPartida),
+          idJugador: String(this.MiId),
+          socketId: socket.id,
+        });
 
+        socket.emit("reconectarPartida", {
+          idPartida: String(this.idPartida),
+          idUsuario: String(this.MiId),
+        });
+      }, 500);
+    });
     socket.on("pasarTurnoBruja", (data) => {
       console.log("Turno de la bruja pasado:", data.mensaje);
     });
@@ -801,12 +811,56 @@ export default {
     socket.off("habilidadAlguacil");
     socket.off("votoRegistrado");
     socket.off("connect");
+    socket.off("reconnecting");
+    socket.off("reconnect");
+    socket.off("reconnect_failed");
+    sessionStorage.removeItem("gameFlowStarted");
     clearInterval(this.countdownInterval);
   },
   methods: {
+    handleEstadoPartida(data) {
+      // 1) Rehidrato todo
+      this.showReconnectOverlay = true;
+      this.currentDay = data.numJornada;
+      this.currentPhase = data.faseActual;
+      this.currentPeriod = data.turno; // "DÍA" o "NOCHE"
+      this.timeLeft = data.tiempoRestante;
+      this.players = data.listaJugadores;
+      this.totalVillagers = data.totalAldeanos;
+      this.aliveVillagers = data.aldeanosVivos;
+      this.totalWolves = data.totalLobos;
+      this.aliveWolves = data.lobosVivos;
+      if (this.players.some((p) => p.id === this.MiId && !p.estaVivo)) {
+        this.markDead(); // Forzar overlay de muerte si está muerto
+      }
+      // 2) Arranco o paro el contador según fase actual  NO SE SI HACE FALTA
+      if (this._isPhaseConTemporizador(data.faseActual)) {
+        this.isVotingPhase = true;
+        this.startCountdown();
+      } else {
+        this.isVotingPhase = false;
+        clearInterval(this.countdownInterval);
+      }
+
+      // 3) Limpio la cola de eventos pendientes (por si venían de antes)
+      this.eventQueue = [];
+      this.isProcessing = false;
+    },
+    // Helper para saber si esa fase lleva countdown…     PUEDE QUE NO SIRVA DE NADA
+    // pero lo dejo por si acaso
+    _isPhaseConTemporizador(phase) {
+      return [
+        "game_voting",
+        "vidente_action",
+        "habilidad_bruja",
+        "alguacil_announce",
+        // etc. las fases que usan timeLeft
+      ].includes(phase);
+    },
     changePhase(newPhase) {
       //console.log(`showDeathOverlay es: ${this.showDeathOverlay}`);
       //console.log(`showCazadorOverlay es: ${this.showCazadorOverlay}`);
+      this.showReconnectOverlay = false; // Ocultar overlay de reconexión al cambiar de fase
       if (
         !this.showDeathOverlay &&
         !this.showCazadorOverlay &&
@@ -1128,14 +1182,14 @@ export default {
      * Inicia un contador (setInterval) que decrementa timeLeft cada segundo.
      * Al llegar a 0, se ejecuta endCallback.
      */
-    startCountdown(endCallback) {
+    startCountdown(endCb) {
       clearInterval(this.countdownInterval);
       this.countdownInterval = setInterval(() => {
         if (this.timeLeft > 0) {
           this.timeLeft--;
         } else {
           clearInterval(this.countdownInterval);
-          endCallback && endCallback();
+          endCb && endCb();
         }
       }, 1000);
     },
@@ -1556,5 +1610,133 @@ export default {
   border-radius: 10px;
   text-align: center;
   max-width: 80%;
+}
+.reconnect-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #1a1a2e, #16213e);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.reconnect-content {
+  position: relative; /* Añadido para contexto de posicionamiento */
+  text-align: center;
+  color: white;
+  padding: 3rem 4rem; /* Aumentamos el padding para mejor equilibrio */
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  display: flex; /* Añadido */
+  flex-direction: column; /* Añadido */
+  align-items: center; /* Añadido */
+  justify-content: center; /* Añadido */
+  min-width: 300px; /* Ancho mínimo para mejor equilibrio */
+  min-height: 200px; /* Altura mínima para centrado vertical */
+}
+
+.reconnect-spinner {
+  position: absolute; /* Cambiado a absolute para centrado perfecto */
+  top: 50%; /* Centrado vertical */
+  left: 50%; /* Centrado horizontal */
+  transform: translate(-50%, -50%); /* Ajuste fino de centrado */
+  width: 70px;
+  height: 70px;
+  margin: 0; /* Eliminamos margen anterior */
+}
+
+.reconnect-spinner::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 4px solid transparent;
+  border-top-color: #3498db;
+  border-bottom-color: #e74c3c;
+  animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+}
+
+.reconnect-spinner::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  height: 50%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+}
+
+.reconnect-content p {
+  position: relative; /* Aseguramos que el texto quede sobre el spinner */
+  z-index: 1; /* Texto sobre el spinner */
+  margin-top: 100px; /* Separación del spinner */
+  font-family: "Arial Rounded MT Bold", sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 0.05em;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: textPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+    border-width: 4px;
+  }
+  50% {
+    border-width: 8px;
+  }
+  100% {
+    transform: rotate(360deg);
+    border-width: 4px;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes textPulse {
+  0%,
+  100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
 }
 </style>
