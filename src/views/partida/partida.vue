@@ -425,7 +425,23 @@ export default {
       MensajeGanadoresPartida: "",
       gameEnded: false,
       BandoGanador: "",
+      reconnectAttempts: 0,
+      reconnectInterval: null,
     };
+  },
+  watch: {
+    // Arranca/parar el incremento cada 7 s según se muestre u oculte el overlay
+    showReconnectOverlay(active) {
+      if (active) {
+        this.reconnectInterval = setInterval(() => {
+          this.reconnectAttempts++;
+        }, 7000);
+      } else {
+        clearInterval(this.reconnectInterval);
+        this.reconnectInterval = null;
+        this.reconnectAttempts = 0; // opcional: reinicia contador al cerrar
+      }
+    },
   },
   computed: {
     /**
@@ -816,6 +832,7 @@ export default {
     socket.off("reconnect_failed");
     sessionStorage.removeItem("gameFlowStarted");
     clearInterval(this.countdownInterval);
+    clearInterval(this.reconnectInterval); // limpia el interval si aún está activo
   },
   methods: {
     handleEstadoPartida(data) {
@@ -1644,13 +1661,16 @@ export default {
 }
 
 .reconnect-spinner {
-  position: absolute; /* Cambiado a absolute para centrado perfecto */
-  top: 50%; /* Centrado vertical */
-  left: 50%; /* Centrado horizontal */
+  position: fixed; /* Cambiado a absolute para centrado perfecto */
+  top: 49%; /* Centrado vertical */
+  left: 40%; /* Centrado horizontal */
   transform: translate(-50%, -50%); /* Ajuste fino de centrado */
   width: 70px;
   height: 70px;
   margin: 0; /* Eliminamos margen anterior */
+}
+.reconnect-spinner::after {
+  display: none;
 }
 
 .reconnect-spinner::before {
@@ -1662,7 +1682,7 @@ export default {
   border: 4px solid transparent;
   border-top-color: #3498db;
   border-bottom-color: #e74c3c;
-  animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+  animation: spin 1.2s cubic-bezier(0, 0, 0, 0) infinite;
 }
 
 .reconnect-spinner::after {
