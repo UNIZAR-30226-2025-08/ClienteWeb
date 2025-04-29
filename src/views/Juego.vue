@@ -122,65 +122,84 @@ onMounted(() => {
   socket.emit("buscarPartidaUsuario", { idUsuario });
 
   // 2) Manejar la respuesta
-  socket.on("partidaEncontrada", ({ idPartida }) => {
-    const handleAccept = (closeToast) => {
-      // guardamos el ID y navegamos
-      localStorage.setItem("partidaID", JSON.stringify(idPartida));
-      router.push({
-        path: `/partida/${idPartida}`,
-        state: { fromDashboard: true },
-      });
-      closeToast(); // cerramos el toast
-    };
-    const handleCancel = (closeToast) => {
-      closeToast(); // simplemente cerramos el toast
-    };
-    toast(
-      ({ closeToast }) =>
-        h(
-          "div",
-          { style: { display: "flex", alignItems: "center", gap: "1rem" } },
-          [
-            h("span", "Tienes una partida en curso. ¿Retomar?"),
-            h(
-              "button",
-              {
-                onClick: () => handleAccept(closeToast),
-                style: {
-                  background: "green",
-                  border: "none",
-                  color: "white",
-                  padding: "4px 8px",
-                  borderRadius: "4px",
-                  cursor: "pointer",
+  socket.on(
+    "partidaEncontrada",
+    ({
+      idPartida,
+      idSala,
+      rol,
+      idUsuario,
+      nombreUsuario,
+      jugadores,
+      lider,
+    }) => {
+      const handleAccept = (closeToast) => {
+        // guardamos el ID de la partida y navegamos
+        localStorage.setItem("partidaID", JSON.stringify(idPartida));
+        localStorage.setItem(
+          "salaActual",
+          JSON.stringify({
+            id: idSala,
+            jugadores: jugadores,
+            lider: lider,
+          })
+        );
+        router.push({
+          path: `/partida/${idSala}`,
+          state: { fromDashboard: true },
+        });
+        closeToast(); // cerramos el toast
+      };
+      const handleCancel = (closeToast) => {
+        closeToast(); // simplemente cerramos el toast
+      };
+      toast(
+        ({ closeToast }) =>
+          h(
+            "div",
+            { style: { display: "flex", alignItems: "center", gap: "1rem" } },
+            [
+              h("span", "Tienes una partida en curso. ¿Retomar?"),
+              h(
+                "button",
+                {
+                  onClick: () => handleAccept(closeToast),
+                  style: {
+                    background: "green",
+                    border: "none",
+                    color: "white",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                  },
                 },
-              },
-              "✔"
-            ),
-            h(
-              "button",
-              {
-                onClick: () => handleCancel(closeToast),
-                style: {
-                  background: "red",
-                  border: "none",
-                  color: "white",
-                  padding: "4px 8px",
-                  borderRadius: "4px",
-                  cursor: "pointer",
+                "✔"
+              ),
+              h(
+                "button",
+                {
+                  onClick: () => handleCancel(closeToast),
+                  style: {
+                    background: "red",
+                    border: "none",
+                    color: "white",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                  },
                 },
-              },
-              "✖"
-            ),
-          ]
-        ),
-      {
-        autoClose: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-      }
-    );
-  });
+                "✖"
+              ),
+            ]
+          ),
+        {
+          autoClose: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+        }
+      );
+    }
+  );
   socket.on("partidaNoEncontrada", () => {
     // No hay nada que hacer si no está en ninguna partida
   });
