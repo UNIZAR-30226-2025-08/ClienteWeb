@@ -111,55 +111,9 @@ async function loginUser() {
       // Si el login es exitoso, almacenar el mensaje de éxito
       localStorage.setItem("loginSuccess", "true"); // Almacenar en localStorage
 
-      console.log("Usuario logueado:", usuario);
-
-      // Configurar los listeners antes de emitir los eventos
-      socket.on("partidaEncontrada", ({ idPartida }) => {
-        console.log("Evento partidaEncontrada recibido:", idPartida);
-        if (idPartida) {
-          // Si está en una partida, redirigir a la sala de la partida
-          router.push(`/partida/${idPartida}`);
-        } else {
-          // Si no está en una partida, redirigir al juego
-          router.push("/juego");
-        }
-      });
-
-      socket.on("partidaNoEncontrada", () => {
-        console.log("Evento partidaNoEncontrada recibido");
-        // Si no está en una partida, redirigir al juego
-        router.push("/juego");
-      });
-
-      // Verificar si el socket está conectado
-      if (!socket.connected) {
-        console.log("Socket no conectado, intentando conectar...");
-        socket.connect();
-      }
-
-      console.log("Emitiendo registrarUsuario:", usuario.id);
       //Emitimos el evento de conexión
       socket.emit("registrarUsuario", { idUsuario: usuario.id });
-
-      console.log("Emitiendo buscarPartidaUsuario:", usuario.id);
-      // Verificar si el usuario está en una partida
-      socket.emit("buscarPartidaUsuario", { idUsuario: usuario.id });
-
-      // Agregar listener para errores del socket
-      socket.on("error", (error) => {
-        console.error("Error en el socket:", error);
-        toast.error("Error de conexión con el servidor");
-      });
-
-      // Agregar listener para conexión del socket
-      socket.on("connect", () => {
-        console.log("Socket conectado");
-      });
-
-      // Agregar listener para desconexión del socket
-      socket.on("disconnect", () => {
-        console.log("Socket desconectado");
-      });
+      router.push("/juego"); // Redirigir al juego
     } else {
       // Si la respuesta no es 200 (exitoso), mostrar error
       mensajeError.value = "Correo o contraseña incorrectos";
