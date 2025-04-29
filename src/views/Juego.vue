@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
+import { h } from "vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import Cabecera from "../components/Cabecera.vue";
@@ -117,6 +118,72 @@ onMounted(() => {
   socket.emit("registrarUsuario", { idUsuario });
   verificarAdministrador(); // Llamamos a la función de verificación al montar el componente
 
+  // 1) Detectar si el usuario ya tiene una partida en curso
+  socket.emit("buscarPartidaUsuario", { idUsuario });
+
+  // 2) Manejar la respuesta
+  socket.on("partidaEncontrada", ({ idPartida }) => {
+    const handleAccept = (closeToast) => {
+      // guardamos el ID y navegamos
+      localStorage.setItem("partidaID", JSON.stringify(idPartida));
+      router.push({
+        path: `/partida/${idPartida}`,
+        state: { fromDashboard: true },
+      });
+      closeToast(); // cerramos el toast
+    };
+    const handleCancel = (closeToast) => {
+      closeToast(); // simplemente cerramos el toast
+    };
+    toast(
+      ({ closeToast }) =>
+        h(
+          "div",
+          { style: { display: "flex", alignItems: "center", gap: "1rem" } },
+          [
+            h("span", "Tienes una partida en curso. ¿Retomar?"),
+            h(
+              "button",
+              {
+                onClick: () => handleAccept(closeToast),
+                style: {
+                  background: "green",
+                  border: "none",
+                  color: "white",
+                  padding: "4px 8px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                },
+              },
+              "✔"
+            ),
+            h(
+              "button",
+              {
+                onClick: () => handleCancel(closeToast),
+                style: {
+                  background: "red",
+                  border: "none",
+                  color: "white",
+                  padding: "4px 8px",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                },
+              },
+              "✖"
+            ),
+          ]
+        ),
+      {
+        autoClose: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+      }
+    );
+  });
+  socket.on("partidaNoEncontrada", () => {
+    // No hay nada que hacer si no está en ninguna partida
+  });
   obtenerHistorialPartidas(); // Cargar el historial de partidas al montar el componente
   obtenerEstadisticas(); // Agregamos la llamada para obtener estadísticas
 
@@ -130,6 +197,8 @@ onUnmounted(() => {
   // Limpiar eventos al desmontar el componente
   socket.off("error");
   socket.off("salaActualizada");
+  socket.off("partidaEncontrada");
+  socket.off("partidaNoEncontrada");
 });
 
 // Funciones de navegación (como las que ya tenías)
