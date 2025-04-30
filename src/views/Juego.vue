@@ -144,10 +144,7 @@ onMounted(() => {
             lider: lider,
           })
         );
-        router.push({
-          path: `/partida/${idSala}`,
-          state: { fromDashboard: true },
-        });
+        window.location.href = `/partida/${idSala}`;
         closeToast(); // cerramos el toast
       };
       const handleCancel = (closeToast) => {

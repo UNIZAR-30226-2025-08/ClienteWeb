@@ -28,10 +28,7 @@
       <!-- Si la fase actual es tratada como overlay, se muestran sólo los overlays -->
       <template v-if="isOverlayActive">
         <!-- Overlays iniciales -->
-        <IntroOverlay
-          v-if="currentPhase === 'intro'"
-          :isFirstTime="isFirstTime"
-        />
+        <IntroOverlay v-if="currentPhase === 'intro'" />
         <RoleOverlay v-else-if="currentPhase === 'role'" :role="chosenRole" />
         <EmpiezaOverlay v-else-if="currentPhase === 'start'" />
 
@@ -389,7 +386,6 @@ export default {
       totalWolves: 2,
       currentDay: 1,
       currentPeriod: "DÍA",
-      isFirstTime: true,
 
       // Nuevas propiedades para la acción de la Vidente
       hasPassedTurn: false,
@@ -498,6 +494,7 @@ export default {
   },
   mounted() {
     this.MiId = this.getMyId();
+    this.idPartida = JSON.parse(localStorage.getItem("partidaID"));
 
     // Obtener el ID de la partida del localStorage
     const partidaGuardada = localStorage.getItem("partidaID");
@@ -507,10 +504,23 @@ export default {
       return;
     }
     this.idPartida = JSON.parse(partidaGuardada);
-    // Asegurarnos de que el socket está conectado y actualizado
-    if (!socket.connected) socket.connect();
-
+    // 1. Registro el listener ANTES de emitir
     socket.on("estadoPartida", this.handleEstadoPartida);
+
+    // 2. Asegurarme de que el socket está conectado
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    socket.emit("actualizarSocketId", {
+      idPartida: String(this.idPartida),
+      idJugador: String(this.MiId),
+      socketId: socket.id,
+    });
+    socket.emit("reconectarPartida", {
+      idPartida: String(this.idPartida),
+      idUsuario: String(this.MiId),
+    });
 
     // Añadir log para debug
     console.log("Socket ID actual:", socket.id);
@@ -525,6 +535,7 @@ export default {
       console.log("Esperando para iniciar la partida:", data.mensaje);
       this.currentPeriod = "DÍA"; // Inicialmente es de día
       this.timeLeft = data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
+      this.startGameFlow();
     });
 
     //2. Evento para iniciar la votación del alguacil
@@ -669,7 +680,6 @@ export default {
             this.hasVotedAlguacil = false; // reseteamos para usarlo como "hasVotedLynch"
             this.timeLeft = 16;
             this.changePhase("game");
-            this.isFirstTime = false;
             this.countdownInterval = setInterval(() => {
               if (this.timeLeft > 0) {
                 this.timeLeft--;
@@ -724,14 +734,18 @@ export default {
     });
     const salaGuardada = localStorage.getItem("salaActual");
     if (!salaGuardada) {
-      console.error("No se encontró la información de la sala");
+      console.error("No se encontró info de la sala");
       this.$router.push("/juego");
       return;
     }
     const sala = JSON.parse(salaGuardada);
+    const maxJugadores = sala.maxJugadores ?? sala.jugadores.length;
 
-    // Sincronizar la lista de jugadores
     this.players = sala.jugadores || [];
+    this.aliveVillagers = maxJugadores;
+    this.totalVillagers = maxJugadores;
+    this.aliveWolves = sala.maxRoles?.["Hombre lobo"] ?? 0;
+    this.totalWolves = sala.maxRoles?.["Hombre lobo"] ?? 0;
 
     // Obtener el rol del jugador (por ejemplo, de localStorage)
     const rol = localStorage.getItem("miRol");
@@ -742,18 +756,6 @@ export default {
       );
     } else {
       console.error("No se encontró el rol del jugador actual");
-    }
-
-    // Ajustar totales: se usan maxJugadores para aldeanos y maxRoles para lobos
-    this.aliveVillagers = sala.maxJugadores;
-    this.totalVillagers = sala.maxJugadores;
-    this.aliveWolves = sala.maxRoles["Hombre lobo"] || 0;
-    this.totalWolves = sala.maxRoles["Hombre lobo"] || 0;
-
-    // Iniciar el flujo de juego
-    if (!sessionStorage.getItem("gameFlowStarted")) {
-      sessionStorage.setItem("gameFlowStarted", "true");
-      this.startGameFlow();
     }
 
     // NUEVO: Escuchar eventos del socket para actualizar el estado tras votar
@@ -791,22 +793,6 @@ export default {
       this.addEventToQueue({ type: "eleccion_sucesor", data });
     });
 
-    // Manejar reconexiones del socket
-    socket.on("connect", () => {
-      // Esperar 500ms para asegurar que la conexión está estable
-      setTimeout(() => {
-        socket.emit("actualizarSocketId", {
-          idPartida: String(this.idPartida),
-          idJugador: String(this.MiId),
-          socketId: socket.id,
-        });
-
-        socket.emit("reconectarPartida", {
-          idPartida: String(this.idPartida),
-          idUsuario: String(this.MiId),
-        });
-      }, 500);
-    });
     socket.on("pasarTurnoBruja", (data) => {
       console.log("Turno de la bruja pasado:", data.mensaje);
     });
@@ -827,17 +813,14 @@ export default {
     socket.off("habilidadAlguacil");
     socket.off("votoRegistrado");
     socket.off("connect");
-    socket.off("reconnecting");
-    socket.off("reconnect");
-    socket.off("reconnect_failed");
     sessionStorage.removeItem("gameFlowStarted");
     clearInterval(this.countdownInterval);
     clearInterval(this.reconnectInterval); // limpia el interval si aún está activo
   },
   methods: {
     handleEstadoPartida(data) {
-      // 1) Rehidrato todo
       this.showReconnectOverlay = true;
+      // 1) Rehidrato todo
       this.currentDay = data.numJornada;
       this.currentPhase = data.faseActual;
       this.currentPeriod = data.turno; // "DÍA" o "NOCHE"
