@@ -498,6 +498,7 @@ export default {
 
     // Obtener el ID de la partida del localStorage
     const partidaGuardada = localStorage.getItem("partidaID");
+
     if (!partidaGuardada) {
       console.error("No se encontró la información de la partida");
       this.$router.push("/juego");
@@ -511,16 +512,24 @@ export default {
     if (!socket.connected) {
       socket.connect();
     }
+    const joinKey = `joinedGame_${this.idPartida}`;
+    const isFirstJoin = !sessionStorage.getItem(joinKey);
 
     socket.emit("actualizarSocketId", {
       idPartida: String(this.idPartida),
       idJugador: String(this.MiId),
       socketId: socket.id,
     });
-    socket.emit("reconectarPartida", {
-      idPartida: String(this.idPartida),
-      idUsuario: String(this.MiId),
-    });
+    if (isFirstJoin) {
+      // He metido en el sessionStorage una clave valor para saber si es la primera vez que entramos
+      sessionStorage.setItem(joinKey, "true");
+    } else {
+      // recargas, vuelves atrás y entras de nuevo, caídas de red, etc.
+      socket.emit("reconectarPartida", {
+        idPartida: String(this.idPartida),
+        idUsuario: String(this.MiId),
+      });
+    }
 
     // Añadir log para debug
     console.log("Socket ID actual:", socket.id);
@@ -725,6 +734,8 @@ export default {
       console.log("Partida finalizada", resultado);
       this.BandoGanador = resultado.ganador;
       this.MensajeGanadoresPartida = resultado.mensaje;
+      const key = `joinedGame_${this.idPartida}`;
+      sessionStorage.removeItem(key);
       this.changePhase("game_over");
       //Limpio también cuentas atras que pudiesen haber pendientes
       clearInterval(this.countdownInterval);
