@@ -1446,6 +1446,13 @@ export default {
       ) {
         return;
       }
+      if (
+        this.currentPhase === "game_voting" &&
+        !this.isLynchPhase && // es la votación de alguacil, no linchamiento
+        playerId === this.MiId
+      ) {
+        return;
+      }
       // En la fase de votación del alguacil, verifica si ya se ha votado
       if (this.currentPhase === "game_voting" && this.hasVotedAlguacil) {
         return;
