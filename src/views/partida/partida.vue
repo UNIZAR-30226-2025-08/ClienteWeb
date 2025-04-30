@@ -158,10 +158,22 @@
             @pass="handlePassBrujaTurn"
           />
         </div>
-        <div v-if="showReconnectOverlay" class="reconnect-overlay">
+        <div
+          v-if="showReconnectOverlay"
+          class="reconnect-overlay"
+          :style="`
+    --overlay-bg: url(${fondoOverlay});
+    --wolf-svg: url(${loboSilhouette});
+  `"
+        >
           <div class="reconnect-content">
-            <div class="reconnect-spinner"></div>
-            <p>Reconectando... Intento {{ reconnectAttempts + 1 }}</p>
+            <h2>Reconectando con el pueblo...</h2>
+            <div class="reconnect-spinner">
+              <img :src="spinnerIcon" alt="spinner" />
+              <img :src="spinnerIcon" alt="spinner" />
+              <img :src="spinnerIcon" alt="spinner" />
+            </div>
+            <p>Intento {{ reconnectAttempts + 1 }}</p>
           </div>
         </div>
 
@@ -284,6 +296,9 @@ import avatar6 from "../../assets/avatares/imagenPerfil6.webp";
 import avatar7 from "../../assets/avatares/imagenPerfil7.webp";
 import avatar8 from "../../assets/avatares/imagenPerfil8.webp";
 import defaultAvatar from "../../assets/profile_icon.jpg"; // Imagen por defecto
+import fondoOverlay from "../../assets/fondo.png";
+import loboSilhouette from "../../assets/peligro_lobo.png";
+import spinnerIcon from "../../assets/CabezaLobo.webp";
 
 export default {
   name: "Partida",
@@ -423,6 +438,9 @@ export default {
       BandoGanador: "",
       reconnectAttempts: 0,
       reconnectInterval: null,
+      fondoOverlay,
+      spinnerIcon,
+      loboSilhouette,
     };
   },
   watch: {
@@ -1622,89 +1640,91 @@ export default {
   text-align: center;
   max-width: 80%;
 }
+/* Reconexión: fondo temático */
 .reconnect-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(45deg, #1a1a2e, #16213e);
+  background-image: url("@/assets/forest_night.jpg");
+  background-size: cover;
+  background-position: center;
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 10000;
-  animation: fadeIn 0.5s ease-out;
+  /* capa semitransparente para contrastar */
+}
+.reconnect-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
 }
 
+/* Contenido centrado con lobo aullando de fondo */
 .reconnect-content {
-  position: relative; /* Añadido para contexto de posicionamiento */
+  position: relative;
+  z-index: 1;
   text-align: center;
-  color: white;
-  padding: 3rem 4rem; /* Aumentamos el padding para mejor equilibrio */
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  display: flex; /* Añadido */
-  flex-direction: column; /* Añadido */
-  align-items: center; /* Añadido */
-  justify-content: center; /* Añadido */
-  min-width: 300px; /* Ancho mínimo para mejor equilibrio */
-  min-height: 200px; /* Altura mínima para centrado vertical */
+  padding: 3rem 4rem;
+  border-radius: 1rem;
+  backdrop-filter: blur(8px);
+  background: rgba(20, 20, 30, 0.6);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
 }
-
-.reconnect-spinner {
-  position: fixed; /* Cambiado a absolute para centrado perfecto */
-  top: 49%; /* Centrado vertical */
-  left: 40%; /* Centrado horizontal */
-  transform: translate(-50%, -50%); /* Ajuste fino de centrado */
-  width: 70px;
-  height: 70px;
-  margin: 0; /* Eliminamos margen anterior */
-}
-.reconnect-spinner::after {
-  display: none;
-}
-
-.reconnect-spinner::before {
+/* Silueta de lobo en background */
+.reconnect-content::after {
   content: "";
   position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: 4px solid transparent;
-  border-top-color: #3498db;
-  border-bottom-color: #e74c3c;
-  animation: spin 1.2s cubic-bezier(0, 0, 0, 0) infinite;
+  bottom: -20%;
+  right: -10%;
+  width: 200%;
+  height: 200%;
+  background: url("@/assets/wolf_silhouette.svg") no-repeat bottom right;
+  background-size: contain;
+  opacity: 0.15;
+  pointer-events: none;
 }
 
-.reconnect-spinner::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 50%;
-  height: 50%;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
-}
-
+/* Título y texto */
 .reconnect-content p {
-  position: relative; /* Aseguramos que el texto quede sobre el spinner */
-  z-index: 1; /* Texto sobre el spinner */
-  margin-top: 100px; /* Separación del spinner */
-  font-family: "Arial Rounded MT Bold", sans-serif;
+  color: #f0f0f0;
+  font-family: "Cinzel", serif;
   font-size: 1.2rem;
+  margin-top: 2rem;
   letter-spacing: 0.05em;
-  margin: 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
   animation: textPulse 1.5s ease-in-out infinite;
+}
+
+/* Huellas animadas en lugar de spinner */
+.reconnect-spinner {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.reconnect-spinner img {
+  width: 110px;
+  height: 110px;
+  opacity: 0.8;
+  animation: pawBounce 0.8s ease-in-out infinite alternate;
+}
+.reconnect-spinner img:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+/* Animaciones */
+@keyframes pawBounce {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-10px) scale(1.1);
+  }
 }
 
 @keyframes spin {
