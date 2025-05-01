@@ -5,7 +5,7 @@ import router from "./router"; // Importamos Vue Router
 import axios from "axios"; // Para comunicarnos con el backend
 
 // Configuramos la URL base para Axios
-axios.defaults.baseURL = "https://albertofsg.ddns.net:5000"; // URL correspondiente al puerto del backend
+axios.defaults.baseURL = "https://albertofsg.ddns.net:443"; // URL correspondiente al puerto del backend
 
 // Podemos configurar un timeout (opcional) para evitar que las solicitudes se queden colgadas
 axios.defaults.timeout = 5000; // 5 segundos de timeout
