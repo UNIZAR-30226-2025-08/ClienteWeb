@@ -37,7 +37,7 @@ onMounted(() => {
   });
 
   // Escuchar las actualizaciones de salas en tiempo real
-  socket.on("actualizarSala", (salaActualizada) => {
+  socket.on("actualizarSalaGlobal", (salaActualizada) => {
     const index = salas.value.findIndex((s) => s.id === salaActualizada.id);
     if (index !== -1) {
       salas.value[index] = salaActualizada; // Si ya existe, actualizamos la sala
@@ -65,7 +65,7 @@ onMounted(() => {
 onUnmounted(() => {
   // Limpiar eventos al desmontar el componente
   socket.off("listaSalas");
-  socket.off("actualizarSala");
+  socket.off("actualizarSalaGlobal");
   socket.off("nuevaSala");
   socket.off("eliminarSala");
   socket.off("error");
