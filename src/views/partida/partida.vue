@@ -972,6 +972,8 @@ export default {
           break;
         case "nocheComienza":
           this.hasVotedAlguacil = false;
+          this.showCazadorOverlay = false;
+          this.showSucesionOverlay = false;
           console.log("Procesando en cola: nocheComienza", event.data);
           this.changePhase("night");
           this.currentPeriod = "NOCHE";
