@@ -667,11 +667,11 @@ export default {
         .map((v) => Number(v))
         .filter((id) => !isNaN(id));
       this.victimasNombres = victimaIds.map((id) => {
-        const p = this.players.find((pl) => pl.id === id);
+        const p = this.players.find((pl) => pl.id == id);
         return p ? p.nombre : "Desconocido";
       });
       victimaIds.forEach((id) => {
-        const p = this.players.find((pl) => pl.id === id);
+        const p = this.players.find((pl) => pl.id == id);
         if (p) {
           p.estaVivo = false;
           this.aliveVillagers--;
