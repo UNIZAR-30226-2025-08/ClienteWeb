@@ -896,8 +896,9 @@ export default {
       ].includes(phase);
     },
     changePhase(newPhase) {
-      //console.log(`showDeathOverlay es: ${this.showDeathOverlay}`);
-      //console.log(`showCazadorOverlay es: ${this.showCazadorOverlay}`);
+      console.log(`showDeathOverlay es: ${this.showDeathOverlay}`);
+      console.log(`showCazadorOverlay es: ${this.showCazadorOverlay}`);
+      console.log(`showSucesionOverlay es: ${this.showSucesionOverlay}`);
       this.showReconnectOverlay = false; // Ocultar overlay de reconexión al cambiar de fase
       if (
         !this.showDeathOverlay &&
@@ -919,14 +920,11 @@ export default {
       return this.MiId == this.idAlguacilMuerto;
     },
     markDead() {
-      this.isSpectator = true;
+      this.isSpectator = true; // El jugador se convierte en espectador
+
+      // Verificar si el jugador que murió es el cazador o el alguacil
       if (this.isCazador()) {
-        // para que el template CazadorOverlay lo vea
-        this.cazadoresMuertos.push(this.MiId);
-        // cambia la fase y levanta el overlay de cazador
-        this.changePhase("habilidad_cazador");
         this.showCazadorOverlay = true;
-        this.timeLeft = 30; // o el tiempo que quieras darle
       } else if (this.isAlguacil()) {
         this.showSucesionOverlay = true;
       } else {
