@@ -89,7 +89,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 3000;
+  z-index: 10000;
 }
 .cazador-dialog {
   background: #000000;
