@@ -898,7 +898,7 @@ export default {
     changePhase(newPhase) {
       console.log(`showDeathOverlay es: ${this.showDeathOverlay}`);
       console.log(`showCazadorOverlay es: ${this.showCazadorOverlay}`);
-      console.log(`showSucesionOverlay es: ${this.showSucesionOverlay}`);
+      console.log(`showSucesionOverlay es: ${this.showCazadorOverlay}`);
       this.showReconnectOverlay = false; // Ocultar overlay de reconexión al cambiar de fase
       if (
         !this.showDeathOverlay &&
@@ -924,7 +924,7 @@ export default {
 
       // Verificar si el jugador que murió es el cazador o el alguacil
       if (this.isCazador()) {
-        this.showCazadorOverlay = true;
+        //this.showCazadorOverlay = true;
       } else if (this.isAlguacil()) {
         this.showSucesionOverlay = true;
       } else {
