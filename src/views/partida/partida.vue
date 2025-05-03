@@ -92,7 +92,11 @@
         />
 
         <CazadorOverlay
-          v-else-if="currentPhase === 'habilidad_cazador' && isCazador()"
+         v-else-if="
+            currentPhase === 'habilidad_cazador' &&
+            isCazador() &&
+            cazadoresMuertos.find((c) => c.id == MiId)
+          "
           :players="players.filter((p) => p.estaVivo && p.id !== MiId)"
           @fire="handleCazadorFire"
           @continue="handleContinueViewing"
@@ -390,6 +394,7 @@ export default {
       chatMessages: [],
 
       // Datos de rol y estado del juego
+      cazadoresMuertos: [],
       chosenRole: {},
       alguacilWinnerIndex: null,
       AlguacilWinnerName: null,
@@ -651,6 +656,7 @@ export default {
     socket.on("habilidadCazador", (data) => {
       console.log("Habilidad de cazador activada:", data.mensaje);
       this.addEventToQueue({ type: "habilidadCazador", data });
+      this.cazadoresMuertos = data.cazadoresMuertos || []; // Actualiza la lista de cazadores muertos
     });
 
     //11. Escuchar evento para pasar al día
