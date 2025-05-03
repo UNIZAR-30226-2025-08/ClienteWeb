@@ -927,7 +927,7 @@ export default {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
     findPlayerNameById(id) {
-      const p = this.players.find((player) => player.id === id);
+      const p = this.players.find((player) => player.id == id);
       return p ? p.nombre : "Desconocido";
     },
 
