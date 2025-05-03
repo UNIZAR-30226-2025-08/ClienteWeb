@@ -755,6 +755,9 @@ export default {
     // Escuchar la finalización de la partida
     socket.on("partidaFinalizada", (resultado) => {
       //Juan: Vacio la cola al finalizar partida para que no me cambie de fase y no pierda el overlay del final de la partida
+      this.showDeathOverlay = false;
+      this.showCazadorOverlay = false;
+      this.showSucesionOverlay = false;
       this.gameEnded = true;
       this.eventQueue = [];
       this.isProcessing = false;

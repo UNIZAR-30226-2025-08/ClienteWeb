@@ -31,7 +31,7 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  z-index: 9999; /* Asegúrate de que se muestre por encima de otros elementos */
+  z-index: 9998; /* Asegúrate de que se muestre por encima de otros elementos */
 }
 
 /* Estilos del texto */
