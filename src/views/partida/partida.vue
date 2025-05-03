@@ -92,10 +92,10 @@
         />
 
         <CazadorOverlay
-         v-else-if="
+          v-else-if="
             currentPhase === 'habilidad_cazador' &&
             isCazador() &&
-            cazadoresMuertos.find((c) => c.id == MiId)
+            cazadoresMuertos.find((c) => c == MiId)
           "
           :players="players.filter((p) => p.estaVivo && p.id !== MiId)"
           @fire="handleCazadorFire"
@@ -104,7 +104,10 @@
         />
 
         <CazadorAtacadoOverlay
-          v-else-if="currentPhase === 'habilidad_cazador' && !isCazador()"
+          v-else-if="
+            currentPhase === 'habilidad_cazador' &&
+            cazadoresMuertos.find((c) => c !== MiId)
+          "
         />
         <SucesionAlguacilOverlay
           v-else-if="
