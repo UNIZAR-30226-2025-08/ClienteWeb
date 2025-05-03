@@ -705,7 +705,7 @@ export default {
             this.isVotingPhase = true;
             this.isLynchPhase = true; // activamos linchamiento
             this.hasVotedAlguacil = false; // reseteamos para usarlo como "hasVotedLynch"
-            this.timeLeft = 16;
+            this.timeLeft = 46;
             this.changePhase("game");
             this.countdownInterval = setInterval(() => {
               if (this.timeLeft > 0) {
