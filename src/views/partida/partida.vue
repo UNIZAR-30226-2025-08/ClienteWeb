@@ -919,11 +919,14 @@ export default {
       return this.MiId == this.idAlguacilMuerto;
     },
     markDead() {
-      this.isSpectator = true; // El jugador se convierte en espectador
-
-      // Verificar si el jugador que murió es el cazador o el alguacil
+      this.isSpectator = true;
       if (this.isCazador()) {
+        // para que el template CazadorOverlay lo vea
+        this.cazadoresMuertos.push(this.MiId);
+        // cambia la fase y levanta el overlay de cazador
+        this.changePhase("habilidad_cazador");
         this.showCazadorOverlay = true;
+        this.timeLeft = 30; // o el tiempo que quieras darle
       } else if (this.isAlguacil()) {
         this.showSucesionOverlay = true;
       } else {
