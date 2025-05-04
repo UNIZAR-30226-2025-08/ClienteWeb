@@ -1008,6 +1008,12 @@ export default {
           this.resetVotingState();
           break;
         case "turnoHombresLobos":
+          // si vienen los lobos pero la vidente aún está durmiendo,
+          // posponemos el evento unos segundos y no lo ejecutamos ahora
+          if (this.currentPhase === "vidente_dormir") {
+            setTimeout(() => this.addEventToQueue(event), 3000);
+            return;
+          }
           console.log("Procesando en cola: turnoHombresLobos", event.data);
           this.handleTurnoHombresLobo(event.data);
           this.resetVotingState();
