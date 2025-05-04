@@ -1049,6 +1049,7 @@ export default {
           }, 5000);
           break;
         case "empateDia":
+          this.resetVotingState();
           this.changePhase("empate_dia");
 
           // esperar que termine la animación
