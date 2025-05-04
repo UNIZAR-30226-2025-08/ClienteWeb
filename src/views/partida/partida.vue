@@ -51,7 +51,7 @@
         />
         <VidenteDormirOverlay
           v-else-if="currentPhase === 'vidente_dormir'"
-          @finish="onVidenteDormirFinish"
+          @finish="onVidenteDormirFinished"
         />
 
         <!-- NUEVO -->
@@ -360,6 +360,7 @@ export default {
       // Fases posibles:
       // 'intro', 'role', 'start', 'alguacil_announce', 'game_voting', 'alguacil_result', 'alguacil_empate',
       // 'night', 'vidente_awaken', 'vidente_action', 'ojo_cerrado', 'game'
+      pendingWolfData: null,
       currentPhase: "intro",
       isGameActive: false,
       isVotingPhase: false,
@@ -1008,15 +1009,8 @@ export default {
           this.resetVotingState();
           break;
         case "turnoHombresLobos":
-          // si vienen los lobos pero la vidente aún está durmiendo,
-          // posponemos el evento unos segundos y no lo ejecutamos ahora
-          if (this.currentPhase === "vidente_dormir") {
-            setTimeout(() => this.addEventToQueue(event), 3000);
-            return;
-          }
-          console.log("Procesando en cola: turnoHombresLobos", event.data);
-          this.handleTurnoHombresLobo(event.data);
-          this.resetVotingState();
+          this.pendingWolfData = event.data;
+          this.changePhase("vidente_dormir");
           break;
         case "habilidadBruja":
           this.changePhase("despertar_bruja");
@@ -1276,9 +1270,17 @@ export default {
         this.changePhase("esperando_eleccion_sucesor");
       }
     },
+    onVidenteDormirFinished() {
+      // 2) pasamos ya al despertar de lobos
+      this.changePhase("despertar_hombres_lobo");
+      this.currentPeriod = "NOCHE";
 
-    onVidenteDormirFinish() {
-      this.finishVidenteAction();
+      // 3) lanzamos la lógica de turno de lobos con los datos guardados
+      if (this.pendingWolfData) {
+        this.handleTurnoHombresLobo(this.pendingWolfData);
+        this.resetVotingState();
+        this.pendingWolfData = null;
+      }
     },
 
     finishVidenteAction() {
@@ -1323,7 +1325,7 @@ export default {
     handlePassTurn() {
       if (!this.hasVidenteActed) {
         this.hasVidenteActed = true;
-        this.changePhase("vidente_dormir");
+        this.finishVidenteAction();
       }
     },
 
@@ -1443,7 +1445,7 @@ export default {
       setTimeout(() => {
         this.closeModal();
         if (this.currentPhase === "vidente_action") {
-          this.changePhase("vidente_dormir");
+          this.finishVidenteAction(); // Cambia a la fase de juego después de mostrar el mensaje
         }
       }, 5000);
     },
