@@ -49,6 +49,11 @@
           v-else-if="currentPhase === 'vidente_awaken'"
           :visible="true"
         />
+        <VidenteDormirOverlay
+          v-else-if="currentPhase === 'vidente_dormir'"
+          @finish="onVidenteDormirFinish"
+        />
+
         <!-- NUEVO -->
         <DespertarBruja v-else-if="currentPhase === 'despertar_bruja'" />
 
@@ -262,6 +267,7 @@ import AlguacilEligeSucesor from "./Componentes/AlguacilEligeSucesor.vue";
 
 import NocheOverlay from "../../views/partida/Overlay/InicioNocheOverlay.vue";
 import VidenteOverlay from "../../views/partida/Overlay/VidenteOverlay.vue";
+import VidenteDormirOverlay from "../../views/partida/Overlay/VidenteDormirOverlay.vue";
 import OjoCerradoOverlay from "../../views/partida/Overlay/OjoCerradoOverlay.vue";
 
 import TurnButton from "../../views/partida/Componentes/TurnButton.vue";
@@ -325,6 +331,7 @@ export default {
     SucesionAlguacilOverlay,
     NocheOverlay,
     VidenteOverlay,
+    VidenteDormirOverlay,
     OjoCerradoOverlay,
     TurnButton,
     DiscoverRoleButton,
@@ -499,6 +506,7 @@ export default {
           "elegir_sucesor",
           "death",
           "game_over",
+          "vidente_dormir",
         ].includes(this.currentPhase) && !this.hasFired
       );
     },
@@ -1263,6 +1271,10 @@ export default {
       }
     },
 
+    onVidenteDormirFinish() {
+      this.finishVidenteAction();
+    },
+
     finishVidenteAction() {
       this.isVotingPhase = false;
       this.resetVotingState();
@@ -1305,7 +1317,7 @@ export default {
     handlePassTurn() {
       if (!this.hasVidenteActed) {
         this.hasVidenteActed = true;
-        this.finishVidenteAction();
+        this.changePhase("vidente_dormir");
       }
     },
 
@@ -1425,7 +1437,7 @@ export default {
       setTimeout(() => {
         this.closeModal();
         if (this.currentPhase === "vidente_action") {
-          this.finishVidenteAction();
+          this.changePhase("vidente_dormir");
         }
       }, 5000);
     },
