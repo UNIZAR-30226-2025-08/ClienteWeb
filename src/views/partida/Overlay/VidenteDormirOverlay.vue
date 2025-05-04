@@ -1,7 +1,7 @@
 <template>
   <div
     class="empieza-overlay fadeInOut"
-    :style="{ animationDuration: '2s' }"
+    :style="{ animationDuration: '4s' }"
     @animationend="onAnimationEnd"
   >
     <h1 class="empieza-text">LA VIDENTE SE VUELVE A DORMIR</h1>
