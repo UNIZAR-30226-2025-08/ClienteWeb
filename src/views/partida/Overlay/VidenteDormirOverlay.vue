@@ -30,7 +30,7 @@ export default {
 
 <style scoped>
 .fadeInOut {
-  animation: fadeInOut 5s ease-in-out forwards;
+  animation: fadeInOut 3s ease-in-out forwards;
 }
 .empieza-overlay {
   position: fixed;
