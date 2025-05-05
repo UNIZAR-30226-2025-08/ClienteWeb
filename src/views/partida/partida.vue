@@ -67,6 +67,11 @@
           :text="pocionVidaMessage"
         />
 
+        <BrujaDormirOverlay
+          v-else-if="currentPhase === 'bruja_dormir'"
+          @finish="onBrujaDormirFinished"
+        />
+
         <OjoCerradoOverlay
           v-else-if="currentPhase === 'ojo_cerrado'"
           :visible="true"
@@ -282,6 +287,7 @@ import BotonBrujaVida from "./Componentes/botonBrujaVida.vue";
 import BotonBrujaMuerte from "./Componentes/botonBrujaMuerte.vue";
 import PocionMuerteUsadaOverlay from "./Overlay/PocionMuerteUsada.vue";
 import PocimaVidaUsadaOverlay from "./Overlay/PocimaVidaUsada.vue";
+import BrujaDormirOverlay from "../../views/partida/Overlay/DormirBrujaOverlay.vue";
 
 // Nuevos overlays para el turno de hombres lobo
 import DespertarHombresLobo from "../../views/partida/Overlay/DespertarHombresLobo.vue";
@@ -332,6 +338,7 @@ export default {
     NocheOverlay,
     VidenteOverlay,
     VidenteDormirOverlay,
+    BrujaDormirOverlay,
     OjoCerradoOverlay,
     TurnButton,
     DiscoverRoleButton,
@@ -508,6 +515,7 @@ export default {
           "death",
           "game_over",
           "vidente_dormir",
+          "bruja_dormir",
         ].includes(this.currentPhase) && !this.hasFired
       );
     },
@@ -1282,6 +1290,7 @@ export default {
         this.pendingWolfData = null;
       }
     },
+    onBrujaDormirFinished() {},
 
     finishVidenteAction() {
       this.isVotingPhase = false;
