@@ -687,17 +687,18 @@ export default {
       this.showSucesionOverlay = false;
       console.log("El día ha comenzado", data);
 
-      // — Tu lógica existente para marcar víctimas —
+      // Actualizar la lista de víctimas con la información completa
       this.victimas = data.victimas || [];
-      const victimaIds = this.victimas
-        .map((v) => Number(v))
-        .filter((id) => !isNaN(id));
-      this.victimasNombres = victimaIds.map((id) => {
-        const p = this.players.find((pl) => pl.id == id);
-        return p ? p.nombre : "Desconocido";
-      });
-      victimaIds.forEach((id) => {
-        const p = this.players.find((pl) => pl.id == id);
+      this.victimasNombres = this.victimas.map((victima) => ({
+        id: victima.id,
+        nombre: victima.nombre,
+        rol: victima.rol,
+        esAlguacil: victima.esAlguacil,
+      }));
+
+      // Actualizar el estado de los jugadores
+      this.victimas.forEach((victima) => {
+        const p = this.players.find((pl) => pl.id == victima.id);
         if (p) {
           p.estaVivo = false;
           this.aliveVillagers--;
@@ -738,7 +739,6 @@ export default {
                 this.timeLeft--;
               } else {
                 clearInterval(this.countdownInterval);
-                //TODO: he quitado lo de pasar al endingvoting phase porque lo hago cuando llega el socket de que ha acabado la votacion
               }
             }, 1000);
           }, 5000);
@@ -764,7 +764,9 @@ export default {
         "Resultado votación de día:",
         data.mensaje,
         "Víctima:",
-        data.jugadorAEliminar
+        data.jugadorAEliminar,
+        "Rol:",
+        data.rolJugadorAEliminar
       );
       this.addEventToQueue({ type: "resultadoVotosDia", data });
     });
@@ -1038,13 +1040,21 @@ export default {
           break;
         case "resultadoVotosDia":
           // 1) Actualizar víctimas
-          const eliminadoId = Number(event.data.jugadorAEliminar);
-          this.victimas = [eliminadoId];
-          this.victimasNombres = this.victimas.map(
-            (id) =>
-              (this.players.find((pl) => pl.id == id) || {}).nombre ||
-              "Desconocido"
+          // Actualizar la información de la víctima con su rol
+          const jugadorAEliminar = this.players.find(
+            (p) => p.id == event.data.jugadorAEliminar
           );
+          if (jugadorAEliminar) {
+            this.victimas = [
+              {
+                id: jugadorAEliminar.id,
+                nombre: jugadorAEliminar.nombre,
+                rol: event.data.rolJugadorAEliminar,
+                esAlguacil: jugadorAEliminar.esAlguacil,
+              },
+            ];
+            this.victimasNombres = this.victimas;
+          }
           // 2) Mostrar overlay de muertes (reutilizamos el de noche)
           this.changePhase("recuento_linchazo");
           // 3) Marcar al jugador como muerto en tu estado
