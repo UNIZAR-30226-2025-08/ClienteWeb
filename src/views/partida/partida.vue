@@ -685,7 +685,7 @@ export default {
       this.nextWolfVictimId = null;
       this.showCazadorOverlay = false;
       this.showSucesionOverlay = false;
-      this.currentPhase = "intro"
+      this.currentPhase = "intro";
       console.log("El día ha comenzado", data);
 
       // — Tu lógica existente para marcar víctimas —
@@ -776,6 +776,7 @@ export default {
       this.showDeathOverlay = false;
       this.showCazadorOverlay = false;
       this.showSucesionOverlay = false;
+      this.isVotingPhase = false;
       this.gameEnded = true;
       this.eventQueue = [];
       this.isProcessing = false;
