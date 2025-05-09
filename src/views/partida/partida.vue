@@ -105,9 +105,9 @@
           v-else-if="
             currentPhase === 'habilidad_cazador' &&
             isCazador() &&
-            cazadoresMuertos.find((c) => c == MiId)
+            cazadorActual.find((c) => c == MiId)
           "
-          :players="players.filter((p) => p.estaVivo && p.id !== MiId)"
+          :players="jugadoresDisponibles"
           @fire="handleCazadorFire"
           @continue="handleContinueViewing"
           @exit="$router.push('/juego')"
@@ -116,7 +116,7 @@
         <CazadorAtacadoOverlay
           v-else-if="
             currentPhase === 'habilidad_cazador' &&
-            cazadoresMuertos.find((c) => c !== MiId)
+            cazadorActual.find((c) => c !== MiId)
           "
         />
         <SucesionAlguacilOverlay
@@ -128,7 +128,7 @@
           v-else-if="
             currentPhase === 'esperando_eleccion_sucesor' && isAlguacil()
           "
-          :players="players.filter((p) => p.estaVivo && p.id !== MiId)"
+          :players="jugadoresDisponibles"
           @vote="handleVoteForSuccessor"
           @continue="handleContinueViewing"
           @exit="$router.push('/juego')"
@@ -412,7 +412,7 @@ export default {
       chatMessages: [],
 
       // Datos de rol y estado del juego
-      cazadoresMuertos: [],
+      cazadorActual: [],
       chosenRole: {},
       alguacilWinnerIndex: null,
       AlguacilWinnerName: null,
@@ -464,6 +464,7 @@ export default {
       fondoOverlay,
       spinnerIcon,
       loboSilhouette,
+      jugadoresDisponibles: [],
     };
   },
   watch: {
@@ -676,7 +677,7 @@ export default {
     socket.on("habilidadCazador", (data) => {
       console.log("Habilidad de cazador activada:", data.mensaje);
       this.addEventToQueue({ type: "habilidadCazador", data });
-      this.cazadoresMuertos = data.cazadoresMuertos || []; // Actualiza la lista de cazadores muertos
+      this.cazadorActual = data.cazadorActual || []; // Actualiza la lista de cazadores muertos
     });
 
     //11. Escuchar evento para pasar al día
@@ -1132,11 +1133,13 @@ export default {
           this.changePhase("habilidad_cazador");
           this.showCazadorOverlay = true;
           this.timeLeft = event.data.tiempo || 30;
+          this.jugadoresDisponibles = event.data.jugadoresDisponibles || [];
           break;
         case "eleccion_sucesor":
           this.changePhase("esperando_eleccion_sucesor");
           this.showSucesionOverlay = true;
           this.timeLeft = event.data.tiempo || 30;
+          this.jugadoresDisponibles = event.data.jugadoresDisponibles || [];
           break;
         default:
           console.warn("Evento desconocido en cola", event);
