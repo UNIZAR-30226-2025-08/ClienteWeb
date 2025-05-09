@@ -1,3 +1,10 @@
+<template>
+  <div class="volver-fixed" @click="goBack">
+    <span class="arrow">←</span>
+    <span class="text">Volver</span>
+  </div>
+</template>
+
 <script setup>
 import { useRouter, useRoute } from "vue-router";
 import { navigationHistory } from "../router";
@@ -43,6 +50,7 @@ const goBack = () => {
   router.back();
 };
 </script>
+
 <style scoped>
 .volver-fixed {
   position: fixed;
