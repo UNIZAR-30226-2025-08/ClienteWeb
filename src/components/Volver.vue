@@ -6,51 +6,19 @@
 </template>
 
 <script setup>
-import { useRouter, useRoute } from "vue-router";
-import { navigationHistory } from "../router";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
-const route = useRoute();
 
 const goBack = () => {
-  if (["perfil", "amigos"].includes(route.name)) {
-    const currentIndex = navigationHistory.indexOf(route.fullPath);
-
-    if (currentIndex === -1 || currentIndex === 0) {
-      return router.push("/");
-    }
-
-    const previousRoutes = navigationHistory.slice(0, currentIndex);
-    const reversedHistory = [...previousRoutes].reverse();
-
-    // Buscar si existe alguna partida en el historial
-    const hasPartida = reversedHistory.some((path) =>
-      path.startsWith("/partida/")
-    );
-
-    // Redirigir a /juego si se encontró partida
-    if (hasPartida) {
-      return router.push("/juego");
-    }
-
-    // Buscar última ruta válida no-perfil/amigos
-    const lastValidPath = reversedHistory.find(
-      (path) => !["/perfil", "/amigos"].some((p) => path.startsWith(p))
-    );
-
-    if (lastValidPath) {
-      router.push(lastValidPath);
-    } else {
-      router.push("/");
-    }
-    return;
+  // Misma lógica que el botón de retroceso del navegador
+  if (window.history.length > 1) {
+    router.back();
+  } else {
+    router.push("/"); // Si no hay historial, ir al inicio
   }
-
-  // Comportamiento normal para otras páginas
-  router.back();
 };
 </script>
-
 <style scoped>
 .volver-fixed {
   position: fixed;
