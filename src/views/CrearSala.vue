@@ -160,8 +160,8 @@ function crearSala() {
     return;
   }
 
-  if (nombreServidor.value.length > 30) {
-    alert("El nombre de la sala no puede exceder los 30 caracteres");
+  if (nombreServidor.value.length > 50) {
+    alert("El nombre de la sala no puede exceder los 50 caracteres");
     return;
   }
 
@@ -226,7 +226,7 @@ socket.on("errorSala", (msg) => {
         <input
           v-model="nombreServidor"
           placeholder="Sala de..."
-          maxlength="30"
+          maxlength="50"
           required
         />
       </div>
