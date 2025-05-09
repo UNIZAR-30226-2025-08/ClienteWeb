@@ -696,6 +696,9 @@ export default {
         esAlguacil: victima.esAlguacil,
       }));
 
+      // Extraer los IDs de las víctimas
+      const victimasIds = this.victimas.map((victima) => victima.id);
+
       // Actualizar el estado de los jugadores
       this.victimas.forEach((victima) => {
         const p = this.players.find((pl) => pl.id == victima.id);
@@ -707,7 +710,7 @@ export default {
       });
 
       // Si tú has muerto, pasas a espectador y sales al overlay de muerte
-      if (victimaIds.includes(this.MiId)) {
+      if (victimasIds.includes(this.MiId)) {
         return this.markDead();
       }
 
@@ -1058,6 +1061,7 @@ export default {
           // 2) Mostrar overlay de muertes (reutilizamos el de noche)
           this.changePhase("recuento_linchazo");
           // 3) Marcar al jugador como muerto en tu estado
+          const eliminadoId = event.data.jugadorAEliminar;
           this.players = this.players.map((pl) =>
             pl.id == eliminadoId ? { ...pl, estaVivo: false } : pl
           );
@@ -1188,6 +1192,7 @@ export default {
     isLobo() {
       return (
         this.chosenRole &&
+        this.chosenRole.nombre &&
         this.chosenRole.nombre.toLowerCase() === "hombre lobo"
       );
     },
@@ -1413,7 +1418,7 @@ export default {
       console.log("Se ha enviado la solicitud para usar la Poción de Muerte.");
 
       if (this.pocionMuerteUsada == false) {
-        this.pocionMuerteMessage = `Has decidido usar la pocima de muerte con el jugador ${this.selectedPlayerIndex}`;
+        this.pocionMuerteMessage = `Has decidido usar la poción de muerte con el jugador ${this.selectedPlayerIndex}`;
         this.changePhase("pocion_muerte_usada");
         this.pocionMuerteUsada = true;
         this.selectedPlayerIndex = null;
@@ -1421,7 +1426,7 @@ export default {
           this.changePhase("habilidad_bruja");
         }, 3000);
       } else {
-        alert("Esta pocima ya ha sido usada");
+        alert("Esta poción ya ha sido usada");
       }
     },
     handleCazadorFire(targetId) {
