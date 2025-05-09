@@ -62,17 +62,28 @@ const router = createRouter({
   routes,
 });
 
-// Modificación en el router (src/router/index.js)
 const navigationHistory = [];
 
-router.beforeEach((to, from) => {
-  // Registrar rutas de origen evitando duplicados consecutivos
-  if (
-    from.fullPath &&
-    navigationHistory[navigationHistory.length - 1] !== from.fullPath
-  ) {
-    navigationHistory.push(from.fullPath);
+router.beforeEach((to, from, next) => {
+  if (from.fullPath) {
+    // Si el destino coincide con la última entrada del historial, es una navegación hacia atrás
+    if (
+      navigationHistory.length > 0 &&
+      navigationHistory[navigationHistory.length - 1] === to.fullPath
+    ) {
+      navigationHistory.pop();
+    } else {
+      // Navegación hacia adelante, añadir la ruta 'from'
+      navigationHistory.push(from.fullPath);
+    }
   }
+
+  // Resetear historial al entrar a /juego
+  if (to.path === "/juego") {
+    navigationHistory.length = 0;
+  }
+
+  next();
 });
 
 export { router, navigationHistory };

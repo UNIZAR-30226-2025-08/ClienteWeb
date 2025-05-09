@@ -7,26 +7,33 @@
 
 <script setup>
 import { useRouter, useRoute } from "vue-router";
-import { navigationHistory } from "../router";
+import { navigationHistory } from "../router"; // Ajusta la ruta si es necesario
 
 const router = useRouter();
 const route = useRoute();
 
+// Componente Volver
+
 const goBack = () => {
-  const currentPath = route.fullPath;
-  const currentIndex = navigationHistory.indexOf(currentPath);
+  const history = navigationHistory;
 
-  // Obtener ruta anterior del historial
-  const previousPath =
-    currentIndex > 0 ? navigationHistory[currentIndex - 1] : null;
-
-  if (previousPath) {
-    // Forzar recarga completa
-    window.location.href = previousPath;
-  } else {
-    // Si no hay historial previo, ir al home
-    window.location.href = "/";
+  // Buscar la última ruta de Sala en el historial
+  let salaRoute = null;
+  for (let i = history.length - 1; i >= 0; i--) {
+    if (history[i]?.includes("/sala")) {
+      salaRoute = history[i];
+      break;
+    }
   }
+
+  // Si estamos en Perfil/Amigos y existe una Sala previa
+  if ((route.name === "perfil" || route.name === "amigos") && salaRoute) {
+    window.location.href = salaRoute;
+    return;
+  }
+
+  // En otros casos, navegar normalmente hacia atrás
+  router.back();
 };
 </script>
 
