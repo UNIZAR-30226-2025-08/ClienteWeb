@@ -8,7 +8,8 @@
           :key="index"
           class="victim-text"
         >
-          ⚔️👥 {{ victima }} ha sido linchado durante el día.
+          ⚔️👥 {{ victima.nombre }} ({{ victima.rol }}) ha sido linchado durante
+          el día.
         </li>
       </ul>
     </div>

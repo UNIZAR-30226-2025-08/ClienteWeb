@@ -9,7 +9,8 @@
           :key="index"
           class="victim-text"
         >
-          🗡️🩸 {{ victima }} ha muerto durante la noche.
+          🗡️🩸 {{ victima.nombre }} ({{ victima.rol }}) ha muerto durante la
+          noche.
         </li>
       </ul>
     </div>

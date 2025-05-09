@@ -1451,7 +1451,12 @@ export default {
       if (this.isSpectator) return; // No permite seleccionar si eres espectador
       // Si no estamos en fase de votación o en la fase de vidente, no se permite seleccionar
 
-      /*Si el jugaodor que queremos votar esta muerto, no se le puede selecionar, convendría enseñar un popup de este jugador ya esta muerto */
+      // Si el jugador está intentando votarse a sí mismo en la fase diurna, no se permite la selección
+      if (this.currentPeriod === "DÍA" && playerId === this.MiId) {
+        return;
+      }
+
+      /*Si el jugador que queremos votar está muerto, no se le puede seleccionar, convendría enseñar un popup de este jugador ya está muerto */
       if (this.IsPlayerDead(playerId)) return; // No permite seleccionar si el jugador está muerto
 
       if (
