@@ -13,35 +13,22 @@ const router = useRouter();
 const route = useRoute();
 
 const goBack = () => {
-  // Si estamos en el perfil, buscamos en el historial una ruta que contenga "/sala"
-  if (route.name === "perfil") {
-    // Buscamos a partir del final del historial (la ruta más antigua en la pila) que contenga "/sala"
-    const salaRoute = navigationHistory
+  // Si estamos en perfil o amigos, buscar última ruta válida que no sea de sala
+  if (route.name === "perfil" || route.name === "amigos") {
+    const validRoute = navigationHistory
       .slice()
       .reverse()
-      .find((path) => path.includes("/sala"));
-    console.log("Perfil");
-    if (salaRoute) {
-      // Si se encontró una ruta de sala, usamos window.location.href para forzar la recarga
-      window.location.href = salaRoute;
-      return;
+      .find((path) => !path.includes("/sala")); // Buscar primera ruta que NO sea de sala
+
+    if (validRoute) {
+      router.push(validRoute);
+    } else {
+      router.push("/"); // Redirigir a home si no hay rutas válidas
     }
+    return;
   }
-  if (route.name === "amigos") {
-    // Si estamos en la página de amigos, buscamos en el historial una ruta que contenga "/sala"
-    console.log("Amigos");
-    const salaRoute = navigationHistory
-      .slice()
-      .reverse()
-      .find((path) => path.includes("/sala"));
-    if (salaRoute) {
-      // Si se encontró una ruta de sala, usamos window.location.href para forzar la recarga
-      window.location.href = salaRoute;
-      return;
-    }
-  }
-  console.log("Volviendo");
-  // En cualquier otro caso, usamos la navegación interna del router
+
+  // Para el resto de casos usar navegación normal
   router.back();
 };
 </script>
