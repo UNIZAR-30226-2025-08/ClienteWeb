@@ -13,48 +13,39 @@ const router = useRouter();
 const route = useRoute();
 
 const goBack = () => {
+  const currentIndex = navigationHistory.indexOf(route.fullPath);
+
+  // Si no hay historial previo, ir al home
+  if (currentIndex === -1 || currentIndex === 0) {
+    return router.push("/");
+  }
+
+  const previousRoutes = navigationHistory.slice(0, currentIndex);
+  const reversedHistory = [...previousRoutes].reverse();
+
+  // Buscar la última ruta válida que NO sea partida
+  const lastValidPath = reversedHistory.find(
+    (path) => !path.startsWith("/partida/")
+  );
+
+  // Caso especial para perfil/amigos: priorizar salas
   if (["perfil", "amigos"].includes(route.name)) {
-    const currentIndex = navigationHistory.indexOf(route.fullPath);
-
-    if (currentIndex === -1 || currentIndex === 0) {
-      return router.push("/");
-    }
-
-    const previousRoutes = navigationHistory.slice(0, currentIndex);
-    const reversedHistory = [...previousRoutes].reverse();
-
-    // 1. Primero verificar partidas
-    const hasPartida = reversedHistory.some((path) =>
-      path.startsWith("/partida/")
-    );
-    if (hasPartida) {
-      return router.push("/juego");
-    }
-
-    // 2. Buscar última sala
     const lastSalaPath = reversedHistory.find((path) =>
       path.startsWith("/sala/")
     );
+
     if (lastSalaPath) {
       window.location.href = lastSalaPath;
       return;
     }
-
-    // 3. Buscar última ruta válida
-    const lastValidPath = reversedHistory.find(
-      (path) => !["/perfil", "/amigos"].some((p) => path.startsWith(p))
-    );
-
-    if (lastValidPath) {
-      router.push(lastValidPath);
-    } else {
-      router.push("/");
-    }
-    return;
   }
 
-  // Comportamiento normal para otras páginas
-  router.back();
+  // Navegación normal evitando partidas
+  if (lastValidPath) {
+    router.push(lastValidPath);
+  } else {
+    router.push("/");
+  }
 };
 </script>
 
