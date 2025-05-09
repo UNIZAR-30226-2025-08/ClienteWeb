@@ -154,6 +154,31 @@ const decrementarRol = (rol) => {
 
 // Función para crear la sala utilizando websockets
 function crearSala() {
+  // Validación de nombre de sala
+  if (!nombreServidor.value || nombreServidor.value.trim() === "") {
+    alert("El nombre de la sala no puede estar vacío");
+    return;
+  }
+
+  if (nombreServidor.value.length > 50) {
+    alert("El nombre de la sala no puede exceder los 50 caracteres");
+    return;
+  }
+
+  // Validación de contraseña para salas privadas
+  if (privacidad.value === "Privada") {
+    if (!password.value || password.value.trim() === "") {
+      alert("La contraseña no puede estar vacía para una sala privada");
+      return;
+    }
+
+    if (password.value.length > 15) {
+      alert("La contraseña no puede exceder los 15 caracteres");
+      return;
+    }
+  }
+
+  // Resto del código original...
   const maxRoles = rolesCantidad.value.reduce((acc, rol) => {
     acc[rol.nombre] = rol.cantidad;
     return acc;
@@ -198,7 +223,12 @@ socket.on("errorSala", (msg) => {
     <div class="formulario">
       <div class="campo">
         <label>Nombre de la Sala:</label>
-        <input v-model="nombreServidor" placeholder="Sala de..." />
+        <input
+          v-model="nombreServidor"
+          placeholder="Sala de..."
+          maxlength="50"
+          required
+        />
       </div>
 
       <div class="campo">
@@ -236,6 +266,7 @@ socket.on("errorSala", (msg) => {
               :type="showPassword ? 'text' : 'password'"
               v-model="password"
               placeholder="Introduce una contraseña"
+              maxlength="15"
             />
             <button
               class="toggle-password"
