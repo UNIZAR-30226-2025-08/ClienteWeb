@@ -7,28 +7,39 @@
 
 <script setup>
 import { useRouter, useRoute } from "vue-router";
-import { navigationHistory } from "../router"; // Ajusta la ruta si es necesario
+import { navigationHistory } from "../router";
 
 const router = useRouter();
 const route = useRoute();
 
 const goBack = () => {
-  // Si estamos en perfil o amigos, buscar última ruta válida que no sea de sala
-  if (route.name === "perfil" || route.name === "amigos") {
-    const validRoute = navigationHistory
-      .slice()
-      .reverse()
-      .find((path) => !path.includes("/sala")); // Buscar primera ruta que NO sea de sala
+  if (["perfil", "amigos"].includes(route.name)) {
+    const currentIndex = navigationHistory.indexOf(route.fullPath);
+    const previousRoutes = navigationHistory.slice(0, currentIndex);
 
-    if (validRoute) {
-      router.push(validRoute);
+    // Crear copia para no mutar el array original
+    const reversedHistory = [...previousRoutes].reverse();
+
+    // Buscar última sala/partida
+    const lastSalaPath = reversedHistory.find(
+      (path) => path.startsWith("/sala/") || path.startsWith("/partida/")
+    );
+
+    // Buscar última ruta válida no-perfil/amigos
+    const lastValidPath = reversedHistory.find(
+      (path) => !["/perfil", "/amigos"].some((p) => path.startsWith(p))
+    );
+
+    if (lastSalaPath) {
+      router.push(lastSalaPath);
+    } else if (lastValidPath) {
+      router.push(lastValidPath);
     } else {
-      router.push("/"); // Redirigir a home si no hay rutas válidas
+      router.push("/");
     }
     return;
   }
 
-  // Para el resto de casos usar navegación normal
   router.back();
 };
 </script>
