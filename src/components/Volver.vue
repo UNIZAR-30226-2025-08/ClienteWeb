@@ -23,17 +23,24 @@ const goBack = () => {
     const previousRoutes = navigationHistory.slice(0, currentIndex);
     const reversedHistory = [...previousRoutes].reverse();
 
-    // Buscar si existe alguna partida en el historial
+    // 1. Primero verificar partidas
     const hasPartida = reversedHistory.some((path) =>
       path.startsWith("/partida/")
     );
-
-    // Redirigir a /juego si se encontró partida
     if (hasPartida) {
       return router.push("/juego");
     }
 
-    // Buscar última ruta válida no-perfil/amigos
+    // 2. Buscar última sala
+    const lastSalaPath = reversedHistory.find((path) =>
+      path.startsWith("/sala/")
+    );
+    if (lastSalaPath) {
+      window.location.href = lastSalaPath;
+      return;
+    }
+
+    // 3. Buscar última ruta válida
     const lastValidPath = reversedHistory.find(
       (path) => !["/perfil", "/amigos"].some((p) => path.startsWith(p))
     );
