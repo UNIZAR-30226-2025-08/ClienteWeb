@@ -13,21 +13,22 @@ const router = useRouter();
 const route = useRoute();
 
 const goBack = () => {
-  // Si estamos en el perfil, buscamos en el historial una ruta que contenga "/sala"
-  if (route.name === "perfil" || route.name === "amigos") {
-    const salaRoute = navigationHistory
-      .slice()
-      .reverse()
-      .find((path) => path.includes("/sala"));
+  // Sacamos el historial
+  const history = navigationHistory;
+  // Ruta actual está al final; la anterior es history[history.length - 2]
+  const prev = history[history.length - 2];
 
-    if (salaRoute) {
-      // Si se encontró una ruta válida de sala, redirigimos a ella
-      window.location.href = salaRoute;
-      return;
-    }
+  // Si vengo de Perfil o Amigos y el anterior es una Sala…
+  if (
+    (route.name === "perfil" || route.name === "amigos") &&
+    prev?.includes("/sala")
+  ) {
+    // volvemos a esa sala
+    window.location.href = prev;
+    return;
   }
 
-  // En cualquier otro caso, usamos la navegación interna del router
+  // en cualquier otro caso, back normal
   router.back();
 };
 </script>
