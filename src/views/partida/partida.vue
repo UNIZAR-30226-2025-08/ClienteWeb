@@ -49,6 +49,11 @@
           v-else-if="currentPhase === 'vidente_awaken'"
           :visible="true"
         />
+        <VidenteDormirOverlay
+          v-else-if="currentPhase === 'vidente_dormir'"
+          @finish="onVidenteDormirFinished"
+        />
+
         <!-- NUEVO -->
         <DespertarBruja v-else-if="currentPhase === 'despertar_bruja'" />
 
@@ -60,6 +65,11 @@
         <PocimaVidaUsadaOverlay
           v-else-if="currentPhase === 'pocion_vida_usada'"
           :text="pocionVidaMessage"
+        />
+
+        <BrujaDormirOverlay
+          v-else-if="currentPhase === 'bruja_dormir'"
+          @finish="onBrujaDormirFinished"
         />
 
         <OjoCerradoOverlay
@@ -262,6 +272,7 @@ import AlguacilEligeSucesor from "./Componentes/AlguacilEligeSucesor.vue";
 
 import NocheOverlay from "../../views/partida/Overlay/InicioNocheOverlay.vue";
 import VidenteOverlay from "../../views/partida/Overlay/VidenteOverlay.vue";
+import VidenteDormirOverlay from "../../views/partida/Overlay/VidenteDormirOverlay.vue";
 import OjoCerradoOverlay from "../../views/partida/Overlay/OjoCerradoOverlay.vue";
 
 import TurnButton from "../../views/partida/Componentes/TurnButton.vue";
@@ -276,6 +287,7 @@ import BotonBrujaVida from "./Componentes/botonBrujaVida.vue";
 import BotonBrujaMuerte from "./Componentes/botonBrujaMuerte.vue";
 import PocionMuerteUsadaOverlay from "./Overlay/PocionMuerteUsada.vue";
 import PocimaVidaUsadaOverlay from "./Overlay/PocimaVidaUsada.vue";
+import BrujaDormirOverlay from "../../views/partida/Overlay/DormirBrujaOverlay.vue";
 
 // Nuevos overlays para el turno de hombres lobo
 import DespertarHombresLobo from "../../views/partida/Overlay/DespertarHombresLobo.vue";
@@ -325,6 +337,8 @@ export default {
     SucesionAlguacilOverlay,
     NocheOverlay,
     VidenteOverlay,
+    VidenteDormirOverlay,
+    BrujaDormirOverlay,
     OjoCerradoOverlay,
     TurnButton,
     DiscoverRoleButton,
@@ -353,6 +367,7 @@ export default {
       // Fases posibles:
       // 'intro', 'role', 'start', 'alguacil_announce', 'game_voting', 'alguacil_result', 'alguacil_empate',
       // 'night', 'vidente_awaken', 'vidente_action', 'ojo_cerrado', 'game'
+      pendingWolfData: null,
       currentPhase: "intro",
       isGameActive: false,
       isVotingPhase: false,
@@ -499,6 +514,8 @@ export default {
           "elegir_sucesor",
           "death",
           "game_over",
+          "vidente_dormir",
+          "bruja_dormir",
         ].includes(this.currentPhase) && !this.hasFired
       );
     },
@@ -668,6 +685,7 @@ export default {
       this.nextWolfVictimId = null;
       this.showCazadorOverlay = false;
       this.showSucesionOverlay = false;
+      this.currentPhase = "start"
       console.log("El día ha comenzado", data);
 
       // — Tu lógica existente para marcar víctimas —
@@ -1000,9 +1018,8 @@ export default {
           this.resetVotingState();
           break;
         case "turnoHombresLobos":
-          console.log("Procesando en cola: turnoHombresLobos", event.data);
-          this.handleTurnoHombresLobo(event.data);
-          this.resetVotingState();
+          this.pendingWolfData = event.data;
+          this.changePhase("vidente_dormir");
           break;
         case "habilidadBruja":
           this.changePhase("despertar_bruja");
@@ -1049,6 +1066,7 @@ export default {
           }, 5000);
           break;
         case "empateDia":
+          this.resetVotingState();
           this.changePhase("empate_dia");
 
           // esperar que termine la animación
@@ -1261,6 +1279,19 @@ export default {
         this.changePhase("esperando_eleccion_sucesor");
       }
     },
+    onVidenteDormirFinished() {
+      // 2) pasamos ya al despertar de lobos
+      this.changePhase("despertar_hombres_lobo");
+      this.currentPeriod = "NOCHE";
+
+      // 3) lanzamos la lógica de turno de lobos con los datos guardados
+      if (this.pendingWolfData) {
+        this.handleTurnoHombresLobo(this.pendingWolfData);
+        this.resetVotingState();
+        this.pendingWolfData = null;
+      }
+    },
+    onBrujaDormirFinished() {},
 
     finishVidenteAction() {
       this.isVotingPhase = false;
@@ -1424,7 +1455,7 @@ export default {
       setTimeout(() => {
         this.closeModal();
         if (this.currentPhase === "vidente_action") {
-          this.finishVidenteAction();
+          this.finishVidenteAction(); // Cambia a la fase de juego después de mostrar el mensaje
         }
       }, 5000);
     },

@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="empieza-overlay fadeInOut"
-    :style="{ animationDuration: '2s' }"
-    @animationend="onAnimationEnd"
-  >
+  <div class="empieza-overlay fadeInOut" @animationend="onAnimationEnd">
     <h1 class="empieza-text">LA VIDENTE SE VUELVE A DORMIR</h1>
   </div>
 </template>
@@ -33,6 +29,9 @@ export default {
 </script>
 
 <style scoped>
+.fadeInOut {
+  animation: fadeInOut 3s ease-in-out forwards;
+}
 .empieza-overlay {
   position: fixed;
   top: 0;
@@ -52,10 +51,6 @@ export default {
   font-family: "Times New Roman", serif;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   letter-spacing: 2px;
-}
-
-.fadeInOut {
-  animation: fadeInOut 6s forwards;
 }
 
 @keyframes fadeInOut {
