@@ -717,7 +717,7 @@ export default {
       // 1) Overlay de recuento de muertes
       this.changePhase("recuento_muertes");
 
-      // 2) Tras 5 s arrancas el día (charla libre)
+      // 2) Tras 8 s arrancas el día (charla libre)
       setTimeout(() => {
         this.changePhase("game");
         this.currentPeriod = "DÍA";
@@ -746,7 +746,7 @@ export default {
             }, 1000);
           }, 5000);
         }, 3000); // 3 s y vamos a las votaciones
-      }, 5000); // 5 s de recuento de muertes
+      }, 8000); // 8 s de recuento de muertes
     });
 
     //12. Evento que notifica un empate en la votación del día y reinicia la votación
