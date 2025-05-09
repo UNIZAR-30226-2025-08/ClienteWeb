@@ -686,6 +686,7 @@ export default {
       this.showCazadorOverlay = false;
       this.showSucesionOverlay = false;
       this.changePhase("intro");
+      this.changePhase("fin_turno_lobos");
       console.log("El día ha comenzado", data);
 
       // — Tu lógica existente para marcar víctimas —
@@ -918,10 +919,10 @@ export default {
       ].includes(phase);
     },
     changePhase(newPhase) {
-      console.log(`showDeathOverlay es: ${this.showDeathOverlay}`);
-      console.log(`showCazadorOverlay es: ${this.showCazadorOverlay}`);
-      console.log(`showSucesionOverlay es: ${this.showCazadorOverlay}`);
-      this.showReconnectOverlay = false; // Ocultar overlay de reconexión al cambiar de fase
+      //console.log(`showDeathOverlay es: ${this.showDeathOverlay}`);
+      //console.log(`showCazadorOverlay es: ${this.showCazadorOverlay}`);
+      //console.log(`showSucesionOverlay es: ${this.showCazadorOverlay}`);
+      //this.showReconnectOverlay = false; // Ocultar overlay de reconexión al cambiar de fase
       if (
         !this.showDeathOverlay &&
         !this.showCazadorOverlay &&
