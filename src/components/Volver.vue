@@ -7,28 +7,46 @@
 
 <script setup>
 import { useRouter, useRoute } from "vue-router";
-import { navigationHistory } from "../router"; // Ajusta la ruta si es necesario
+import { navigationHistory } from "../router";
 
 const router = useRouter();
 const route = useRoute();
 
 const goBack = () => {
-  // Si estamos en perfil o amigos, buscar última ruta válida que no sea de sala
-  if (route.name === "perfil" || route.name === "amigos") {
-    const validRoute = navigationHistory
-      .slice()
-      .reverse()
-      .find((path) => !path.includes("/sala")); // Buscar primera ruta que NO sea de sala
+  if (["perfil", "amigos"].includes(route.name)) {
+    const currentIndex = navigationHistory.indexOf(route.fullPath);
 
-    if (validRoute) {
-      router.push(validRoute);
+    if (currentIndex === -1 || currentIndex === 0) {
+      return router.push("/");
+    }
+
+    const previousRoutes = navigationHistory.slice(0, currentIndex);
+    const reversedHistory = [...previousRoutes].reverse();
+
+    // Buscar si existe alguna partida en el historial
+    const hasPartida = reversedHistory.some((path) =>
+      path.startsWith("/partida/")
+    );
+
+    // Redirigir a /juego si se encontró partida
+    if (hasPartida) {
+      return router.push("/juego");
+    }
+
+    // Buscar última ruta válida no-perfil/amigos
+    const lastValidPath = reversedHistory.find(
+      (path) => !["/perfil", "/amigos"].some((p) => path.startsWith(p))
+    );
+
+    if (lastValidPath) {
+      router.push(lastValidPath);
     } else {
-      router.push("/"); // Redirigir a home si no hay rutas válidas
+      router.push("/");
     }
     return;
   }
 
-  // Para el resto de casos usar navegación normal
+  // Comportamiento normal para otras páginas
   router.back();
 };
 </script>
