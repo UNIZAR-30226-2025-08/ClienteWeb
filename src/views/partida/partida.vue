@@ -696,6 +696,9 @@ export default {
         esAlguacil: victima.esAlguacil,
       }));
 
+      // Extraer los IDs de las víctimas
+      const victimasIds = this.victimas.map((victima) => victima.id);
+
       // Actualizar el estado de los jugadores
       this.victimas.forEach((victima) => {
         const p = this.players.find((pl) => pl.id == victima.id);
@@ -707,7 +710,7 @@ export default {
       });
 
       // Si tú has muerto, pasas a espectador y sales al overlay de muerte
-      if (victimaIds.includes(this.MiId)) {
+      if (victimasIds.includes(this.MiId)) {
         return this.markDead();
       }
 
