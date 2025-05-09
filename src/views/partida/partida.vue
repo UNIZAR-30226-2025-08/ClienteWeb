@@ -964,7 +964,7 @@ export default {
     },
 
     IsPlayerDead(id) {
-      const player = this.players.find((p) => p.id === id);
+      const player = this.players.find((p) => p.id == id);
       return player ? !player.estaVivo : false;
     },
 
@@ -1043,18 +1043,18 @@ export default {
           this.victimas = [eliminadoId];
           this.victimasNombres = this.victimas.map(
             (id) =>
-              (this.players.find((pl) => pl.id === id) || {}).nombre ||
+              (this.players.find((pl) => pl.id == id) || {}).nombre ||
               "Desconocido"
           );
           // 2) Mostrar overlay de muertes (reutilizamos el de noche)
           this.changePhase("recuento_linchazo");
           // 3) Marcar al jugador como muerto en tu estado
           this.players = this.players.map((pl) =>
-            pl.id === eliminadoId ? { ...pl, estaVivo: false } : pl
+            pl.id == eliminadoId ? { ...pl, estaVivo: false } : pl
           );
           this.aliveVillagers--;
 
-          if (eliminadoId === this.MiId) {
+          if (eliminadoId == this.MiId) {
             this.markDead(); // Aquí es donde llamas al método markDead
           }
 
