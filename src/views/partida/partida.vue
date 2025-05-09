@@ -594,6 +594,8 @@ export default {
     socket.on("iniciarVotacionAlguacil", (data) => {
       console.log("Votación del alguacil iniciada", data);
       this.flujoVotacionAlguacil();
+      this.changePhase("intro");
+      this.changePhase("fin_turno_lobos");
       this.timeLeft = 24; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
       this.isVotingPhase = true;
     });
@@ -685,8 +687,6 @@ export default {
       this.nextWolfVictimId = null;
       this.showCazadorOverlay = false;
       this.showSucesionOverlay = false;
-      this.changePhase("intro");
-      this.changePhase("fin_turno_lobos");
       console.log("El día ha comenzado", data);
 
       // — Tu lógica existente para marcar víctimas —
