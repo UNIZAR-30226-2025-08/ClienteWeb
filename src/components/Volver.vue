@@ -13,42 +13,38 @@ const router = useRouter();
 const route = useRoute();
 
 const goBack = () => {
-  const currentIndex = navigationHistory.indexOf(route.fullPath);
-
-  // Si no hay historial previo, ir al home
-  if (currentIndex === -1 || currentIndex === 0) {
-    return router.push("/");
-  }
-
-  const previousRoutes = navigationHistory.slice(0, currentIndex);
-  const reversedHistory = [...previousRoutes].reverse();
-
-  // Buscar la última ruta válida que NO sea partida
-  const lastValidPath = reversedHistory.find(
-    (path) => !path.startsWith("/partida/")
-  );
-
-  // Caso especial para perfil/amigos: priorizar salas
-  if (["perfil", "amigos"].includes(route.name)) {
-    const lastSalaPath = reversedHistory.find((path) =>
-      path.startsWith("/sala/")
-    );
-
-    if (lastSalaPath) {
-      window.location.href = lastSalaPath;
+  // Si estamos en el perfil, buscamos en el historial una ruta que contenga "/sala"
+  if (route.name === "perfil") {
+    // Buscamos a partir del final del historial (la ruta más antigua en la pila) que contenga "/sala"
+    const salaRoute = navigationHistory
+      .slice()
+      .reverse()
+      .find((path) => path.includes("/sala"));
+    console.log("Perfil");
+    if (salaRoute) {
+      // Si se encontró una ruta de sala, usamos window.location.href para forzar la recarga
+      window.location.href = salaRoute;
       return;
     }
   }
-
-  // Navegación normal evitando partidas
-  if (lastValidPath) {
-    router.push(lastValidPath);
-  } else {
-    router.push("/");
+  if (route.name === "amigos") {
+    // Si estamos en la página de amigos, buscamos en el historial una ruta que contenga "/sala"
+    console.log("Amigos");
+    const salaRoute = navigationHistory
+      .slice()
+      .reverse()
+      .find((path) => path.includes("/sala"));
+    if (salaRoute) {
+      // Si se encontró una ruta de sala, usamos window.location.href para forzar la recarga
+      window.location.href = salaRoute;
+      return;
+    }
   }
+  console.log("Volviendo");
+  // En cualquier otro caso, usamos la navegación interna del router
+  router.back();
 };
 </script>
-
 <style scoped>
 .volver-fixed {
   position: fixed;
