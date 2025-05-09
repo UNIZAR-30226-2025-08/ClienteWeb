@@ -6,19 +6,32 @@
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
+import { navigationHistory } from "../router"; // Ajusta la ruta si es necesario
 
 const router = useRouter();
+const route = useRoute();
 
 const goBack = () => {
-  // Misma lógica que el botón de retroceso del navegador
-  if (window.history.length > 1) {
-    router.back();
-  } else {
-    router.push("/"); // Si no hay historial, ir al inicio
+  // Si estamos en el perfil, buscamos en el historial una ruta que contenga "/sala"
+  if (route.name === "perfil" || route.name === "amigos") {
+    const salaRoute = navigationHistory
+      .slice()
+      .reverse()
+      .find((path) => path.includes("/sala"));
+
+    if (salaRoute) {
+      // Si se encontró una ruta válida de sala, redirigimos a ella
+      window.location.href = salaRoute;
+      return;
+    }
   }
+
+  // En cualquier otro caso, usamos la navegación interna del router
+  router.back();
 };
 </script>
+
 <style scoped>
 .volver-fixed {
   position: fixed;
