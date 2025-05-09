@@ -62,19 +62,17 @@ const router = createRouter({
   routes,
 });
 
+// Modificación en el router (src/router/index.js)
 const navigationHistory = [];
 
-// En cada navegación agregamos la ruta "from" al historial
-router.beforeEach((to, from, next) => {
-  // Mantener historial
-  if (from.fullPath) navigationHistory.push(from.fullPath);
-  // Verificar rutas protegidas
-  if (to.meta.requiresAuth && !localStorage.getItem("usuario")) {
-    // Si no está logueado, redirigir a Home
-    return next({ path: "/" });
+router.beforeEach((to, from) => {
+  // Registrar rutas de origen evitando duplicados consecutivos
+  if (
+    from.fullPath &&
+    navigationHistory[navigationHistory.length - 1] !== from.fullPath
+  ) {
+    navigationHistory.push(from.fullPath);
   }
-
-  next();
 });
 
 export { router, navigationHistory };
