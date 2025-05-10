@@ -930,17 +930,10 @@ export default {
       //console.log(`showCazadorOverlay es: ${this.showCazadorOverlay}`);
       //console.log(`showSucesionOverlay es: ${this.showCazadorOverlay}`);
       //this.showReconnectOverlay = false; // Ocultar overlay de reconexión al cambiar de fase
-      if (
-        !this.showDeathOverlay &&
-        !this.showCazadorOverlay &&
-        !this.showSucesionOverlay
-      ) {
+
         this.currentPhase = newPhase;
         //console.log(`Cambiando a la fase: ${newPhase}`); LO DEJO COMENTADO QUE SINO HAY MUCHA MIERDA EN LA CONSOLA// Esto registrará la fase a la que se está cambiando
-      } else {
-        console.log(
-          `No se puede cambiar a la fase: ${newPhase} porque hay un overlay activo`
-        );
+
       }
     },
     isCazador() {
