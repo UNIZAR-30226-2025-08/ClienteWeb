@@ -225,7 +225,6 @@
           "
           class="vidente-buttons"
         >
-          <TurnButton :has-passed="hasVidenteActed" @pass="handlePassTurn" />
           <DiscoverRoleButton
             :has-discovered="hasVidenteActed"
             @discover="handleDiscoverRole"
