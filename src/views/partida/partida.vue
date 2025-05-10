@@ -677,6 +677,10 @@ export default {
       console.log("Habilidad de cazador activada:", data.mensaje);
       this.addEventToQueue({ type: "habilidadCazador", data });
       this.cazadorActual = data.cazadorActual; // Actualiza la lista de cazadores muertos
+      console.log(
+        "Jugadores disponibles para el cazador:",
+        data.jugadoresDisponibles
+      );
     });
 
     //11. Escuchar evento para pasar al día
@@ -1335,7 +1339,7 @@ export default {
         } else {
           this.changePhase("estado_durmiendo");
         }
-        this.timeLeft = 19;
+        this.timeLeft = 50;
         this.countdownInterval = setInterval(() => {
           if (this.timeLeft > 0) {
             this.timeLeft--;
