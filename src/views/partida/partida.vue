@@ -696,6 +696,8 @@ export default {
       this.showSucesionOverlay = false;
       console.log("El día ha comenzado", data);
 
+      this.changePhase("intro");
+
       // Actualizar la lista de víctimas con la información completa
       this.victimas = data.victimas || [];
       this.victimasNombres = this.victimas.map((victima) => ({
@@ -722,8 +724,9 @@ export default {
       if (victimasIds.includes(this.MiId)) {
         return this.markDead();
       }
-
+      this.showDeathOverlay = false;
       this.changePhase("intro");
+
       setTimeout(() => {
         // 1) Overlay de recuento de muertes
         this.changePhase("recuento_muertes");
