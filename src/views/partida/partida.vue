@@ -985,12 +985,6 @@ export default {
       }
     },
 
-    hayRolVivo(rol) {
-      return this.jugadores.some(
-        (jugador) => jugador.rol === rol && jugador.estaVivo
-      );
-    },
-
     // Procesa cada evento en cola con una espera de 5 segundos entre cada uno
     async processQueue() {
       this.isProcessing = true;
@@ -1036,7 +1030,10 @@ export default {
         case "turnoHombresLobos":
           this.pendingWolfData = event.data;
           // Comprobamos si hay algún vidente vivo
-          const hayVidentesVivos = this.hayRolVivo("Vidente");
+          const hayVidentesVivos = this.players.some(
+            (jugador) => jugador.rol === "Vidente" && jugador.estaVivo,
+            console.log("rol:",jugador.rol)
+          );
 
           // Si hay videntes vivos, cambiamos la fase a "vidente_dormir"
           if (hayVidentesVivos) {
