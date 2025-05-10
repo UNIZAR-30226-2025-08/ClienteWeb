@@ -1040,7 +1040,16 @@ export default {
           } else {
             // Si no quedan videntes vivos, puedes cambiar a otra fase o hacer alguna otra acción
             console.log("No quedan videntes vivos. No se cambia a la fase 'vidente_dormir'.");
-            this.onVidenteDormirFinished();
+            // 2) pasamos ya al despertar de lobos
+            this.changePhase("despertar_hombres_lobo");
+            this.currentPeriod = "NOCHE";
+
+            // 3) lanzamos la lógica de turno de lobos con los datos guardados
+            if (this.pendingWolfData) {
+              this.handleTurnoHombresLobo(this.pendingWolfData);
+              this.resetVotingState();
+              this.pendingWolfData = null;
+            }
           }
           break;
         case "habilidadBruja":
