@@ -225,7 +225,6 @@
           "
           class="vidente-buttons"
         >
-          <TurnButton :has-passed="hasVidenteActed" @pass="handlePassTurn" />
           <DiscoverRoleButton
             :has-discovered="hasVidenteActed"
             @discover="handleDiscoverRole"
@@ -696,6 +695,8 @@ export default {
       this.showSucesionOverlay = false;
       console.log("El día ha comenzado", data);
 
+      //this.changePhase("intro");
+
       // Actualizar la lista de víctimas con la información completa
       this.victimas = data.victimas || [];
       this.victimasNombres = this.victimas.map((victima) => ({
@@ -722,40 +723,45 @@ export default {
       if (victimasIds.includes(this.MiId)) {
         return this.markDead();
       }
-
-      // 1) Overlay de recuento de muertes
+      
       this.changePhase("recuento_muertes");
 
-      // 2) Tras 8 s arrancas el día (charla libre)
       setTimeout(() => {
-        this.changePhase("game");
-        this.currentPeriod = "DÍA";
-        this.timeLeft = data.tiempo || 60;
+        // 1) Overlay de recuento de muertes
+        this.showDeathOverlay = false;
+        this.changePhase("intro");
 
-        // 3) Espera 30 s de charla libre…
+        // 2) Tras 8 s arrancas el día (charla libre)
         setTimeout(() => {
-          // 4) Muestras overlay de votaciones de día
-          this.changePhase("votaciones_dia");
-          if (this.countdownInterval) {
-            clearInterval(this.countdownInterval);
-          }
-          // 5) Tras unos segundos (o instantáneo), habilita la votación
+          this.changePhase("game");
+          this.currentPeriod = "DÍA";
+          this.timeLeft = data.tiempo || 60;
+
+          // 3) Espera 30 s de charla libre…
           setTimeout(() => {
-            this.isVotingPhase = true;
-            this.isLynchPhase = true; // activamos linchamiento
-            this.hasVotedAlguacil = false; // reseteamos para usarlo como "hasVotedLynch"
-            this.timeLeft = 46;
-            this.changePhase("game");
-            this.countdownInterval = setInterval(() => {
-              if (this.timeLeft > 0) {
-                this.timeLeft--;
-              } else {
-                clearInterval(this.countdownInterval);
-              }
-            }, 1000);
-          }, 5000);
-        }, 3000); // 3 s y vamos a las votaciones
-      }, 8000); // 8 s de recuento de muertes
+            // 4) Muestras overlay de votaciones de día
+            this.changePhase("votaciones_dia");
+            if (this.countdownInterval) {
+              clearInterval(this.countdownInterval);
+            }
+            // 5) Tras unos segundos (o instantáneo), habilita la votación
+            setTimeout(() => {
+              this.isVotingPhase = true;
+              this.isLynchPhase = true; // activamos linchamiento
+              this.hasVotedAlguacil = false; // reseteamos para usarlo como "hasVotedLynch"
+              this.timeLeft = 46;
+              this.changePhase("game");
+              this.countdownInterval = setInterval(() => {
+                if (this.timeLeft > 0) {
+                  this.timeLeft--;
+                } else {
+                  clearInterval(this.countdownInterval);
+                }
+              }, 1000);
+            }, 5000);
+          }, 3000); // 3 s y vamos a las votaciones
+        }, 8000); // 8 s de recuento de muertes
+      }, 8000);
     });
 
     //12. Evento que notifica un empate en la votación del día y reinicia la votación
@@ -1023,7 +1029,28 @@ export default {
           break;
         case "turnoHombresLobos":
           this.pendingWolfData = event.data;
-          this.changePhase("vidente_dormir");
+          // Comprobamos si hay algún vidente vivo
+          const hayVidentesVivos = this.players.some(function (jugador) {
+            return jugador.rol === "Vidente" && jugador.estaVivo;
+          });
+
+          // Si hay videntes vivos, cambiamos la fase a "vidente_dormir"
+          if (hayVidentesVivos) {
+            this.changePhase("vidente_dormir");
+          } else {
+            // Si no quedan videntes vivos, puedes cambiar a otra fase o hacer alguna otra acción
+            console.log("No quedan videntes vivos. No se cambia a la fase 'vidente_dormir'.");
+            // 2) pasamos ya al despertar de lobos
+            this.changePhase("despertar_hombres_lobo");
+            this.currentPeriod = "NOCHE";
+
+            // 3) lanzamos la lógica de turno de lobos con los datos guardados
+            if (this.pendingWolfData) {
+              this.handleTurnoHombresLobo(this.pendingWolfData);
+              this.resetVotingState();
+              this.pendingWolfData = null;
+            }
+          }
           break;
         case "habilidadBruja":
           this.changePhase("despertar_bruja");
