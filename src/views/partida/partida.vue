@@ -724,11 +724,12 @@ export default {
       if (victimasIds.includes(this.MiId)) {
         return this.markDead();
       }
-      this.showDeathOverlay = false;
+      
       this.changePhase("recuento_muertes");
 
       setTimeout(() => {
         // 1) Overlay de recuento de muertes
+        this.showDeathOverlay = false;
         this.changePhase("intro");
 
         // 2) Tras 8 s arrancas el día (charla libre)
