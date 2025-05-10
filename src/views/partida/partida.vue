@@ -164,7 +164,12 @@
 
         <!-- Nuevo bloque para la acción de la bruja (fase "habilidad_bruja") -->
         <div
-          v-if="!isSpectator && currentPhase === 'habilidad_bruja' && isBruja()"
+          v-if="
+            !isSpectator &&
+            currentPhase === 'habilidad_bruja' &&
+            isBruja() &&
+            gameEnded == false
+          "
           class="bruja-buttons"
         >
           <BotonBrujaVida @usar-pocima-vida="manejarPocimaVida" />
