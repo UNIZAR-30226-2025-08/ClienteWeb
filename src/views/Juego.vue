@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { h } from "vue";
 import { toast } from "vue3-toastify";
@@ -18,6 +18,10 @@ const showExitConfirm = ref(false);
 const partidas = ref([]); // Lista de partidas
 const partidaSeleccionada = ref(null); // Partida seleccionada para mostrar detalles
 const mostrarDetalles = ref(false); // Controla la visibilidad del modal de detalles
+
+// Variables para la paginación
+const paginaActual = ref(1);
+const partidasPorPagina = 6;
 
 // Variables para estadísticas
 const estadisticas = ref({
@@ -103,6 +107,25 @@ const verificarAdministrador = async () => {
     }
   } catch (error) {
     console.error("Error al verificar administrador:", error);
+  }
+};
+
+// Función para obtener las partidas de la página actual
+const partidasPaginadas = computed(() => {
+  const inicio = (paginaActual.value - 1) * partidasPorPagina;
+  const fin = inicio + partidasPorPagina;
+  return partidas.value.slice(inicio, fin);
+});
+
+// Función para cambiar de página
+const cambiarPagina = (direccion) => {
+  if (direccion === "anterior" && paginaActual.value > 1) {
+    paginaActual.value--;
+  } else if (
+    direccion === "siguiente" &&
+    paginaActual.value < Math.ceil(partidas.value.length / partidasPorPagina)
+  ) {
+    paginaActual.value++;
   }
 };
 
@@ -383,7 +406,7 @@ const unirseRapido = () => {
               <table class="history-table">
                 <tbody>
                   <tr
-                    v-for="partida in partidas"
+                    v-for="partida in partidasPaginadas"
                     :key="partida.idPartida"
                     class="light-row"
                     @click="seleccionarPartida(partida)"
@@ -400,6 +423,29 @@ const unirseRapido = () => {
                   </tr>
                 </tbody>
               </table>
+            </div>
+            <!-- Controles de paginación -->
+            <div class="pagination-controls">
+              <button
+                class="pagination-button"
+                @click="cambiarPagina('anterior')"
+                :disabled="paginaActual === 1"
+              >
+                ← Anterior
+              </button>
+              <span class="pagination-info">
+                Página {{ paginaActual }} de
+                {{ Math.ceil(partidas.length / partidasPorPagina) }}
+              </span>
+              <button
+                class="pagination-button"
+                @click="cambiarPagina('siguiente')"
+                :disabled="
+                  paginaActual >= Math.ceil(partidas.length / partidasPorPagina)
+                "
+              >
+                Siguiente →
+              </button>
             </div>
           </div>
         </div>
@@ -722,7 +768,7 @@ const unirseRapido = () => {
   display: flex;
   gap: 10%;
   margin-top: 0px; /* para dejar un espacio encima de los botones */
-  margin-bottom: 50px;
+  margin-bottom: 30px;
 }
 
 .action-button {
@@ -829,6 +875,8 @@ const unirseRapido = () => {
 .history-table-container {
   max-height: 450px; /* Altura máxima del contenido de la tabla */
   overflow-y: auto; /* Habilitar desplazamiento vertical */
+  position: relative; /* Para posicionar los controles de paginación */
+  padding-bottom: 50px; /* Espacio para los controles de paginación */
 }
 /* Estilos para el modal */
 .exit-modal h3 {
@@ -839,7 +887,7 @@ const unirseRapido = () => {
 .stats-section {
   background-color: #1e1c1a;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1rem;
   margin-bottom: 2rem;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
@@ -876,5 +924,48 @@ const unirseRapido = () => {
   color: #fff;
   font-size: 1.5rem;
   font-weight: bold;
+}
+
+/* Estilos para la paginación */
+.pagination-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem;
+  border-top: 1px solid #302e2b;
+  z-index: 10;
+}
+
+.pagination-button {
+  background-color: #262522;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px; /* Ancho mínimo para mantener consistencia */
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #333;
+  border-color: #666;
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  color: #fff;
+  font-size: 0.9rem;
+  min-width: 150px; /* Ancho mínimo para mantener consistencia */
+  text-align: center;
 }
 </style>

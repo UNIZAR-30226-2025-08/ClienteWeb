@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { toast } from "vue3-toastify";
@@ -54,12 +54,36 @@ const partidas = ref([]); // Lista de partidas
 const partidaSeleccionada = ref(null); // Partida seleccionada para mostrar detalles
 const mostrarDetalles = ref(false); // Controla la visibilidad del modal de detalles
 
+// Variables para la paginación
+const paginaActual = ref(1);
+const partidasPorPagina = 10;
+
 // Variables para estadísticas
 const estadisticas = ref({
   partidasGanadas: 0,
   partidasTotales: 0,
   porcentajeVictorias: 0,
 });
+
+// Función para obtener las partidas de la página actual
+const partidasPaginadas = computed(() => {
+  const inicio = (paginaActual.value - 1) * partidasPorPagina;
+  const fin = inicio + partidasPorPagina;
+  return partidas.value.slice(inicio, fin);
+});
+
+// Función para cambiar de página
+const cambiarPagina = (direccion) => {
+  if (direccion === "anterior" && paginaActual.value > 1) {
+    paginaActual.value--;
+  } else if (
+    direccion === "siguiente" &&
+    paginaActual.value < Math.ceil(partidas.value.length / partidasPorPagina)
+  ) {
+    paginaActual.value++;
+  }
+};
+
 const initUser = () => {
   const storedUser = localStorage.getItem("usuario");
   if (storedUser) {
@@ -315,7 +339,7 @@ onUnmounted(() => {
             </thead>
             <tbody>
               <tr
-                v-for="partida in partidas"
+                v-for="partida in partidasPaginadas"
                 :key="partida.idPartida"
                 @click="seleccionarPartida(partida)"
                 style="cursor: pointer"
@@ -330,6 +354,26 @@ onUnmounted(() => {
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class="pagination">
+          <button
+            @click="cambiarPagina('anterior')"
+            :disabled="paginaActual === 1"
+          >
+            ← Anterior
+          </button>
+          <span
+            >Página {{ paginaActual }} de
+            {{ Math.ceil(partidas.length / partidasPorPagina) }}</span
+          >
+          <button
+            @click="cambiarPagina('siguiente')"
+            :disabled="
+              paginaActual === Math.ceil(partidas.length / partidasPorPagina)
+            "
+          >
+            Siguiente →
+          </button>
         </div>
       </div>
 
@@ -528,32 +572,42 @@ onUnmounted(() => {
 .stats-section {
   background-color: #1e1c1a;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1rem;
+  margin-bottom: 2rem;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .stats-section h3 {
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  color: #fff;
+  font-size: 1.5rem;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .stat-item {
+  background-color: #262522;
+  padding: 1rem;
+  border-radius: 8px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: transform 0.3s ease;
 }
 
 .stat-label {
-  display: block;
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
+  color: #aaa;
+  font-size: 0.9rem;
 }
 
 .stat-value {
+  color: #fff;
   font-size: 1.5rem;
   font-weight: bold;
 }
@@ -572,12 +626,16 @@ onUnmounted(() => {
 }
 
 .history-table-wrapper {
-  overflow-x: auto;
+  max-height: none;
+  overflow-y: visible;
+  position: relative;
+  padding-bottom: 0;
 }
 
 .history-table {
   width: 100%;
   border-collapse: collapse;
+  margin-bottom: 1rem;
 }
 
 .history-table th,
@@ -588,7 +646,9 @@ onUnmounted(() => {
 }
 
 .history-table th {
-  background-color: #333;
+  background-color: #262522;
+  color: #fff;
+  font-weight: bold;
 }
 
 .history-table tr:nth-child(even) {
@@ -597,6 +657,7 @@ onUnmounted(() => {
 
 .history-table tr:hover {
   background-color: #3a3a3a;
+  cursor: pointer;
 }
 
 /* Estilos para el modal */
@@ -707,5 +768,47 @@ onUnmounted(() => {
 
 .cancel-btn:hover {
   background-color: darkred;
+}
+
+/* Estilos para la paginación */
+.pagination {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #1e1c1a;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  margin-top: 1rem;
+}
+
+.pagination button {
+  background-color: #262522;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px;
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: #333;
+  border-color: #666;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  color: #fff;
+  font-size: 0.9rem;
+  min-width: 150px;
+  text-align: center;
 }
 </style>
