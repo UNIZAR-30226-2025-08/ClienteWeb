@@ -1030,10 +1030,9 @@ export default {
         case "turnoHombresLobos":
           this.pendingWolfData = event.data;
           // Comprobamos si hay algún vidente vivo
-          const hayVidentesVivos = this.players.some(
-            (jugador) => jugador.rol === "Vidente" && jugador.estaVivo,
-            console.log("rol:",jugador.rol)
-          );
+          const hayVidentesVivos = this.players.some(function (jugador) {
+            return jugador.rol === "Vidente" && jugador.estaVivo;
+          });
 
           // Si hay videntes vivos, cambiamos la fase a "vidente_dormir"
           if (hayVidentesVivos) {
