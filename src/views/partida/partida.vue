@@ -1038,7 +1038,7 @@ export default {
               this.changePhase("habilidad_bruja");
               this.timeLeft = event.data.tiempo || 30; // Tiempo que nos envia el backend sino pongo el tiempo que de momento se ha estimado en backend (revisar partida.js o partidaws)
             } else {
-              //this.currentPhase = "estado_durmiendo"; // Cambia a la fase correspondiente para los demás jugadores
+              this.currentPhase = "estado_durmiendo"; // Cambia a la fase correspondiente para los demás jugadores
             }
           }, 3000);
           this.timeLeft = event.data.tiempo || 30;
