@@ -725,7 +725,7 @@ export default {
         return this.markDead();
       }
       this.showDeathOverlay = false;
-      this.changePhase("intro");
+      this.changePhase("recuento_muertes");
 
       setTimeout(() => {
         // 1) Overlay de recuento de muertes
@@ -761,7 +761,7 @@ export default {
             }, 5000);
           }, 3000); // 3 s y vamos a las votaciones
         }, 8000); // 8 s de recuento de muertes
-      }, 3000);
+      }, 8000);
     });
 
     //12. Evento que notifica un empate en la votación del día y reinicia la votación
