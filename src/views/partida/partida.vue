@@ -723,39 +723,42 @@ export default {
         return this.markDead();
       }
 
-      // 1) Overlay de recuento de muertes
-      this.changePhase("recuento_muertes");
-
-      // 2) Tras 8 s arrancas el día (charla libre)
+      this.changePhase("intro");
       setTimeout(() => {
-        this.changePhase("game");
-        this.currentPeriod = "DÍA";
-        this.timeLeft = data.tiempo || 60;
+        // 1) Overlay de recuento de muertes
+        this.changePhase("recuento_muertes");
 
-        // 3) Espera 30 s de charla libre…
+        // 2) Tras 8 s arrancas el día (charla libre)
         setTimeout(() => {
-          // 4) Muestras overlay de votaciones de día
-          this.changePhase("votaciones_dia");
-          if (this.countdownInterval) {
-            clearInterval(this.countdownInterval);
-          }
-          // 5) Tras unos segundos (o instantáneo), habilita la votación
+          this.changePhase("game");
+          this.currentPeriod = "DÍA";
+          this.timeLeft = data.tiempo || 60;
+
+          // 3) Espera 30 s de charla libre…
           setTimeout(() => {
-            this.isVotingPhase = true;
-            this.isLynchPhase = true; // activamos linchamiento
-            this.hasVotedAlguacil = false; // reseteamos para usarlo como "hasVotedLynch"
-            this.timeLeft = 46;
-            this.changePhase("game");
-            this.countdownInterval = setInterval(() => {
-              if (this.timeLeft > 0) {
-                this.timeLeft--;
-              } else {
-                clearInterval(this.countdownInterval);
-              }
-            }, 1000);
-          }, 5000);
-        }, 3000); // 3 s y vamos a las votaciones
-      }, 8000); // 8 s de recuento de muertes
+            // 4) Muestras overlay de votaciones de día
+            this.changePhase("votaciones_dia");
+            if (this.countdownInterval) {
+              clearInterval(this.countdownInterval);
+            }
+            // 5) Tras unos segundos (o instantáneo), habilita la votación
+            setTimeout(() => {
+              this.isVotingPhase = true;
+              this.isLynchPhase = true; // activamos linchamiento
+              this.hasVotedAlguacil = false; // reseteamos para usarlo como "hasVotedLynch"
+              this.timeLeft = 46;
+              this.changePhase("game");
+              this.countdownInterval = setInterval(() => {
+                if (this.timeLeft > 0) {
+                  this.timeLeft--;
+                } else {
+                  clearInterval(this.countdownInterval);
+                }
+              }, 1000);
+            }, 5000);
+          }, 3000); // 3 s y vamos a las votaciones
+        }, 8000); // 8 s de recuento de muertes
+      }, 3000);
     });
 
     //12. Evento que notifica un empate en la votación del día y reinicia la votación
