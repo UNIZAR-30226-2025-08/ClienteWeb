@@ -696,7 +696,7 @@ export default {
       this.showSucesionOverlay = false;
       console.log("El día ha comenzado", data);
 
-      this.changePhase("intro");
+      //this.changePhase("intro");
 
       // Actualizar la lista de víctimas con la información completa
       this.victimas = data.victimas || [];
@@ -729,7 +729,7 @@ export default {
 
       setTimeout(() => {
         // 1) Overlay de recuento de muertes
-        this.changePhase("recuento_muertes");
+        this.changePhase("intro");
 
         // 2) Tras 8 s arrancas el día (charla libre)
         setTimeout(() => {
