@@ -931,6 +931,7 @@ export default {
       //console.log(`showSucesionOverlay es: ${this.showCazadorOverlay}`);
       //this.showReconnectOverlay = false; // Ocultar overlay de reconexión al cambiar de fase
       this.currentPhase = newPhase;
+      console.log("Cambio de fase:", newPhase);
     },
     isCazador() {
       return this.chosenRole && this.chosenRole.nombre === "Cazador";
