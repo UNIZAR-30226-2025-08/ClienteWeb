@@ -1040,7 +1040,7 @@ export default {
           } else {
             // Si no quedan videntes vivos, puedes cambiar a otra fase o hacer alguna otra acción
             console.log("No quedan videntes vivos. No se cambia a la fase 'vidente_dormir'.");
-            onVidenteDormirFinished();
+            this.onVidenteDormirFinished();
           }
           break;
         case "habilidadBruja":
