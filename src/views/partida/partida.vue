@@ -1029,7 +1029,17 @@ export default {
           break;
         case "turnoHombresLobos":
           this.pendingWolfData = event.data;
-          this.changePhase("vidente_dormir");
+          const noQuedanVidentes = !this.players.some(
+            (player) => player.rol === "Vidente" && player.estaVivo
+          );
+
+          // Solo cambiamos la fase a "vidente_dormir" si quedan videntes vivos
+          if (!noQuedanVidentes) {
+            this.changePhase("vidente_dormir");
+          } else {
+            // Si no quedan videntes, puedes cambiar a una fase alternativa o hacer alguna otra acción
+            console.log("No quedan videntes vivos, no cambiamos a la fase 'vidente_dormir'.");
+          }
           break;
         case "habilidadBruja":
           this.changePhase("despertar_bruja");
