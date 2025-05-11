@@ -1194,7 +1194,7 @@ export default {
       console.log("this.MiId es ", this.MiId);
       console.log("this.idAlguacilMuerto es ", this.idAlguacilMuerto);
       if (this.MiId == this.idAlguacilMuerto || this.MiId == this.isCazador()) {
-        this.showDeathOverlay = false;
+        this.showDeathOverlay = true;
       }
       this.showCazadorOverlay = false;
       this.showSucesionOverlay = false;
