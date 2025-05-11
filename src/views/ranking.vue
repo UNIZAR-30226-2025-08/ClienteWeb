@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import Volver from "../components/Volver.vue";
@@ -15,7 +15,6 @@ import avatar6 from "../assets/avatares/imagenPerfil6.webp";
 import avatar7 from "../assets/avatares/imagenPerfil7.webp";
 import avatar8 from "../assets/avatares/imagenPerfil8.webp";
 
-// Mapeo de avatares
 const avatarMap = {
   avatar1,
   avatar2,
@@ -26,117 +25,166 @@ const avatarMap = {
   avatar7,
   avatar8,
 };
-
 const router = useRouter();
 
-// Variables reactivas para los datos, estado de carga y errores
+// Datos y estado
 const rankedPlayers = ref([]);
 const loading = ref(true);
 const error = ref(null);
+const searchName = ref("");
+const paginaActual = ref(1);
+const jugadoresPorPag = 10;
 
-// Función para obtener el ranking desde el endpoint del backend
+// Reiniciar página al cambiar búsqueda para que los resultados aparezcan en la primera página
+watch(searchName, () => {
+  paginaActual.value = 1;
+});
+
+// Carga del ranking
 const fetchRanking = async () => {
   try {
-    const response = await axios.get("/api/ranking/ranking");
-    // Se asume que la respuesta tiene la forma { mensaje: "Ranking global obtenido", ranking: [...] }
-    // Mapeamos los datos para que tengan las propiedades que usamos en el template
-    rankedPlayers.value = response.data.ranking.map((item) => ({
-      name: item.nombre,
-      victories: item.victorias,
-      avatar: item.avatar,
+    const { data } = await axios.get("/api/ranking/ranking");
+    rankedPlayers.value = data.ranking.map((p) => ({
+      id: p.idUsuario || p.id,
+      name: p.nombre,
+      victories: p.victorias,
+      avatar: p.avatar,
     }));
-  } catch (err) {
-    console.error("Error al obtener el ranking:", err);
+  } catch {
     error.value = "Error al obtener el ranking global";
   } finally {
     loading.value = false;
   }
 };
 
-// Ejecuta la función cuando el componente se monta
-onMounted(() => {
-  fetchRanking();
+onMounted(fetchRanking);
+
+// Orden y filtro de todos los jugadores
+const sortedPlayers = computed(() =>
+  [...rankedPlayers.value].sort((a, b) => b.victories - a.victorias)
+);
+const filteredPlayers = computed(() => {
+  const term = searchName.value.trim().toLowerCase();
+  return term
+    ? sortedPlayers.value.filter((p) => p.name.toLowerCase().includes(term))
+    : sortedPlayers.value;
 });
 
-// Computed para ordenar los jugadores según sus victorias (descendente)
-const sortedPlayers = computed(() => {
-  return [...rankedPlayers.value].sort((a, b) => b.victories - a.victories);
+// Posición global y paginación de los filtrados
+const jugadoresConPosicion = computed(() =>
+  filteredPlayers.value.map((p) => ({
+    ...p,
+    globalRank: sortedPlayers.value.findIndex((sp) => sp.id === p.id) + 1,
+  }))
+);
+const jugadoresPaginados = computed(() => {
+  const start = (paginaActual.value - 1) * jugadoresPorPag;
+  return jugadoresConPosicion.value.slice(start, start + jugadoresPorPag);
 });
+const totalPaginas = computed(() =>
+  Math.ceil(jugadoresConPosicion.value.length / jugadoresPorPag)
+);
 
-// Función para obtener el avatar correcto
-const getAvatar = (avatarName) => {
-  return avatarMap[avatarName] || avatar1; // Si no se encuentra el avatar, usar el predeterminado
-};
+function paginaSiguiente() {
+  if (paginaActual.value < totalPaginas.value) paginaActual.value++;
+}
+function paginaAnterior() {
+  if (paginaActual.value > 1) paginaActual.value--;
+}
+
+function getAvatar(name) {
+  return avatarMap[name] || avatar1;
+}
 </script>
 
 <template>
-  <!-- Cabecera: Se utiliza el componente Cabecera -->
-  <Cabecera :titulo="'Ranking'" :compacto="false" />
+  <Cabecera
+    :titulo="'Ranking de Jugadores'"
+    :compacto="false"
+    class="cabecera-medieval"
+  />
+  <div class="ranking-container medieval-font">
+    <div v-if="loading" class="loading medieval-font">Cargando ranking…</div>
+    <div v-else-if="error" class="error medieval-font">{{ error }}</div>
 
-  <div class="ranking-container">
-    <h1 class="ranking-title">
-      <i class="bi bi-award-fill title-icon"></i> Ranking de Jugadores
-    </h1>
-
-    <!-- Mensajes de carga y error -->
-    <div v-if="loading">Cargando ranking...</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
-
-    <!-- Tabla del ranking -->
-    <table v-else class="ranking-table">
+    <table v-else class="ranking-table medieval-font">
       <thead>
         <tr>
-          <th><i class="bi bi-list-ol"></i> Posición</th>
-          <th><i class="bi bi-person-fill"></i> Jugador</th>
-          <th><i class="bi bi-trophy-fill"></i> Victorias</th>
+          <th><i class="bi bi-list-ol"></i> POSICIÓN</th>
+          <th><i class="bi bi-person-fill"></i> JUGADOR</th>
+          <th><i class="bi bi-trophy-fill"></i> VICTORIAS</th>
+        </tr>
+        <tr class="filter-row">
+          <th colspan="3" class="filter-header-cell">
+            <input
+              v-model="searchName"
+              type="text"
+              placeholder="Buscar jugador..."
+              class="buscador-medieval medieval-font"
+            />
+          </th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(player, index) in sortedPlayers" :key="index">
-          <td class="rank-cell">
-            <!-- Iconos para el top 3 -->
-            <span v-if="index === 0" class="icon trophy" title="Primer lugar"
-              >🏆</span
-            >
-            <span
-              v-else-if="index === 1"
-              class="icon medal"
-              title="Segundo lugar"
-              >🥈</span
-            >
-            <span
-              v-else-if="index === 2"
-              class="icon medal"
-              title="Tercer lugar"
-              >🥉</span
-            >
-            <span v-else>{{ index + 1 }}</span>
+        <tr v-for="player in jugadoresPaginados" :key="player.id">
+          <td class="rank-cell medieval-font">
+            <span v-if="player.globalRank === 1">🏆</span>
+            <span v-else-if="player.globalRank === 2">🥈</span>
+            <span v-else-if="player.globalRank === 3">🥉</span>
+            <span v-else>{{ player.globalRank }}</span>
           </td>
-
-          <td class="player-cell">
+          <td
+            class="player-cell medieval-font"
+            @click="router.push(`/perfil/${player.id}`)"
+          >
             <div class="player-info">
               <img
                 :src="getAvatar(player.avatar)"
                 :alt="player.name"
                 class="player-avatar"
               />
-              <span class="player-name">{{ player.name }}</span>
+              <span class="player-name medieval-font">{{ player.name }}</span>
             </div>
           </td>
-          <td class="victories">{{ player.victories }}</td>
+          <td class="victories medieval-font">{{ player.victories }}</td>
         </tr>
       </tbody>
     </table>
+
+    <div
+      v-if="totalPaginas > 1"
+      class="pagination-controls-ranking medieval-font"
+    >
+      <button
+        @click="paginaAnterior"
+        :disabled="paginaActual === 1"
+        class="btn-medieval"
+      >
+        ← Anterior
+      </button>
+      <span class="medieval-font"
+        >Página {{ paginaActual }} de {{ totalPaginas }}</span
+      >
+      <button
+        @click="paginaSiguiente"
+        :disabled="paginaActual === totalPaginas"
+        class="btn-medieval"
+      >
+        Siguiente →
+      </button>
+    </div>
+
+    <Volver />
   </div>
-  <Volver />
 </template>
 
 <style scoped>
-/*
-*FALTA INCLUIR EL AVATAR CUANDO LOS TENGAMOS YA IMPLEMENTADOS
-*/
+@import url("https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap");
+.medieval-font {
+  font-family: "MedievalSharp", cursive !important;
+}
 
-/* Contenedor con fondo degradado */
+/* Contenedor */
 .ranking-container {
   padding: 2rem;
   background: linear-gradient(135deg, #2b2b2b, #191919);
@@ -147,81 +195,77 @@ const getAvatar = (avatarName) => {
   text-align: center;
 }
 
-/* Título con tipografía Bebas Neue, efecto de sombra e icono */
-.ranking-title {
-  font-family: "Bebas Neue", sans-serif;
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  margin-top: 0;
-  color: #fbdc2e;
-  text-shadow: 8px 3px 3px rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.title-icon {
-  font-size: 4.5rem;
-  margin-right: 1rem;
-  color: #ffd700;
-}
-
-/* Estilo de la tabla */
+/* Tabla y filtros */
 .ranking-table {
   width: 100%;
   border-collapse: collapse;
   background-color: rgba(255, 255, 255, 0.05);
-  table-layout: fixed; /* Asegura que las columnas tengan un ancho consistente */
+  table-layout: fixed;
 }
-
 .ranking-table th,
 .ranking-table td {
   padding: 1.2rem;
   border: 1px solid #302e2b;
-  height: 60px; /* Altura fija para todas las filas */
-  vertical-align: middle; /* Centra el contenido verticalmente */
+  height: 60px;
+  vertical-align: middle !important;
+  line-height: 1;
 }
-
+.ranking-table th i {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.5rem;
+}
 .ranking-table th {
   background-color: rgba(0, 0, 0, 0.4);
-  font-family: "Bebas Neue", sans-serif;
   font-size: 2rem;
-  color: #ffffff;
+  color: #fff;
   text-transform: uppercase;
   border-bottom: 2px solid rgba(255, 255, 255, 0.2);
 }
-
 .ranking-table td {
   padding: 1rem;
-  font-family: "MedievalSharp", cursive;
   font-size: 1.7rem;
   font-weight: bold;
-  color: #ffffff;
+  color: #fff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   text-shadow: 5px 3px 3px rgba(0, 0, 0, 0.7);
 }
-
 .ranking-table tbody tr:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-thead {
-  text-shadow: 5px 1px 2px rgba(0, 0, 0, 0.7);
+/* Fila filtro */
+.filter-row {
+  background: rgba(255, 255, 255, 0.1);
+}
+.filter-header-cell {
+  padding: 0.5rem 1rem;
+  border: none;
+}
+.buscador-medieval {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 1.6rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* Ajustes para la celda del jugador */
+/* Celdas contenido */
 .player-cell {
   text-align: left;
-  height: 60px; /* Misma altura que las demás celdas */
+  cursor: pointer;
 }
-
+.player-cell:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
 .player-info {
   display: flex;
   align-items: center;
   gap: 1rem;
-  height: 100%; /* Ocupa toda la altura de la celda */
+  height: 60px;
 }
-
 .player-avatar {
   width: 50px;
   height: 50px;
@@ -229,60 +273,46 @@ thead {
   border: 2px solid #fbdc2e;
   object-fit: cover;
 }
-
 .player-name {
-  font-family: "MedievalSharp", cursive;
   font-size: 1.7rem;
-  font-weight: bold;
-  color: #ffffff;
+  color: #fff;
   text-shadow: 5px 3px 3px rgba(0, 0, 0, 0.7);
 }
-
-.bi-trophy-fill {
-  color: #ffd700;
-}
-
-.bi-person-fill {
-  color: #af9b9b;
-}
-
-.bi-list-ol {
-  color: #f0ec00;
-}
-
-/* Ajustes para la celda de victorias */
+.rank-cell,
 .victories {
-  text-align: center;
-  height: 60px; /* Misma altura que las demás celdas */
-}
-
-/* Ajustes para la celda de posición */
-.rank-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 60px; /* Misma altura que las demás celdas */
-}
-
-.icon {
-  margin-right: 0.5rem;
-  color: #f4f4f4;
-  height: 100%; /* Ocupa toda la altura de la celda */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.trophy {
-  font-size: 3.2rem;
+/* Paginación */
+.pagination-controls-ranking {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.btn-medieval {
+  font-family: "MedievalSharp", cursive !important;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-medieval:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.medal {
-  font-size: 2.8rem;
+/* Mensajes */
+.loading {
+  font-size: 1.8rem;
+  color: #fff;
 }
-
 .error {
-  color: red;
+  color: #ff4d4f;
   font-weight: bold;
   margin: 1rem 0;
 }
