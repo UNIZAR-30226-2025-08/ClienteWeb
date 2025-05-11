@@ -36,6 +36,21 @@ async function generarHashSHA256(contrasena) {
 async function registerUser() {
   mensajeError.value = "";
 
+  // Validar que el nombre de usuario no contenga espacios
+  if (nombre.value.includes(" ")) {
+    mensajeError.value = "El nombre de usuario no puede contener espacios";
+    toast.error(mensajeError.value, { autoClose: 3000 });
+    return;
+  }
+
+  // Validar el formato del correo electrónico
+  const correoRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!correoRegex.test(correo.value)) {
+    mensajeError.value = "Por favor, ingresa un correo válido";
+    toast.error(mensajeError.value, { autoClose: 3000 });
+    return;
+  }
+
   if (contrasena.value !== confirmacionContrasena.value) {
     mensajeError.value = "Las contraseñas no coinciden";
     toast.error(mensajeError.value, { autoClose: 3000 });
