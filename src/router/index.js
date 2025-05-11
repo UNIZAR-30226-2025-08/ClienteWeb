@@ -41,6 +41,7 @@ const routes = [
     path: "/perfil/:idUsuario?",
     name: "perfil",
     component: Perfil,
+    props: true,
     meta: { requiresAuth: true },
   },
   {

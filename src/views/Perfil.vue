@@ -271,7 +271,7 @@ onUnmounted(() => {
       <Cabecera :titulo="'Perfil'" :esAdmin="esAdmin" />
     </div>
 
-    <div class="perfil-page">
+    <div class="perfil-page medieval-font">
       <!-- Tarjeta de información del usuario -->
       <div class="user-info-card">
         <div class="avatar-section">
@@ -488,6 +488,9 @@ onUnmounted(() => {
 
 <style scoped>
 /* Contenedor general de la página de perfil */
+.medieval-font {
+  font-family: "MedievalSharp", cursive !important;
+}
 .perfil-page {
   background-color: #181715;
   color: #fff;

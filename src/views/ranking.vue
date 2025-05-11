@@ -299,6 +299,7 @@ function getAvatar(name) {
   padding: 0.6rem 1rem;
   border-radius: 4px;
   cursor: pointer;
+  color: #fff;
 }
 .btn-medieval:disabled {
   opacity: 0.5;

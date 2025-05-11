@@ -89,11 +89,7 @@ const rejectInvitation = () => {
 const irAlPerfil = () => {
   router.push({
     name: "perfil",
-    query: {
-      nombre: user.value.nombre,
-      avatar: user.value.avatar || "",
-      rolFavorito: user.value.rolFavorito || "Sin rol favorito",
-    },
+    params: { idUsuario: user.value.id },
   });
 };
 
