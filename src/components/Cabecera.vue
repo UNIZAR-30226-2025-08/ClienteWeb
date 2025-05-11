@@ -224,7 +224,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <header class="cabecera">
+  <header class="cabecera medieval-font">
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
@@ -332,7 +332,9 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap");
+.medieval-font {
+  font-family: "MedievalSharp", cursive !important;
+}
 /* Estilo para el título editable con MedievalSharp */
 .titulo-medieval {
   margin: 0;

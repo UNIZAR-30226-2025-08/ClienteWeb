@@ -1,6 +1,6 @@
 <template>
-  <Cabecera :titulo="'Sugerencias'" :compacto="false" />
-  <div class="sugerencias-container">
+  <Cabecera class="medieval-font" :titulo="'Sugerencias'" :compacto="false" />
+  <div class="sugerencias-page sugerencias-container">
     <!-- Contenedor que centra el formulario en el medio de la pantalla -->
     <div class="enviar-sugerencia-wrapper">
       <div class="card">
@@ -190,6 +190,10 @@ export default {
 </script>
 
 <style scoped>
+.sugerencias-page {
+  font-family: "MedievalSharp", cursive !important;
+}
+
 .sugerencias-container {
   max-width: 1400px;
   margin: 0 auto;

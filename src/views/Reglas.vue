@@ -89,7 +89,6 @@ import Cabecera from "../components/Cabecera.vue";
 </template>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap");
 .medieval-font {
   font-family: "MedievalSharp", cursive !important;
 }
