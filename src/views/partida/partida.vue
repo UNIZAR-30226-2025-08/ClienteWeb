@@ -951,6 +951,8 @@ export default {
       return this.chosenRole && this.chosenRole.nombre === "Cazador";
     },
     isAlguacil() {
+      console.log("ID Alguacil muerto:", this.idAlguacilMuerto);
+      console.log("Mi ID:", this.MiId);
       return this.MiId == this.idAlguacilMuerto;
     },
     markDead() {
@@ -959,8 +961,10 @@ export default {
       // Verificar si el jugador que murió es el cazador o el alguacil
       if (this.isCazador()) {
         //this.showCazadorOverlay = true;
+        return;
       } else if (this.isAlguacil()) {
         this.showSucesionOverlay = true;
+        return;
       } else {
         this.changePhase("death");
         this.showDeathOverlay = true;
