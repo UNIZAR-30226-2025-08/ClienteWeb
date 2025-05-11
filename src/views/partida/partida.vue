@@ -953,7 +953,7 @@ export default {
     isAlguacil() {
       console.log("ID Alguacil muerto:", this.idAlguacilMuerto);
       console.log("Mi ID:", this.MiId);
-      return this.MiId == this.idAlguacilMuerto;
+      return this.MiId == this.alguacilId;
     },
     markDead() {
       this.isSpectator = true; // El jugador se convierte en espectador
