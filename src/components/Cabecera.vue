@@ -231,7 +231,7 @@ onUnmounted(() => {
     />
     <div class="contenido">
       <!-- Título a la izquierda -->
-      <h1>{{ titulo }}</h1>
+      <h1 class="titulo-medieval" contenteditable>{{ titulo }}</h1>
 
       <!-- Perfil + notificaciones a la derecha -->
       <div class="perfil-notificaciones">
@@ -332,6 +332,16 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+@import url("https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap");
+/* Estilo para el título editable con MedievalSharp */
+.titulo-medieval {
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+  flex-grow: 1;
+  font-family: "MedievalSharp", cursive;
+  font-size: 1.8rem;
+}
 /* CABECERA */
 .cabecera {
   width: 100%;
