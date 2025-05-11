@@ -660,7 +660,7 @@ export default {
           this.changePhase("despertar_bruja");
         } else {
           // si no, volvemos al juego
-          this.changePhase("estado_durmiendo");
+          //this.changePhase("estado_durmiendo");
           console.log("664");
         }
       }, 6000);
@@ -944,8 +944,10 @@ export default {
       //console.log(`showCazadorOverlay es: ${this.showCazadorOverlay}`);
       //console.log(`showSucesionOverlay es: ${this.showCazadorOverlay}`);
       this.showReconnectOverlay = false; // Ocultar overlay de reconexión al cambiar de fase
-      this.currentPhase = newPhase;
-      console.log("Cambio de fase:", newPhase);
+      if (!this.showDeathOverlay) {
+        this.currentPhase = newPhase;
+        console.log("Cambio de fase:", newPhase);
+      }
     },
     isCazador() {
       return this.chosenRole && this.chosenRole.nombre === "Cazador";
@@ -1189,7 +1191,11 @@ export default {
 
     handleContinueViewing() {
       // quita overlay, pero mantiene isSpectator = true
-      this.showDeathOverlay = false;
+      console.log("this.MiId es ", this.MiId);
+      console.log("this.idAlguacilMuerto es ", this.idAlguacilMuerto);
+      if (this.MiId == this.idAlguacilMuerto || this.MiId == this.isCazador()) {
+        this.showDeathOverlay = false;
+      }
       this.showCazadorOverlay = false;
       this.showSucesionOverlay = false;
       this.changePhase("game");
