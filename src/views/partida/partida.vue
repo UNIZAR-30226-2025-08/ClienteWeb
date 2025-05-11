@@ -115,7 +115,7 @@
 
         <CazadorAtacadoOverlay
           v-else-if="
-            currentPhase === 'habilidad_cazador' && cazadorActual == MiId
+            currentPhase === 'habilidad_cazador' && cazadorActual != MiId
           "
         />
         <SucesionAlguacilOverlay
