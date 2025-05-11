@@ -12,7 +12,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="roles-page">
+  <div class="roles-page medieval-font">
     <!-- Cabecera -->
     <Cabecera titulo="Roles" :compacto="true" />
 
@@ -31,11 +31,17 @@ onMounted(() => {
     </div>
 
     <!-- Botón de volver -->
+    <Volver />
   </div>
-  <Volver />
 </template>
 
 <style scoped>
+@import url("https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap");
+
+.medieval-font {
+  font-family: "MedievalSharp", cursive !important;
+}
+
 /* Estilos generales */
 .roles-page {
   display: flex;
@@ -54,7 +60,7 @@ onMounted(() => {
   background-color: #2a2724;
   padding: 15px;
   border-radius: 8px;
-  overflow-y: auto; /* Scroll vertical si es necesario */
+  overflow-y: auto;
 }
 
 /* Lista de roles */
@@ -82,22 +88,16 @@ onMounted(() => {
 }
 
 /* Información del rol */
-.rol-info {
-  flex: 1;
-}
-
 .rol-info h3 {
   margin: 0;
   font-size: 1.2rem;
-  color: #f2b632; /* Cambié el color al actual color del nombre del equipo */
+  color: #f2b632;
 }
-
 .equipo {
   font-size: 0.9rem;
   font-weight: bold;
-  color: white; /* Cambié el color a blanco */
+  color: white;
 }
-
 .descripcion {
   margin-top: 5px;
   font-size: 0.9rem;
@@ -108,12 +108,10 @@ onMounted(() => {
 .roles-container::-webkit-scrollbar {
   width: 8px;
 }
-
 .roles-container::-webkit-scrollbar-thumb {
   background-color: #444;
   border-radius: 4px;
 }
-
 .roles-container::-webkit-scrollbar-track {
   background-color: #2a2724;
 }

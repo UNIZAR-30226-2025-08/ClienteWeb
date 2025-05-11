@@ -1,174 +1,146 @@
-<template>
-  <Cabecera :titulo="'Reglas del Juego'" :compacto="true" />
-  <div class="reglas-page">
-    <div class="reglas-content">
-      <section class="introduccion">
-        <h2>Introducción</h2>
-        <p>
-          Los Hombres Lobos de Castronegro es un juego de cartas y roles en el
-          que los jugadores asumen roles secretos, entre ellos hombres lobos,
-          aldeanos, y otros personajes con habilidades especiales. El objetivo
-          del juego es que los aldeanos descubran quiénes son los hombres lobos
-          antes de que estos eliminen a todos los aldeanos.
-        </p>
-      </section>
-
-      <section class="distribucion-roles">
-        <h2>Distribución de Roles</h2>
-        <p>
-          Se reparten los roles a los jugadores. Cada jugador mira su carta para
-          saber cuál es su personaje, información que mantendrá en secreto a
-          menos que sea eliminado. El Narrador decide si los aldeanos votarán
-          ahora por un Alguacil (función adicional, independiente del personaje)
-          por mayoría simple, o si el Alguacil será elegido más tarde en el
-          transcurso de la partida. El voto del Alguacil cuenta como dos votos.
-        </p>
-        <p>
-          Para más detalles sobre los roles específicos, puedes consultar la
-          página de <router-link to="/roles">Roles</router-link>.
-        </p>
-      </section>
-
-      <section class="fase-noche">
-        <h2>Fase de Noche</h2>
-        <p>
-          Durante la fase de noche, todos los jugadores tienen los ojos
-          cerrados, salvo aquellos que van siendo llamados por el narrador y
-          actúan en silencio.
-        </p>
-        <h3>Orden de actuación durante la noche:</h3>
-        <ul>
-          <li>
-            <strong>Vidente:</strong> Elige un jugador y el narrador le mostrará
-            la carta de dicho jugador.
-          </li>
-          <li>
-            <strong>Hombres Lobo:</strong> Los hombres lobos abren los ojos para
-            elegir a su próxima víctima. Si no hay unanimidad en la designación
-            de la víctima, no hay muerte. El narrador dispone de un tiempo
-            limitado para que elijan.
-          </li>
-          <li>
-            <strong>Bruja:</strong> El narrador le señala al jugador a punto de
-            morir y la bruja decidirá si lo salva con su Poción de la Vida o lo
-            deja morir. La bruja también puede usar su Poción de la Muerte para
-            eliminar a otro jugador. Ambas pociones son de un solo uso.
-          </li>
-        </ul>
-        <p>
-          En caso de que el Cazador muera, el narrador le informará y el cazador
-          podrá eliminar a un jugador de su elección.
-        </p>
-      </section>
-
-      <section class="fase-dia">
-        <h2>Fase de Día</h2>
-        <p>
-          Durante la fase de día, todos los jugadores tienen los ojos abiertos y
-          comienzan a hablar, tratando de encontrar a los hombres lobos. Los
-          hombres lobos se hacen pasar por aldeanos.
-        </p>
-        <p>
-          El narrador indicará quién ha muerto durante la noche anterior.
-          Durante la fase del día, los jugadores discutirán y votarán a un
-          jugador para ser linchado (el jugador con más votos será eliminado de
-          la partida y mostrará su carta públicamente).
-        </p>
-      </section>
-
-      <section class="fin-juego">
-        <h2>Final del Juego</h2>
-        <p>
-          Las fases de noche y día se alternan sucesivamente hasta que
-          únicamente queden hombres lobos o aldeanos vivos. El juego terminará
-          con la victoria de uno de los dos bandos:
-        </p>
-        <ul>
-          <li>Los aldeanos ganan si eliminan a todos los hombres lobos.</li>
-          <li>
-            Los hombres lobos ganan si eliminan a todos los aldeanos o si el
-            número de lobos es igual al de los aldeanos.
-          </li>
-        </ul>
-      </section>
-
-      <section class="video-explicativo">
-        <h2>Vídeo Explicativo</h2>
-        <p>
-          Puedes ver un vídeo explicativo del juego aquí:
-          <a
-            href="https://www.youtube.com/watch?v=OkK9zW1BnyY"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            https://www.youtube.com/watch?v=OkK9zW1BnyY
-          </a>
-        </p>
-      </section>
-    </div>
-  </div>
-  <Volver />
-</template>
-
 <script setup>
-// No es necesario agregar código adicional para este componente.
 import { useRouter } from "vue-router";
-const router = useRouter();
 import Volver from "../components/Volver.vue";
 import Cabecera from "../components/Cabecera.vue";
 </script>
 
+<template>
+  <div class="reglas-page medieval-font">
+    <Cabecera titulo="Reglas del Juego" :compacto="true" />
+
+    <main class="reglas-content">
+      <section id="introduccion" class="card">
+        <h2>Introducción</h2>
+        <p>
+          Los <strong>Hombres Lobos de Castronegro</strong> es un juego de
+          cartas y roles en el que los jugadores asumen identidades secretas. El
+          objetivo varía según el rol: los aldeanos deben descubrir a los
+          hombres lobos antes de ser eliminados, mientras que los lobos buscan
+          permanecer ocultos y sobrevivir.
+        </p>
+      </section>
+
+      <section id="distribucion-roles" class="card">
+        <h2>Distribución de Roles</h2>
+        <p>
+          Cada jugador recibe una carta de rol al azar. El narrador explica si
+          se elige un Alguacil por votación inmediata. El Alguacil tiene doble
+          voto y puede influir en la dinámica del pueblo.
+        </p>
+        <p>
+          Consulta la lista completa en
+          <router-link to="/roles">Roles</router-link>.
+        </p>
+      </section>
+
+      <section id="fase-noche" class="card">
+        <h2>Fase de Noche</h2>
+        <p>
+          Todos cierran los ojos. El narrador llama en orden a los roles con
+          acción nocturna:
+        </p>
+        <ul>
+          <li><strong>Vidente:</strong> Revela el rol de un jugador.</li>
+          <li>
+            <strong>Hombres Lobo:</strong> Eligen silenciosamente a su víctima.
+          </li>
+          <li>
+            <strong>Bruja:</strong> Usa pociones de vida o muerte para salvar o
+            eliminar.
+          </li>
+        </ul>
+        <p>
+          Si muere el Cazador, puede disparar de despedida antes de revelar su
+          carta.
+        </p>
+      </section>
+
+      <section id="fase-dia" class="card">
+        <h2>Fase de Día</h2>
+        <p>
+          Tras la noche, se anuncian las bajas. Los jugadores discuten y votan a
+          un sospechoso para linchar; el más votado muestra su rol al morir.
+        </p>
+      </section>
+
+      <section id="fin-juego" class="card">
+        <h2>Final del Juego</h2>
+        <p>Alternan noche y día hasta que:</p>
+        <ul>
+          <li>Los aldeanos ganan eliminando a todos los lobos.</li>
+          <li>
+            Los lobos ganan alcanzando o superando en número a los aldeanos.
+          </li>
+        </ul>
+      </section>
+
+      <section id="video-explicativo" class="card video-card">
+        <h2>Vídeo Explicativo</h2>
+        <iframe
+          src="https://www.youtube.com/embed/OkK9zW1BnyY"
+          title="Vídeo Explicativo"
+          allowfullscreen
+        ></iframe>
+      </section>
+    </main>
+
+    <Volver />
+  </div>
+</template>
+
 <style scoped>
-/* Estilos generales */
-.reglas-page {
-  background-color: #1e1c1a;
-  color: white;
-  padding: 20px;
-  font-family: "Arial", sans-serif;
+@import url("https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap");
+.medieval-font {
+  font-family: "MedievalSharp", cursive !important;
 }
 
-h1 {
-  text-align: center;
-  font-size: 2rem;
-  margin-bottom: 20px;
+.reglas-page {
+  background-color: #1e1c1a;
+  color: #fff;
+  padding: 1rem;
 }
 
 .reglas-content {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-section {
-  margin-bottom: 20px;
+.card {
+  background-color: #262522;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
-h2 {
-  font-size: 1.5rem;
-  margin-bottom: 10px;
+.card h2 {
+  margin-top: 0;
   color: #f2b632;
+  font-size: 1.8rem;
 }
 
-h3 {
-  font-size: 1.2rem;
-  margin-top: 10px;
-  color: #f2b632;
-}
-
-ul {
-  padding-left: 20px;
-}
-
-ul li {
+.card p,
+.card ul {
+  margin: 0.8rem 0;
   font-size: 1rem;
-  color: #b5b5b5;
+  line-height: 1.5;
 }
 
-.video-explicativo a {
-  color: #f2b632;
-  text-decoration: none;
+.card ul {
+  padding-left: 1.4rem;
 }
 
-.video-explicativo a:hover {
-  text-decoration: underline;
+.card ul li {
+  margin-bottom: 0.4rem;
+}
+
+.video-card iframe {
+  width: 100%;
+  height: 480px;
+  border: none;
+  border-radius: 8px;
+  margin-top: 0.8rem;
 }
 </style>
