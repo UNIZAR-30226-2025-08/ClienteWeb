@@ -1242,7 +1242,7 @@ export default {
       setTimeout(() => {
         this.changePhase("game_voting");
         this.isVotingPhase = true;
-        // this.timeLeft = 25;
+        this.timeLeft = 50;
         this.countdownInterval = setInterval(() => {
           if (this.timeLeft > 0) {
             this.timeLeft--;
@@ -1263,7 +1263,7 @@ export default {
       setTimeout(() => {
         this.changePhase("game_voting");
         this.isVotingPhase = true;
-        this.timeLeft = 24;
+        this.timeLeft = 50;
         this.countdownInterval = setInterval(() => {
           if (this.timeLeft > 0) {
             this.timeLeft--;
