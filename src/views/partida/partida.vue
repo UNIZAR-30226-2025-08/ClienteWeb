@@ -661,6 +661,7 @@ export default {
         } else {
           // si no, volvemos al juego
           this.changePhase("game");
+          console.log("664");
         }
       }, 6000);
     });
@@ -734,6 +735,7 @@ export default {
         // 2) Tras 8 s arrancas el día (charla libre)
         setTimeout(() => {
           this.changePhase("game");
+          console.log("737");
           this.currentPeriod = "DÍA";
           this.timeLeft = data.tiempo || 60;
 
@@ -751,6 +753,7 @@ export default {
               this.hasVotedAlguacil = false; // reseteamos para usarlo como "hasVotedLynch"
               this.timeLeft = 35;
               this.changePhase("game");
+              console.log("754");
               this.countdownInterval = setInterval(() => {
                 if (this.timeLeft > 0) {
                   this.timeLeft--;
@@ -1102,6 +1105,7 @@ export default {
           // 4) Tras X segundos, volver al ciclo normal (día->noche)
           setTimeout(() => {
             this.changePhase("game");
+            console.log("1105");
             this.currentPeriod = "NOCHE";
             // reinicia banderas si hace falta
             this.resetVotingState();
@@ -1115,6 +1119,7 @@ export default {
           await this.sleep(5000);
           // reiniciar votación de día
           this.changePhase("game");
+          console.log("1118");
 
           this.isVotingPhase = true;
           this.isLynchPhase = true;
@@ -1137,6 +1142,7 @@ export default {
           await this.sleep(5000);
           // ya no repetimos voto
           this.changePhase("game");
+          console.log("1204");
           this.isVotingPhase = false;
           this.isLynchPhase = false;
           break;
@@ -1152,7 +1158,7 @@ export default {
             if (this.isBruja()) {
               this.changePhase("despertar_bruja");
             } else {
-              this.changePhase("game");
+              this.changePhase("estado_durmiendo");
             }
           }, 6000);
           break;
@@ -1179,6 +1185,7 @@ export default {
       this.showCazadorOverlay = false;
       this.showSucesionOverlay = false;
       this.changePhase("game");
+      console.log("1182");
     },
     addMessage(message) {
       if (this.isSpectator) return; // No envíes mensajes si eres espectador
@@ -1201,6 +1208,7 @@ export default {
       });
       // Cambiar la fase a "game" y ocultar el overlay de elección de sucesor
       this.changePhase("game");
+      console.log("1204");
       this.showDeathOverlay = false;
     },
 
@@ -1234,6 +1242,7 @@ export default {
           this.changePhase("start");
           setTimeout(() => {
             this.changePhase("game");
+            console.log("1237");
           }, 3000);
         }, 6000);
       }, 6000);
@@ -1342,6 +1351,7 @@ export default {
       this.isVotingPhase = false;
       this.resetVotingState();
       this.changePhase("game");
+      console.log("1346");
     },
 
     handleTurnoHombresLobo(data) {
