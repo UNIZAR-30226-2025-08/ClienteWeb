@@ -660,7 +660,7 @@ export default {
           this.changePhase("despertar_bruja");
         } else {
           // si no, volvemos al juego
-          this.changePhase("game");
+          this.changePhase("estado_durmiendo");
           console.log("664");
         }
       }, 6000);
