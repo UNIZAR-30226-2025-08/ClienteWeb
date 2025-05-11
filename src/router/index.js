@@ -125,7 +125,7 @@ router.beforeEach((to, from, next) => {
 // Al terminar cada cambio de ruta:
 router.afterEach((to) => {
   // si existe meta.title úsalo; si no, pon uno por defecto
-  document.title = to.meta.title || "Mi App";
+  document.title = to.meta.title || "Inicio";
 });
 
 export { router, navigationHistory };
