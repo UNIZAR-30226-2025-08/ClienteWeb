@@ -963,9 +963,13 @@ export default {
         //this.showCazadorOverlay = true;
         return;
       } else if (this.isAlguacil()) {
+        console.log("Soy el alguacil, mostrando overlay de sucesión");
         this.showSucesionOverlay = true;
         return;
       } else {
+        console.log(
+          "No eres el cazador ni el alguacil, mostrando overlay de muerte"
+        );
         this.changePhase("death");
         this.showDeathOverlay = true;
       }
