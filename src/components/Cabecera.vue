@@ -87,10 +87,7 @@ const rejectInvitation = () => {
 };
 
 const irAlPerfil = () => {
-  router.push({
-    name: "perfil",
-    params: { idUsuario: user.value.id },
-  });
+  router.push({ name: "perfil" });
 };
 
 const toggleNotifications = () => {

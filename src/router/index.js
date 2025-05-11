@@ -65,21 +65,29 @@ const router = createRouter({
 
 const navigationHistory = [];
 
+// src/router/index.js
 router.beforeEach((to, from, next) => {
+  // 1) Lógica para ocultar el ID propio
+  if (to.name === "perfil" && to.params.idUsuario) {
+    const stored = localStorage.getItem("usuario");
+    const miId = stored ? String(JSON.parse(stored).id) : null;
+    if (to.params.idUsuario === miId) {
+      // redirige a /perfil sin parámetros
+      return next({ name: "perfil", params: {} });
+    }
+  }
+
+  // 2) Tu lógica actual de navegación
   if (from.fullPath) {
-    // Si el destino coincide con la última entrada del historial, es una navegación hacia atrás
     if (
       navigationHistory.length > 0 &&
       navigationHistory[navigationHistory.length - 1] === to.fullPath
     ) {
       navigationHistory.pop();
     } else {
-      // Navegación hacia adelante, añadir la ruta 'from'
       navigationHistory.push(from.fullPath);
     }
   }
-
-  // Resetear historial al entrar a /juego
   if (to.path === "/juego") {
     navigationHistory.length = 0;
   }
