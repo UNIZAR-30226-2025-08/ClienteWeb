@@ -1109,9 +1109,6 @@ export default {
           this.aliveVillagers--;
 
           if (eliminadoId == this.MiId) {
-            if (eliminadoId == this.alguacilId) {
-              this.showDeathOverlay = true;
-            }
             this.markDead(); // Aquí es donde llamas al método markDead
           }
 
