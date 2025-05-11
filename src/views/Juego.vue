@@ -423,29 +423,30 @@ const unirseRapido = () => {
                   </tr>
                 </tbody>
               </table>
-            </div>
-            <!-- Controles de paginación -->
-            <div class="pagination-controls">
-              <button
-                class="pagination-button"
-                @click="cambiarPagina('anterior')"
-                :disabled="paginaActual === 1"
-              >
-                ← Anterior
-              </button>
-              <span class="pagination-info">
-                Página {{ paginaActual }} de
-                {{ Math.ceil(partidas.length / partidasPorPagina) }}
-              </span>
-              <button
-                class="pagination-button"
-                @click="cambiarPagina('siguiente')"
-                :disabled="
-                  paginaActual >= Math.ceil(partidas.length / partidasPorPagina)
-                "
-              >
-                Siguiente →
-              </button>
+              <!-- Controles de paginación -->
+              <div class="pagination-controls">
+                <button
+                  class="pagination-button"
+                  @click="cambiarPagina('anterior')"
+                  :disabled="paginaActual === 1"
+                >
+                  ← Anterior
+                </button>
+                <span class="pagination-info">
+                  Página {{ paginaActual }} de
+                  {{ Math.ceil(partidas.length / partidasPorPagina) }}
+                </span>
+                <button
+                  class="pagination-button"
+                  @click="cambiarPagina('siguiente')"
+                  :disabled="
+                    paginaActual >=
+                    Math.ceil(partidas.length / partidasPorPagina)
+                  "
+                >
+                  Siguiente →
+                </button>
+              </div>
             </div>
           </div>
         </div>
