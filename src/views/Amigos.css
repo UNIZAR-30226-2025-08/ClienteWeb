@@ -47,8 +47,15 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  cursor: pointer;
 }
-
+.friend-info:hover .friend-icon {
+  transform: scale(1.05);
+  transition: transform 0.6s;
+}
+.friend-info:hover .friend-text {
+  color: #a2d060; /* Cambia el color del texto al pasar el ratón */
+}
 .friend-icon {
   width: 50px;
   height: 50px;
