@@ -71,7 +71,7 @@ const getAvatar = (avatarName) => {
 
 <template>
   <!-- Cabecera: Se utiliza el componente Cabecera -->
-  <Cabecera :titulo="'Mi Juego'" :compacto="false" />
+  <Cabecera :titulo="'Ranking'" :compacto="false" />
 
   <div class="ranking-container">
     <h1 class="ranking-title">
