@@ -87,6 +87,14 @@ async function loginUser() {
     return;
   }
 
+  // Validar el formato del correo electrónico
+  const correoRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!correoRegex.test(correo.value)) {
+    mensajeError.value = "Por favor, ingresa un correo válido";
+    toast.error(mensajeError.value, { autoClose: 3000 });
+    return;
+  }
+
   try {
     // Generar hash SHA-256 en el cliente
     const hashContrasena = await generarHashSHA256(contrasena.value);
