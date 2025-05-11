@@ -271,7 +271,7 @@ onUnmounted(() => {
       <Cabecera :titulo="'Perfil'" :esAdmin="esAdmin" />
     </div>
 
-    <div class="perfil-page medieval-font">
+    <div class="perfil-page">
       <!-- Tarjeta de información del usuario -->
       <div class="user-info-card">
         <div class="avatar-section">
@@ -488,9 +488,6 @@ onUnmounted(() => {
 
 <style scoped>
 /* Contenedor general de la página de perfil */
-.medieval-font {
-  font-family: "MedievalSharp", cursive !important;
-}
 .perfil-page {
   background-color: #181715;
   color: #fff;
@@ -687,9 +684,9 @@ onUnmounted(() => {
 }
 
 .details-modal .details-modal-content {
-  max-width: 500px;
+  max-width: 360px;
   width: 100%;
-  text-align: left;
+  text-align: center;
 }
 
 .update-form .form-group {

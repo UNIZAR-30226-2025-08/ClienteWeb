@@ -723,7 +723,7 @@ export default {
       if (victimasIds.includes(this.MiId)) {
         return this.markDead();
       }
-      
+
       this.changePhase("recuento_muertes");
 
       setTimeout(() => {
@@ -940,7 +940,7 @@ export default {
       //console.log(`showDeathOverlay es: ${this.showDeathOverlay}`);
       //console.log(`showCazadorOverlay es: ${this.showCazadorOverlay}`);
       //console.log(`showSucesionOverlay es: ${this.showCazadorOverlay}`);
-      //this.showReconnectOverlay = false; // Ocultar overlay de reconexión al cambiar de fase
+      this.showReconnectOverlay = false; // Ocultar overlay de reconexión al cambiar de fase
       this.currentPhase = newPhase;
       console.log("Cambio de fase:", newPhase);
     },
@@ -1039,7 +1039,9 @@ export default {
             this.changePhase("vidente_dormir");
           } else {
             // Si no quedan videntes vivos, puedes cambiar a otra fase o hacer alguna otra acción
-            console.log("No quedan videntes vivos. No se cambia a la fase 'vidente_dormir'.");
+            console.log(
+              "No quedan videntes vivos. No se cambia a la fase 'vidente_dormir'."
+            );
             // 2) pasamos ya al despertar de lobos
             this.changePhase("despertar_hombres_lobo");
             this.currentPeriod = "NOCHE";
