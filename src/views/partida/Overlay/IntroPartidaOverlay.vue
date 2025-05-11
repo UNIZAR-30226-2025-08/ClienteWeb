@@ -70,7 +70,7 @@ export default {
   text-align: center; /*prittier*/
   max-width: 80%;
   line-height: 1.2;
-  font-family: "Times New Roman", serif;
+  font-family: "MedievalSharp", serif;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 

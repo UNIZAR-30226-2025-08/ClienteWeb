@@ -163,14 +163,14 @@ export default {
 .final-title {
   font-size: 2.8rem;
   margin: 0.5rem 0;
-  font-family: "Playfair Display", serif;
+  font-family: "MedievalSharp", serif;;
   letter-spacing: 0.05em;
 }
 
 .final-message {
   font-size: 1.8rem;
   margin-bottom: 2rem;
-  font-family: "Lato", sans-serif;
+  font-family: "MedievalSharp", serif;
 }
 
 /* Estilos para texto de lobos */
