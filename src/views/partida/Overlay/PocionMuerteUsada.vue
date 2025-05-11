@@ -33,7 +33,7 @@ export default {
 .overlay-text {
   color: white;
   font-size: 4rem;
-  font-family: "Times New Roman", serif;
+  font-family: "MedievalSharp", serif;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   letter-spacing: 2px;
 }

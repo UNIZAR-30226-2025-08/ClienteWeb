@@ -40,7 +40,7 @@ export default {
   color: white;
   font-size: 4rem;
   margin-bottom: 2rem;
-  font-family: "Times New Roman", serif;
+  font-family: "MedievalSharp", serif;
 }
 
 .role-image {

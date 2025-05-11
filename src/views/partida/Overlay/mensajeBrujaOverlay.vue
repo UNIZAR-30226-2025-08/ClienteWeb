@@ -38,7 +38,7 @@ export default {
 .result-text {
   color: #8b0000;
   font-size: 4rem;
-  font-family: "Times New Roman", serif;
+  font-family: "MedievalSharp", serif;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   text-align: center;
 }

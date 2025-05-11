@@ -55,7 +55,7 @@ export default {
   text-align: center;
   max-width: 80%;
   line-height: 1.3;
-  font-family: "Times New Roman", serif;
+  font-family: "MedievalSharp", serif;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
