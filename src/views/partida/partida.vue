@@ -749,7 +749,7 @@ export default {
               this.isVotingPhase = true;
               this.isLynchPhase = true; // activamos linchamiento
               this.hasVotedAlguacil = false; // reseteamos para usarlo como "hasVotedLynch"
-              this.timeLeft = 46;
+              this.timeLeft = 35;
               this.changePhase("game");
               this.countdownInterval = setInterval(() => {
                 if (this.timeLeft > 0) {
@@ -1119,7 +1119,7 @@ export default {
           if (this.countdownInterval) {
             clearInterval(this.countdownInterval);
           }
-          this.timeLeft = 25;
+          this.timeLeft = 54;
           this.countdownInterval = setInterval(() => {
             if (this.timeLeft > 0) {
               this.timeLeft--;
@@ -1361,7 +1361,7 @@ export default {
         } else {
           this.changePhase("estado_durmiendo");
         }
-        this.timeLeft = 50;
+        this.timeLeft = 45;
         this.countdownInterval = setInterval(() => {
           if (this.timeLeft > 0) {
             this.timeLeft--;
