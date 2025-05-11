@@ -16,45 +16,73 @@ import Sugerencias from "../views/Sugerencias.vue";
 import SugerenciasAdmin from "../views/SugerenciasAdmin.vue";
 
 const routes = [
-  { path: "/", component: Home },
-  { path: "/register", component: Register },
-  { path: "/Roles", component: Roles, meta: { requiresAuth: true } },
-  { path: "/crear-sala", component: CrearSala, meta: { requiresAuth: true } },
-  { path: "/juego", component: Juego, meta: { requiresAuth: true } },
-  { path: "/reglas", component: Reglas, meta: { requiresAuth: true } },
-  { path: "/servidores", component: Servidores, meta: { requiresAuth: true } },
-  { path: "/sala/:idSala", component: Sala, meta: { requiresAuth: true } }, // Ruta dinámica para la sala
+  { path: "/", component: Home, title: "Inicio" },
+  { path: "/register", component: Register, title: "Registrarse" },
+  {
+    path: "/Roles",
+    component: Roles,
+    meta: { requiresAuth: true, title: "Roles" },
+  },
+  {
+    path: "/crear-sala",
+    component: CrearSala,
+    meta: { requiresAuth: true, title: "Crear sala" },
+  },
+  {
+    path: "/juego",
+    component: Juego,
+    meta: { requiresAuth: true, title: "Juego" },
+  },
+  {
+    path: "/reglas",
+    component: Reglas,
+    meta: { requiresAuth: true, title: "Reglas" },
+  },
+  {
+    path: "/servidores",
+    component: Servidores,
+    meta: { requiresAuth: true, title: "Servidores" },
+  },
+  {
+    path: "/sala/:idSala",
+    component: Sala,
+    meta: { requiresAuth: true, title: "En Sala" },
+  }, // Ruta dinámica para la sala
   {
     path: "/amigos",
     name: "amigos",
     component: Amigos,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, title: "Amigos" },
   },
-  { path: "/ranking", component: ranking, meta: { requiresAuth: true } },
+  {
+    path: "/ranking",
+    component: ranking,
+    meta: { requiresAuth: true, title: "Ranking" },
+  },
   {
     path: "/partida/:idSala",
     component: Partida,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, title: "Partida" },
   },
-  // La ruta de perfil acepta un parámetro opcional
+
   {
     path: "/perfil/:idUsuario?",
     name: "perfil",
     component: Perfil,
     props: true,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, title: "Perfil" },
   },
   {
     path: "/sugerencias",
     name: "sugerencias",
     component: Sugerencias,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, title: "Sugerencias" },
   },
   {
     path: "/sugerenciasadmin",
     name: "sugerenciasadmin",
     component: SugerenciasAdmin,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, title: "Sugerencias Admin" },
   },
 ];
 
@@ -93,6 +121,11 @@ router.beforeEach((to, from, next) => {
   }
 
   next();
+});
+// Al terminar cada cambio de ruta:
+router.afterEach((to) => {
+  // si existe meta.title úsalo; si no, pon uno por defecto
+  document.title = to.meta.title || "Mi App";
 });
 
 export { router, navigationHistory };

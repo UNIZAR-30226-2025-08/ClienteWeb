@@ -224,7 +224,7 @@ onUnmounted(() => {
     />
     <div class="contenido">
       <!-- Título a la izquierda -->
-      <h1 class="titulo-medieval" contenteditable>{{ titulo }}</h1>
+      <h1 class="titulo-medieval">{{ titulo }}</h1>
 
       <!-- Perfil + notificaciones a la derecha -->
       <div class="perfil-notificaciones">
