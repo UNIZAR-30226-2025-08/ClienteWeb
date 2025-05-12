@@ -1075,6 +1075,20 @@ export default {
           this.hasBrujaPassed = false;
           break;
         case "resultadoVotosDia":
+          // — Sucesión de alguacil si muere durante el día —
+          // Si el jugador eliminado era el alguacil actual, forzamos elección de sucesor
+          if (event.data.jugadorAEliminar === this.alguacilId) {
+            this.idAlguacilMuerto = event.data.jugadorAEliminar;
+            // Preparamos la lista de candidatos vivos
+            this.jugadoresDisponibles = this.players
+              .filter((p) => p.estaVivo && p.id !== event.data.jugadorAEliminar)
+              .map((p) => ({ id: p.id, nombre: p.nombre }));
+            // Lanzamos la fase de sucesión
+            this.changePhase("esperando_eleccion_sucesor");
+            this.showSucesionOverlay = true;
+            this.timeLeft = event.data.tiempo || 30;
+            return; // Salimos para no ejecutar el resto de la lógica de linchazo
+          }
           // 1) Actualizar víctimas
           // Actualizar la información de la víctima con su rol
           const jugadorAEliminar = this.players.find(
