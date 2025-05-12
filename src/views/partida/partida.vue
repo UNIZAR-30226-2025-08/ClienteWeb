@@ -1110,6 +1110,7 @@ export default {
 
           if (eliminadoId == this.MiId) {
             this.markDead(); // Aquí es donde llamas al método markDead
+            return;
           }
 
           // 4) Tras X segundos, volver al ciclo normal (día->noche)
@@ -1194,7 +1195,7 @@ export default {
       console.log("this.MiId es ", this.MiId);
       console.log("this.idAlguacilMuerto es ", this.idAlguacilMuerto);
       if (this.MiId == this.idAlguacilMuerto || this.MiId == this.isCazador()) {
-        this.showDeathOverlay = true;
+        this.showDeathOverlay = false;
       }
       this.showCazadorOverlay = false;
       this.showSucesionOverlay = false;
