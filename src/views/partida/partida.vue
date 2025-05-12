@@ -1075,24 +1075,6 @@ export default {
           this.hasBrujaPassed = false;
           break;
         case "resultadoVotosDia":
-          // Sucesión de alguacil si muere durante el día
-          if (event.data.jugadorAEliminar == this.alguacilId) {
-            this.idAlguacilMuerto = event.data.jugadorAEliminar;
-            // — Sucesión de alguacil si muere durante el día —
-            // comparamos con idAlguacilMuerto, no con el nuevo this.alguacilId
-            const eliminadoId = event.data.jugadorAEliminar;
-            if (eliminadoId == this.idAlguacilMuerto) {
-              // Preparamos la lista de candidatos vivos
-              this.jugadoresDisponibles = this.players
-                .filter((p) => p.estaVivo && p.id !== eliminadoId)
-                .map((p) => ({ id: p.id, nombre: p.nombre }));
-              // Lanzamos la fase de sucesión
-              this.changePhase("esperando_eleccion_sucesor");
-              this.showSucesionOverlay = true;
-              this.timeLeft = event.data.tiempo || 30;
-              return;
-            }
-          }
           // 1) Actualizar víctimas
           // Actualizar la información de la víctima con su rol
           const jugadorAEliminar = this.players.find(
@@ -1118,6 +1100,24 @@ export default {
           );
           this.aliveVillagers--;
 
+          // Sucesión de alguacil si muere durante el día
+          if (event.data.jugadorAEliminar == this.alguacilId) {
+            this.idAlguacilMuerto = event.data.jugadorAEliminar;
+            // — Sucesión de alguacil si muere durante el día —
+            // comparamos con idAlguacilMuerto, no con el nuevo this.alguacilId
+            const eliminadoId = event.data.jugadorAEliminar;
+            if (eliminadoId == this.idAlguacilMuerto) {
+              // Preparamos la lista de candidatos vivos
+              this.jugadoresDisponibles = this.players
+                .filter((p) => p.estaVivo && p.id !== eliminadoId)
+                .map((p) => ({ id: p.id, nombre: p.nombre }));
+              // Lanzamos la fase de sucesión
+              this.changePhase("esperando_eleccion_sucesor");
+              this.showSucesionOverlay = true;
+              this.timeLeft = event.data.tiempo || 30;
+              return;
+            }
+          }
           if (eliminadoId == this.MiId) {
             this.markDead(); // Aquí es donde llamas al método markDead
           }
