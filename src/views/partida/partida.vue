@@ -960,21 +960,13 @@ export default {
     markDead() {
       this.isSpectator = true; // El jugador se convierte en espectador
 
-      // Verificar si el jugador que murió es el cazador o el alguacil
-      if (this.isCazador()) {
-        //this.showCazadorOverlay = true;
-        return;
-      } else if (this.isAlguacil()) {
-        console.log("Soy el alguacil, mostrando overlay de sucesión");
-        this.showSucesionOverlay = true;
-        return;
-      } else {
-        console.log(
-          "No eres el cazador ni el alguacil, mostrando overlay de muerte"
-        );
-        this.changePhase("death");
-        this.showDeathOverlay = true;
-      }
+      // oculta cualquier overlay que pudiera estar activo
+      this.showCazadorOverlay = false;
+      this.showSucesionOverlay = false;
+
+      // ahora tratamos todas las muertes igual
+      this.changePhase("death");
+      this.showDeathOverlay = true;
     },
     // Función auxiliar: pausa la ejecución
     sleep(ms) {
@@ -1110,7 +1102,6 @@ export default {
 
           if (eliminadoId == this.MiId) {
             this.markDead(); // Aquí es donde llamas al método markDead
-            return;
           }
 
           // 4) Tras X segundos, volver al ciclo normal (día->noche)
@@ -1194,9 +1185,8 @@ export default {
       // quita overlay, pero mantiene isSpectator = true
       console.log("this.MiId es ", this.MiId);
       console.log("this.idAlguacilMuerto es ", this.idAlguacilMuerto);
-      if (this.MiId == this.idAlguacilMuerto || this.MiId == this.isCazador()) {
-        this.showDeathOverlay = false;
-      }
+      // borramos todos los overlays de muerte/cazador/sucesión
+      this.showDeathOverlay = false;
       this.showCazadorOverlay = false;
       this.showSucesionOverlay = false;
       this.changePhase("game");
