@@ -1076,12 +1076,12 @@ export default {
           break;
         case "resultadoVotosDia":
           // Sucesión de alguacil si muere durante el día
-          if (event.data.jugadorAEliminar === this.alguacilId) {
+          if (event.data.jugadorAEliminar == this.alguacilId) {
             this.idAlguacilMuerto = event.data.jugadorAEliminar;
             // — Sucesión de alguacil si muere durante el día —
             // comparamos con idAlguacilMuerto, no con el nuevo this.alguacilId
             const eliminadoId = event.data.jugadorAEliminar;
-            if (eliminadoId === this.idAlguacilMuerto) {
+            if (eliminadoId == this.idAlguacilMuerto) {
               // Preparamos la lista de candidatos vivos
               this.jugadoresDisponibles = this.players
                 .filter((p) => p.estaVivo && p.id !== eliminadoId)
