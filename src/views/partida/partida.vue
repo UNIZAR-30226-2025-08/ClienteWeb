@@ -691,6 +691,7 @@ export default {
     //11. Escuchar evento para pasar al día
     socket.on("diaComienza", (data) => {
       // Eliminar icono de próxima víctima al inicio del día
+      this.currentDay++;
       this.nextWolfVictimId = null;
       this.showCazadorOverlay = false;
       this.showSucesionOverlay = false;
